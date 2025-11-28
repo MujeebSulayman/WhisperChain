@@ -34,7 +34,8 @@ export function getMediaTypeName(type: number): MediaType {
 
 export async function uploadToIPFS(
 	file: File | Blob,
-	filename?: string
+	filename?: string,
+	checkUsed?: (hash: string) => Promise<boolean>
 ): Promise<string> {
 	if (!PINATA_API_KEY || !PINATA_SECRET_KEY) {
 		throw new Error(
@@ -43,7 +44,17 @@ export async function uploadToIPFS(
 	}
 
 	try {
-		return await uploadToPinata(file, filename);
+		const hash = await uploadToPinata(file, filename);
+
+		// Check if hash is already used (optional)
+		if (checkUsed) {
+			const isUsed = await checkUsed(hash);
+			if (isUsed) {
+				throw new Error('This file has already been uploaded to the network');
+			}
+		}
+
+		return hash;
 	} catch (error: any) {
 		throw new Error(`IPFS upload failed: ${error.message}`);
 	}

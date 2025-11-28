@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { Upload, X, File, Image, Video, Music, FileText, Loader2 } from 'lucide-react';
-import { uploadToIPFS, getMediaTypeFromFile, type MediaType } from '@WhisperChain/lib/ipfs';
+import { Upload, X, Image, Video, Music, FileText, Loader2 } from 'lucide-react';
+import { uploadToIPFS, getMediaTypeFromFile } from '@WhisperChain/lib/ipfs';
+import { isIPFSHashUsed } from '@WhisperChain/lib/whisperchainActions';
 
 type FileUploadProps = {
     onUploadComplete: (ipfsHash: string, mediaType: number, fileSize: bigint) => void;
@@ -13,7 +14,6 @@ type FileUploadProps = {
 export function FileUpload({ onUploadComplete, onCancel, maxSize = 50 * 1024 * 1024 }: FileUploadProps) {
     const [file, setFile] = useState<File | null>(null);
     const [isUploading, setIsUploading] = useState(false);
-    const [uploadProgress, setUploadProgress] = useState(0);
     const [error, setError] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -37,7 +37,13 @@ export function FileUpload({ onUploadComplete, onCancel, maxSize = 50 * 1024 * 1
         setError(null);
 
         try {
-            const ipfsHash = await uploadToIPFS(file, file.name);
+            const ipfsHash = await uploadToIPFS(file, file.name, async (hash) => {
+                try {
+                    return await isIPFSHashUsed(hash);
+                } catch {
+                    return false;
+                }
+            });
             const mediaType = getMediaTypeFromFile(file);
             const fileSize = BigInt(file.size);
 
@@ -47,16 +53,15 @@ export function FileUpload({ onUploadComplete, onCancel, maxSize = 50 * 1024 * 1
             setError(err.message || 'Upload failed');
         } finally {
             setIsUploading(false);
-            setUploadProgress(0);
         }
     };
 
     const getFileIcon = (file: File) => {
         const type = file.type.toLowerCase();
-        if (type.startsWith('image/')) return <Image className="size-5 text-emerald-400" />;
-        if (type.startsWith('video/')) return <Video className="size-5 text-violet-400" />;
-        if (type.startsWith('audio/')) return <Music className="size-5 text-pink-400" />;
-        return <FileText className="size-5 text-sky-400" />;
+        if (type.startsWith('image/')) return <Image style={{ width: '1.25rem', height: '1.25rem', color: '#00ffff' }} />;
+        if (type.startsWith('video/')) return <Video style={{ width: '1.25rem', height: '1.25rem', color: '#ff00ff' }} />;
+        if (type.startsWith('audio/')) return <Music style={{ width: '1.25rem', height: '1.25rem', color: '#8b00ff' }} />;
+        return <FileText style={{ width: '1.25rem', height: '1.25rem', color: '#00ffff' }} />;
     };
 
     const formatFileSize = (bytes: number) => {
@@ -66,16 +71,48 @@ export function FileUpload({ onUploadComplete, onCancel, maxSize = 50 * 1024 * 1
     };
 
     return (
-        <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-slate-900/90 to-slate-800/90 p-4 backdrop-blur-sm">
+        <div
+            style={{
+                borderRadius: '0.75rem',
+                border: '1px solid rgba(0, 255, 255, 0.2)',
+                background: 'rgba(10, 10, 15, 0.95)',
+                padding: '1rem',
+                backdropFilter: 'blur(10px)',
+                boxShadow: '0 0 20px rgba(0, 255, 255, 0.1)',
+            }}
+        >
             {!file ? (
                 <div
                     onClick={() => fileInputRef.current?.click()}
-                    className="flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-white/20 p-8 cursor-pointer transition-all hover:border-sky-500/50 hover:bg-slate-800/50"
+                    style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '0.75rem',
+                        borderRadius: '0.5rem',
+                        border: '2px dashed rgba(0, 255, 255, 0.3)',
+                        padding: '2rem',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s',
+                    }}
+                    onMouseEnter={(e) => {
+                        e.currentTarget.style.borderColor = 'rgba(0, 255, 255, 0.5)';
+                        e.currentTarget.style.background = 'rgba(0, 255, 255, 0.05)';
+                        e.currentTarget.style.boxShadow = '0 0 20px rgba(0, 255, 255, 0.2)';
+                    }}
+                    onMouseLeave={(e) => {
+                        e.currentTarget.style.borderColor = 'rgba(0, 255, 255, 0.3)';
+                        e.currentTarget.style.background = 'transparent';
+                        e.currentTarget.style.boxShadow = 'none';
+                    }}
                 >
-                    <Upload className="size-8 text-slate-400" />
-                    <div className="text-center">
-                        <p className="text-sm font-medium text-slate-300">Click to upload file</p>
-                        <p className="text-xs text-slate-500 mt-1">
+                    <Upload style={{ width: '2rem', height: '2rem', color: 'rgba(0, 255, 255, 0.6)' }} />
+                    <div style={{ textAlign: 'center' }}>
+                        <p style={{ fontSize: '0.875rem', fontWeight: 600, color: '#00ffff', marginBottom: '0.25rem' }}>
+                            Click to upload file
+                        </p>
+                        <p style={{ fontSize: '0.75rem', color: 'rgba(0, 255, 255, 0.5)', fontFamily: 'monospace' }}>
                             Max size: {(maxSize / 1024 / 1024).toFixed(0)}MB
                         </p>
                     </div>
@@ -83,47 +120,114 @@ export function FileUpload({ onUploadComplete, onCancel, maxSize = 50 * 1024 * 1
                         ref={fileInputRef}
                         type="file"
                         onChange={handleFileSelect}
-                        className="hidden"
+                        style={{ display: 'none' }}
                         accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.txt"
                     />
                 </div>
             ) : (
-                <div className="space-y-3">
-                    <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-slate-800/50 p-3">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                    <div
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.75rem',
+                            borderRadius: '0.5rem',
+                            border: '1px solid rgba(0, 255, 255, 0.2)',
+                            background: 'rgba(0, 255, 255, 0.05)',
+                            padding: '0.75rem',
+                        }}
+                    >
                         {getFileIcon(file)}
-                        <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-white truncate">{file.name}</p>
-                            <p className="text-xs text-slate-400">{formatFileSize(file.size)}</p>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                            <p
+                                style={{
+                                    fontSize: '0.875rem',
+                                    fontWeight: 600,
+                                    color: '#00ffff',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    whiteSpace: 'nowrap',
+                                }}
+                            >
+                                {file.name}
+                            </p>
+                            <p style={{ fontSize: '0.75rem', color: 'rgba(0, 255, 255, 0.5)', fontFamily: 'monospace' }}>
+                                {formatFileSize(file.size)}
+                            </p>
                         </div>
                         <button
                             onClick={() => setFile(null)}
-                            className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-700 hover:text-white transition-colors"
+                            style={{
+                                borderRadius: '0.5rem',
+                                padding: '0.375rem',
+                                background: 'transparent',
+                                border: '1px solid rgba(0, 255, 255, 0.3)',
+                                color: '#00ffff',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s',
+                            }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.background = 'rgba(0, 255, 255, 0.1)';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.background = 'transparent';
+                            }}
                         >
-                            <X className="size-4" />
+                            <X style={{ width: '1rem', height: '1rem' }} />
                         </button>
                     </div>
 
                     {error && (
-                        <div className="rounded-lg bg-red-500/10 border border-red-500/20 px-3 py-2">
-                            <p className="text-xs text-red-400">{error}</p>
+                        <div
+                            style={{
+                                borderRadius: '0.5rem',
+                                background: 'rgba(239, 68, 68, 0.1)',
+                                border: '1px solid rgba(239, 68, 68, 0.3)',
+                                padding: '0.75rem',
+                            }}
+                        >
+                            <p style={{ fontSize: '0.75rem', color: '#fca5a5' }}>{error}</p>
                         </div>
                     )}
 
-                    <div className="flex gap-2">
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
                         <button
                             onClick={handleUpload}
                             disabled={isUploading}
-                            className="flex-1 rounded-xl bg-gradient-to-r from-sky-500 to-sky-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-sky-500/30 transition-all hover:from-sky-400 hover:to-sky-500 hover:shadow-xl hover:shadow-sky-500/40 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                            style={{
+                                flex: 1,
+                                borderRadius: '0.5rem',
+                                background: 'linear-gradient(135deg, #00ffff 0%, #8b00ff 100%)',
+                                border: 'none',
+                                padding: '0.75rem 1rem',
+                                fontSize: '0.875rem',
+                                fontWeight: 700,
+                                color: '#0a0a0f',
+                                cursor: isUploading ? 'not-allowed' : 'pointer',
+                                opacity: isUploading ? 0.5 : 1,
+                                boxShadow: '0 0 20px rgba(0, 255, 255, 0.4)',
+                                transition: 'all 0.2s',
+                            }}
+                            onMouseEnter={(e) => {
+                                if (!isUploading) {
+                                    e.currentTarget.style.boxShadow = '0 0 30px rgba(0, 255, 255, 0.6)';
+                                }
+                            }}
+                            onMouseLeave={(e) => {
+                                if (!isUploading) {
+                                    e.currentTarget.style.boxShadow = '0 0 20px rgba(0, 255, 255, 0.4)';
+                                }
+                            }}
                         >
                             {isUploading ? (
-                                <div className="flex items-center justify-center gap-2">
-                                    <Loader2 className="size-4 animate-spin" />
-                                    <span>Uploading...</span>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                                    <Loader2 style={{ width: '1rem', height: '1rem', animation: 'spin 1s linear infinite' }} />
+                                    <span>UPLOADING...</span>
                                 </div>
                             ) : (
-                                <div className="flex items-center justify-center gap-2">
-                                    <Upload className="size-4" />
-                                    <span>Upload to IPFS</span>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                                    <Upload style={{ width: '1rem', height: '1rem' }} />
+                                    <span>UPLOAD TO IPFS</span>
                                 </div>
                             )}
                         </button>
@@ -131,9 +235,30 @@ export function FileUpload({ onUploadComplete, onCancel, maxSize = 50 * 1024 * 1
                             <button
                                 onClick={onCancel}
                                 disabled={isUploading}
-                                className="rounded-xl border border-white/10 bg-slate-800/50 px-4 py-2.5 text-sm font-medium text-slate-300 transition-all hover:bg-slate-800 hover:text-white disabled:opacity-50"
+                                style={{
+                                    borderRadius: '0.5rem',
+                                    border: '1px solid rgba(0, 255, 255, 0.3)',
+                                    background: 'transparent',
+                                    padding: '0.75rem 1rem',
+                                    fontSize: '0.875rem',
+                                    fontWeight: 500,
+                                    color: '#00ffff',
+                                    cursor: isUploading ? 'not-allowed' : 'pointer',
+                                    opacity: isUploading ? 0.5 : 1,
+                                    transition: 'all 0.2s',
+                                }}
+                                onMouseEnter={(e) => {
+                                    if (!isUploading) {
+                                        e.currentTarget.style.background = 'rgba(0, 255, 255, 0.1)';
+                                    }
+                                }}
+                                onMouseLeave={(e) => {
+                                    if (!isUploading) {
+                                        e.currentTarget.style.background = 'transparent';
+                                    }
+                                }}
                             >
-                                Cancel
+                                CANCEL
                             </button>
                         )}
                     </div>
@@ -142,4 +267,3 @@ export function FileUpload({ onUploadComplete, onCancel, maxSize = 50 * 1024 * 1
         </div>
     );
 }
-

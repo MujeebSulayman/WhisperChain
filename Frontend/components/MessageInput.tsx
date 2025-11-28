@@ -1,6 +1,6 @@
 'use client';
 
-import { Send, Paperclip, Loader2, Sparkles, Coins, X } from 'lucide-react';
+import { Send, Paperclip, Loader2, Coins, X } from 'lucide-react';
 import { useState, KeyboardEvent, useRef, useEffect } from 'react';
 import { FileUpload } from './FileUpload';
 import { PaymentOptions } from './PaymentOptions';
@@ -26,7 +26,6 @@ export function MessageInput({
 }: MessageInputProps) {
     const [input, setInput] = useState('');
     const [isSending, setIsSending] = useState(false);
-    const [isFocused, setIsFocused] = useState(false);
     const [showFileUpload, setShowFileUpload] = useState(false);
     const [showPayment, setShowPayment] = useState(false);
     const [ipfsHash, setIpfsHash] = useState<string | null>(null);
@@ -89,9 +88,9 @@ export function MessageInput({
     };
 
     return (
-        <div className="border-t border-white/5 bg-gradient-to-b from-slate-900/95 to-slate-950/95 backdrop-blur-sm p-4 shadow-2xl">
+        <div style={{ borderTop: '1px solid rgba(255, 255, 255, 0.1)', background: '#111118', padding: '1rem' }}>
             {(showFileUpload || showPayment) && (
-                <div className="mb-4 animate-in fade-in slide-in-from-bottom-2">
+                <div style={{ marginBottom: '1rem' }}>
                     {showFileUpload && (
                         <FileUpload
                             onUploadComplete={handleFileUpload}
@@ -116,56 +115,64 @@ export function MessageInput({
             )}
 
             {(ipfsHash || paymentAmount) && (
-                <div className="mb-3 flex flex-wrap items-center gap-2 animate-in fade-in slide-in-from-bottom-2">
+                <div style={{ marginBottom: '0.75rem', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '0.5rem' }}>
                     {ipfsHash && (
-                        <div className="flex items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5">
-                            <span className="text-xs font-medium text-emerald-300">File: {ipfsHash.slice(0, 12)}...</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.375rem 0.75rem', borderRadius: '0.5rem', background: 'rgba(99, 102, 241, 0.2)', border: '1px solid rgba(99, 102, 241, 0.3)' }}>
+                            <span style={{ fontSize: '0.75rem', color: '#c7d2fe' }}>File: {ipfsHash.slice(0, 12)}...</span>
                             <button
                                 onClick={() => {
                                     setIpfsHash(null);
                                     setMediaType(0);
                                     setFileSize(BigInt(0));
                                 }}
-                                className="text-emerald-400 hover:text-emerald-300"
+                                style={{ background: 'transparent', border: 'none', color: '#818cf8', cursor: 'pointer', padding: 0 }}
+                                onMouseEnter={(e) => e.currentTarget.style.color = '#6366f1'}
+                                onMouseLeave={(e) => e.currentTarget.style.color = '#818cf8'}
                             >
-                                <X className="size-3" />
+                                <X style={{ width: '0.875rem', height: '0.875rem' }} />
                             </button>
                         </div>
                     )}
                     {paymentAmount && (
-                        <div className="flex items-center gap-2 rounded-lg border border-sky-500/30 bg-sky-500/10 px-3 py-1.5">
-                            <span className="text-xs font-medium text-sky-300">
-                                Payment: {paymentAmount.toString()} wei
-                            </span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.375rem 0.75rem', borderRadius: '0.5rem', background: 'rgba(99, 102, 241, 0.2)', border: '1px solid rgba(99, 102, 241, 0.3)' }}>
+                            <span style={{ fontSize: '0.75rem', color: '#c7d2fe' }}>Payment: {paymentAmount.toString()} wei</span>
                             <button
                                 onClick={() => {
                                     setPaymentAmount(undefined);
                                     setPaymentToken(undefined);
                                 }}
-                                className="text-sky-400 hover:text-sky-300"
+                                style={{ background: 'transparent', border: 'none', color: '#818cf8', cursor: 'pointer', padding: 0 }}
+                                onMouseEnter={(e) => e.currentTarget.style.color = '#6366f1'}
+                                onMouseLeave={(e) => e.currentTarget.style.color = '#818cf8'}
                             >
-                                <X className="size-3" />
+                                <X style={{ width: '0.875rem', height: '0.875rem' }} />
                             </button>
                         </div>
                     )}
                 </div>
             )}
 
-            <div className="mx-auto flex max-w-4xl items-end gap-3">
-                <div className="flex gap-2">
+            <div style={{ display: 'flex', alignItems: 'flex-end', gap: '0.5rem' }}>
+                <div style={{ display: 'flex', gap: '0.25rem' }}>
                     <button
                         onClick={() => {
                             setShowFileUpload(!showFileUpload);
                             setShowPayment(false);
                         }}
                         disabled={disabled}
-                        className={`group relative rounded-xl border p-3 transition-all duration-300 hover:scale-110 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 ${showFileUpload
-                                ? 'border-sky-500/50 bg-sky-500/10 text-sky-300'
-                                : 'border-white/10 bg-slate-800/50 text-slate-400 hover:border-sky-500/50 hover:bg-sky-500/10 hover:text-sky-300'
-                            }`}
-                        title="Attach file"
+                        style={{
+                            padding: '0.625rem',
+                            borderRadius: '0.5rem',
+                            background: showFileUpload ? 'rgba(99, 102, 241, 0.2)' : 'transparent',
+                            border: showFileUpload ? '1px solid rgba(99, 102, 241, 0.3)' : 'none',
+                            color: showFileUpload ? '#818cf8' : 'rgba(255, 255, 255, 0.6)',
+                            cursor: disabled ? 'not-allowed' : 'pointer',
+                            opacity: disabled ? 0.5 : 1,
+                        }}
+                        onMouseEnter={(e) => !disabled && !showFileUpload && (e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)')}
+                        onMouseLeave={(e) => !disabled && !showFileUpload && (e.currentTarget.style.background = 'transparent')}
                     >
-                        <Paperclip className="size-4 transition-transform group-hover:rotate-12" />
+                        <Paperclip style={{ width: '1rem', height: '1rem' }} />
                     </button>
                     <button
                         onClick={() => {
@@ -173,37 +180,39 @@ export function MessageInput({
                             setShowFileUpload(false);
                         }}
                         disabled={disabled}
-                        className={`group relative rounded-xl border p-3 transition-all duration-300 hover:scale-110 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 ${showPayment
-                                ? 'border-sky-500/50 bg-sky-500/10 text-sky-300'
-                                : 'border-white/10 bg-slate-800/50 text-slate-400 hover:border-sky-500/50 hover:bg-sky-500/10 hover:text-sky-300'
-                            }`}
-                        title="Add payment"
+                        style={{
+                            padding: '0.625rem',
+                            borderRadius: '0.5rem',
+                            background: showPayment ? 'rgba(99, 102, 241, 0.2)' : 'transparent',
+                            border: showPayment ? '1px solid rgba(99, 102, 241, 0.3)' : 'none',
+                            color: showPayment ? '#818cf8' : 'rgba(255, 255, 255, 0.6)',
+                            cursor: disabled ? 'not-allowed' : 'pointer',
+                            opacity: disabled ? 0.5 : 1,
+                        }}
+                        onMouseEnter={(e) => !disabled && !showPayment && (e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)')}
+                        onMouseLeave={(e) => !disabled && !showPayment && (e.currentTarget.style.background = 'transparent')}
                     >
-                        <Coins className="size-4" />
+                        <Coins style={{ width: '1rem', height: '1rem' }} />
                     </button>
                 </div>
 
-                <div
-                    className={`group relative flex-1 rounded-2xl border bg-slate-800/50 p-3 transition-all duration-300 ${isFocused
-                            ? 'border-sky-500/50 bg-slate-800 shadow-lg shadow-sky-500/10'
-                            : 'border-white/10 hover:border-white/20'
-                        }`}
-                >
-                    {isFocused && (
-                        <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-sky-500/0 via-sky-500/5 to-sky-500/0 animate-shimmer pointer-events-none" />
-                    )}
+                <div style={{ flex: 1, borderRadius: '0.5rem', background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)', padding: '0.75rem' }}>
                     <textarea
                         ref={textareaRef}
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
                         onKeyDown={handleKeyDown}
-                        onFocus={() => setIsFocused(true)}
-                        onBlur={() => setIsFocused(false)}
                         disabled={disabled || isSending}
                         placeholder={placeholder}
                         rows={1}
-                        className="relative w-full resize-none bg-transparent text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none transition-all duration-300"
                         style={{
+                            width: '100%',
+                            resize: 'none',
+                            background: 'transparent',
+                            fontSize: '0.875rem',
+                            color: '#ffffff',
+                            border: 'none',
+                            outline: 'none',
                             minHeight: '24px',
                             maxHeight: '120px',
                         }}
@@ -213,23 +222,33 @@ export function MessageInput({
                 <button
                     onClick={handleSend}
                     disabled={(!input.trim() && !ipfsHash) || isSending || disabled}
-                    className="group relative overflow-hidden rounded-xl bg-gradient-to-r from-sky-500 to-sky-600 p-3 text-white shadow-lg shadow-sky-500/30 transition-all duration-300 hover:from-sky-400 hover:to-sky-500 hover:shadow-xl hover:shadow-sky-500/40 hover:scale-110 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-                    title="Send message"
+                    style={{
+                        padding: '0.75rem',
+                        borderRadius: '0.5rem',
+                        background: '#6366f1',
+                        border: 'none',
+                        color: '#ffffff',
+                        cursor: (!input.trim() && !ipfsHash) || isSending || disabled ? 'not-allowed' : 'pointer',
+                        opacity: (!input.trim() && !ipfsHash) || isSending || disabled ? 0.5 : 1,
+                    }}
+                    onMouseEnter={(e) => {
+                        if (!(!input.trim() && !ipfsHash) && !isSending && !disabled) {
+                            e.currentTarget.style.background = '#4f46e5';
+                        }
+                    }}
+                    onMouseLeave={(e) => {
+                        if (!(!input.trim() && !ipfsHash) && !isSending && !disabled) {
+                            e.currentTarget.style.background = '#6366f1';
+                        }
+                    }}
                 >
-                    <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
                     {isSending ? (
-                        <Loader2 className="relative size-5 animate-spin" />
+                        <Loader2 style={{ width: '1.25rem', height: '1.25rem', animation: 'spin 1s linear infinite' }} />
                     ) : (
-                        <Send className="relative size-5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                        <Send style={{ width: '1.25rem', height: '1.25rem' }} />
                     )}
                 </button>
             </div>
-            {input.trim() && (
-                <div className="mt-2 flex items-center gap-2 text-xs text-slate-500 animate-in fade-in slide-in-from-bottom-2">
-                    <Sparkles className="size-3 animate-pulse" />
-                    <span>Press Enter to send, Shift+Enter for new line</span>
-                </div>
-            )}
         </div>
     );
 }
