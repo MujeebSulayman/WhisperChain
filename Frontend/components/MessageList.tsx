@@ -18,6 +18,7 @@ type MessageListProps = {
     messages: Message[];
     isLoading?: boolean;
     emptyMessage?: string;
+    onMessageUpdate?: () => void;
 };
 
 function SkeletonMessage() {
@@ -34,6 +35,7 @@ export function MessageList({
     messages,
     isLoading,
     emptyMessage = 'No messages yet. Start the conversation!',
+    onMessageUpdate,
 }: MessageListProps) {
     const scrollRef = useRef<HTMLDivElement>(null);
     const [isAtBottom, setIsAtBottom] = useState(true);
@@ -97,7 +99,12 @@ export function MessageList({
             }}
         >
             {messages.map((message, index) => (
-                <MessageBubble key={message.id} message={message} index={index} />
+                <MessageBubble
+                    key={message.id}
+                    message={message}
+                    index={index}
+                    onUpdate={onMessageUpdate}
+                />
             ))}
         </div>
     );

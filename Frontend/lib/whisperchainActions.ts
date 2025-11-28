@@ -183,5 +183,136 @@ export async function fetchStorageUsage(user: AddressLike) {
 	}
 }
 
+export async function updateLastSeen() {
+	const contract = await getSignerContract();
+	return contract.updateLastSeen();
+}
+
+export async function withdrawBalance() {
+	const contract = await getSignerContract();
+	return contract.withdrawBalance();
+}
+
+export async function clearStorage() {
+	const contract = await getSignerContract();
+	return contract.clearStorage();
+}
+
+export async function isUserRegistered(user: AddressLike) {
+	try {
+		const contract = getReadOnlyContract();
+		return await contract.isUserRegistered(user);
+	} catch (error: any) {
+		throw new Error(`Failed to check registration: ${error.message}`);
+	}
+}
+
+export async function getUserConversations(user: AddressLike) {
+	try {
+		const contract = getReadOnlyContract();
+		const conversations: BytesLike[] = [];
+		let index = 0;
+		while (true) {
+			try {
+				const convId = await contract.userConversations(user, index);
+				if (
+					convId ===
+					'0x0000000000000000000000000000000000000000000000000000000000000000'
+				) {
+					break;
+				}
+				conversations.push(convId);
+				index++;
+				if (index > 100) break;
+			} catch {
+				break;
+			}
+		}
+		return conversations;
+	} catch (error: any) {
+		throw new Error(`Failed to fetch conversations: ${error.message}`);
+	}
+}
+
+export async function getUserMessageCount(user: AddressLike) {
+	try {
+		const contract = getReadOnlyContract();
+		return await contract.getUserMessageCount(user);
+	} catch (error: any) {
+		throw new Error(`Failed to fetch message count: ${error.message}`);
+	}
+}
+
+export async function isMessageDeleted(messageId: BytesLike) {
+	try {
+		const contract = getReadOnlyContract();
+		return await contract.isMessageDeleted(messageId);
+	} catch (error: any) {
+		throw new Error(`Failed to check message status: ${error.message}`);
+	}
+}
+
+export async function sendBatchMessages(args: {
+	recipients: AddressLike[];
+	messageHashes: BytesLike[];
+	ipfsHashes: string[];
+	mediaTypes?: BigNumberish[];
+	fileSizes: BigNumberish[];
+	paymentTokens?: AddressLike[];
+	paymentAmounts?: BigNumberish[];
+	value?: BigNumberish;
+}) {
+	const contract = await getSignerContract();
+	const paymentTokens =
+		args.paymentTokens ?? args.recipients.map(() => ZeroAddress);
+	const paymentAmounts =
+		args.paymentAmounts ?? args.recipients.map(() => BigInt(0));
+	const mediaTypes = args.mediaTypes ?? args.recipients.map(() => 0);
+
+	const overrides =
+		args.value !== undefined ? { value: args.value } : undefined;
+
+	if (overrides) {
+		return contract.sendBatchMessages(
+			args.recipients,
+			args.messageHashes,
+			paymentTokens,
+			paymentAmounts,
+			args.ipfsHashes,
+			mediaTypes,
+			args.fileSizes,
+			overrides
+		);
+	}
+
+	return contract.sendBatchMessages(
+		args.recipients,
+		args.messageHashes,
+		paymentTokens,
+		paymentAmounts,
+		args.ipfsHashes,
+		mediaTypes,
+		args.fileSizes
+	);
+}
+
+export async function getUserPublicKey(user: AddressLike) {
+	try {
+		const contract = getReadOnlyContract();
+		return await contract.getUserPublicKey(user);
+	} catch (error: any) {
+		throw new Error(`Failed to fetch public key: ${error.message}`);
+	}
+}
+
+export async function isIPFSHashUsed(ipfsHash: string) {
+	try {
+		const contract = getReadOnlyContract();
+		return await contract.isIPFSHashUsed(ipfsHash);
+	} catch (error: any) {
+		throw new Error(`Failed to check IPFS hash: ${error.message}`);
+	}
+}
+
 export type WhisperChainRead = ReturnType<typeof getReadOnlyContract>;
 export type WhisperChainWrite = WhisperChain;

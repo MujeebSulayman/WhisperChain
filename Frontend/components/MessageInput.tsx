@@ -1,10 +1,20 @@
 'use client';
 
-import { Send, Paperclip, Loader2, Sparkles } from 'lucide-react';
+import { Send, Paperclip, Loader2, Sparkles, Coins, X } from 'lucide-react';
 import { useState, KeyboardEvent, useRef, useEffect } from 'react';
+import { FileUpload } from './FileUpload';
+import { PaymentOptions } from './PaymentOptions';
+import type { AddressLike, BigNumberish } from 'ethers';
 
 type MessageInputProps = {
-    onSend: (message: string) => Promise<void>;
+    onSend: (args: {
+        text: string;
+        ipfsHash?: string;
+        mediaType?: number;
+        fileSize?: bigint;
+        paymentAmount?: BigNumberish;
+        paymentToken?: AddressLike;
+    }) => Promise<void>;
     disabled?: boolean;
     placeholder?: string;
 };
@@ -17,6 +27,13 @@ export function MessageInput({
     const [input, setInput] = useState('');
     const [isSending, setIsSending] = useState(false);
     const [isFocused, setIsFocused] = useState(false);
+    const [showFileUpload, setShowFileUpload] = useState(false);
+    const [showPayment, setShowPayment] = useState(false);
+    const [ipfsHash, setIpfsHash] = useState<string | null>(null);
+    const [mediaType, setMediaType] = useState<number>(0);
+    const [fileSize, setFileSize] = useState<bigint>(BigInt(0));
+    const [paymentAmount, setPaymentAmount] = useState<BigNumberish | undefined>();
+    const [paymentToken, setPaymentToken] = useState<AddressLike | undefined>();
     const textareaRef = useRef<HTMLTextAreaElement>(null);
 
     useEffect(() => {
@@ -27,17 +44,30 @@ export function MessageInput({
     }, [input]);
 
     const handleSend = async () => {
-        if (!input.trim() || isSending || disabled) return;
+        if ((!input.trim() && !ipfsHash) || isSending || disabled) return;
 
-        const message = input.trim();
+        const message = input.trim() || 'Media message';
+        const currentInput = input;
         setInput('');
         setIsSending(true);
 
         try {
-            await onSend(message);
+            await onSend({
+                text: message,
+                ipfsHash: ipfsHash || undefined,
+                mediaType: ipfsHash ? mediaType : undefined,
+                fileSize: ipfsHash ? fileSize : undefined,
+                paymentAmount,
+                paymentToken,
+            });
+            setIpfsHash(null);
+            setMediaType(0);
+            setFileSize(BigInt(0));
+            setPaymentAmount(undefined);
+            setPaymentToken(undefined);
         } catch (error) {
             console.error('Failed to send message:', error);
-            setInput(message);
+            setInput(currentInput);
         } finally {
             setIsSending(false);
             textareaRef.current?.focus();
@@ -51,16 +81,107 @@ export function MessageInput({
         }
     };
 
+    const handleFileUpload = (hash: string, type: number, size: bigint) => {
+        setIpfsHash(hash);
+        setMediaType(type);
+        setFileSize(size);
+        setShowFileUpload(false);
+    };
+
     return (
         <div className="border-t border-white/5 bg-gradient-to-b from-slate-900/95 to-slate-950/95 backdrop-blur-sm p-4 shadow-2xl">
+            {(showFileUpload || showPayment) && (
+                <div className="mb-4 animate-in fade-in slide-in-from-bottom-2">
+                    {showFileUpload && (
+                        <FileUpload
+                            onUploadComplete={handleFileUpload}
+                            onCancel={() => setShowFileUpload(false)}
+                        />
+                    )}
+                    {showPayment && (
+                        <PaymentOptions
+                            onPaymentSet={(amount, token) => {
+                                setPaymentAmount(amount);
+                                setPaymentToken(token);
+                                setShowPayment(false);
+                            }}
+                            onCancel={() => {
+                                setShowPayment(false);
+                                setPaymentAmount(undefined);
+                                setPaymentToken(undefined);
+                            }}
+                        />
+                    )}
+                </div>
+            )}
+
+            {(ipfsHash || paymentAmount) && (
+                <div className="mb-3 flex flex-wrap items-center gap-2 animate-in fade-in slide-in-from-bottom-2">
+                    {ipfsHash && (
+                        <div className="flex items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5">
+                            <span className="text-xs font-medium text-emerald-300">File: {ipfsHash.slice(0, 12)}...</span>
+                            <button
+                                onClick={() => {
+                                    setIpfsHash(null);
+                                    setMediaType(0);
+                                    setFileSize(BigInt(0));
+                                }}
+                                className="text-emerald-400 hover:text-emerald-300"
+                            >
+                                <X className="size-3" />
+                            </button>
+                        </div>
+                    )}
+                    {paymentAmount && (
+                        <div className="flex items-center gap-2 rounded-lg border border-sky-500/30 bg-sky-500/10 px-3 py-1.5">
+                            <span className="text-xs font-medium text-sky-300">
+                                Payment: {paymentAmount.toString()} wei
+                            </span>
+                            <button
+                                onClick={() => {
+                                    setPaymentAmount(undefined);
+                                    setPaymentToken(undefined);
+                                }}
+                                className="text-sky-400 hover:text-sky-300"
+                            >
+                                <X className="size-3" />
+                            </button>
+                        </div>
+                    )}
+                </div>
+            )}
+
             <div className="mx-auto flex max-w-4xl items-end gap-3">
-                <button
-                    disabled={disabled}
-                    className="group relative rounded-xl border border-white/10 bg-slate-800/50 p-3 text-slate-400 transition-all duration-300 hover:border-sky-500/50 hover:bg-sky-500/10 hover:text-sky-300 hover:scale-110 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-                    title="Attach file"
-                >
-                    <Paperclip className="size-4 transition-transform group-hover:rotate-12" />
-                </button>
+                <div className="flex gap-2">
+                    <button
+                        onClick={() => {
+                            setShowFileUpload(!showFileUpload);
+                            setShowPayment(false);
+                        }}
+                        disabled={disabled}
+                        className={`group relative rounded-xl border p-3 transition-all duration-300 hover:scale-110 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 ${showFileUpload
+                                ? 'border-sky-500/50 bg-sky-500/10 text-sky-300'
+                                : 'border-white/10 bg-slate-800/50 text-slate-400 hover:border-sky-500/50 hover:bg-sky-500/10 hover:text-sky-300'
+                            }`}
+                        title="Attach file"
+                    >
+                        <Paperclip className="size-4 transition-transform group-hover:rotate-12" />
+                    </button>
+                    <button
+                        onClick={() => {
+                            setShowPayment(!showPayment);
+                            setShowFileUpload(false);
+                        }}
+                        disabled={disabled}
+                        className={`group relative rounded-xl border p-3 transition-all duration-300 hover:scale-110 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 ${showPayment
+                                ? 'border-sky-500/50 bg-sky-500/10 text-sky-300'
+                                : 'border-white/10 bg-slate-800/50 text-slate-400 hover:border-sky-500/50 hover:bg-sky-500/10 hover:text-sky-300'
+                            }`}
+                        title="Add payment"
+                    >
+                        <Coins className="size-4" />
+                    </button>
+                </div>
 
                 <div
                     className={`group relative flex-1 rounded-2xl border bg-slate-800/50 p-3 transition-all duration-300 ${isFocused
@@ -91,7 +212,7 @@ export function MessageInput({
 
                 <button
                     onClick={handleSend}
-                    disabled={!input.trim() || isSending || disabled}
+                    disabled={(!input.trim() && !ipfsHash) || isSending || disabled}
                     className="group relative overflow-hidden rounded-xl bg-gradient-to-r from-sky-500 to-sky-600 p-3 text-white shadow-lg shadow-sky-500/30 transition-all duration-300 hover:from-sky-400 hover:to-sky-500 hover:shadow-xl hover:shadow-sky-500/40 hover:scale-110 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                     title="Send message"
                 >
