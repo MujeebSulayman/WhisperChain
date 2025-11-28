@@ -20,7 +20,6 @@ import {
 	fetchConversation,
 	isUserRegistered,
 	getUserConversations,
-	updateLastSeen,
 	getUserPublicKey,
 } from '@WhisperChain/lib/whisperchainActions';
 import { useWhisperChain } from '../hooks/useWhisperChain';
@@ -66,21 +65,6 @@ export function ChatContainer() {
 	const [userPublicKey, setUserPublicKey] = useState<string>('');
 
 	const { profile, isRegistered, refresh } = useWhisperChain(connectedAddress);
-
-	// Auto-update last seen every 30 seconds
-	useEffect(() => {
-		if (!connectedAddress || !isRegistered) return;
-
-		const interval = setInterval(async () => {
-			try {
-				await updateLastSeen();
-			} catch (error) {
-				console.error('Failed to update last seen:', error);
-			}
-		}, 30000);
-
-		return () => clearInterval(interval);
-	}, [connectedAddress, isRegistered]);
 
 	// Load user public key
 	useEffect(() => {

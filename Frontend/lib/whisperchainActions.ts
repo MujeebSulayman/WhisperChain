@@ -314,5 +314,41 @@ export async function isIPFSHashUsed(ipfsHash: string) {
 	}
 }
 
+export async function getUserBalance(user: AddressLike) {
+	try {
+		const contract = getReadOnlyContract();
+		return await contract.userBalances(user);
+	} catch (error: any) {
+		throw new Error(`Failed to fetch user balance: ${error.message}`);
+	}
+}
+
+export async function getMediaType(messageId: BytesLike) {
+	try {
+		const contract = getReadOnlyContract();
+		return await contract.getMediaType(messageId);
+	} catch (error: any) {
+		throw new Error(`Failed to fetch media type: ${error.message}`);
+	}
+}
+
+export async function getIPFSHash(messageId: BytesLike) {
+	try {
+		const contract = getReadOnlyContract();
+		return await contract.getIPFSHash(messageId);
+	} catch (error: any) {
+		throw new Error(`Failed to fetch IPFS hash: ${error.message}`);
+	}
+}
+
+export async function getFileSize(messageId: BytesLike) {
+	try {
+		const contract = getReadOnlyContract();
+		return await contract.getFileSize(messageId);
+	} catch (error: any) {
+		throw new Error(`Failed to fetch file size: ${error.message}`);
+	}
+}
+
 export type WhisperChainRead = ReturnType<typeof getReadOnlyContract>;
 export type WhisperChainWrite = WhisperChain;
