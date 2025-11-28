@@ -1,7 +1,7 @@
 import { run } from "hardhat";
 
 async function main() {
-  const contractAddress = "0xCCA7f351fA1689b33F22b66A8a69509F6b428718";
+  const contractAddress = "0x89343A3d8BFb9dea288b5aEF9773892F34c60665";
   
   console.log("Verifying WhisperChain contract...");
   console.log(`Address: ${contractAddress}`);
