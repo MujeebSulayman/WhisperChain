@@ -26,7 +26,7 @@ export function MessageActions({
         setIsLoading('delivered');
         try {
             const tx = await markDelivered(messageId);
-            await waitForTransaction(tx);
+            await waitForTransaction(Promise.resolve(tx));
             onUpdate();
         } catch (error) {
             console.error('Failed to mark as delivered:', error);
@@ -39,7 +39,7 @@ export function MessageActions({
         setIsLoading('read');
         try {
             const tx = await markRead(messageId);
-            await waitForTransaction(tx);
+            await waitForTransaction(Promise.resolve(tx));
             onUpdate();
         } catch (error) {
             console.error('Failed to mark as read:', error);
@@ -54,7 +54,7 @@ export function MessageActions({
         setIsLoading('delete');
         try {
             const tx = await deleteWhisper(messageId);
-            await waitForTransaction(tx);
+            await waitForTransaction(Promise.resolve(tx));
             onUpdate();
         } catch (error) {
             console.error('Failed to delete message:', error);

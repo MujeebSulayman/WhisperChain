@@ -20,10 +20,10 @@ import {
 	fetchConversation,
 	isUserRegistered,
 	getUserConversations,
-	updateLastSeen,
 	getUserPublicKey,
 } from '@WhisperChain/lib/whisperchainActions';
 import { useWhisperChain } from '../hooks/useWhisperChain';
+import { useWallet } from '../hooks/useWallet';
 import { ethers } from 'ethers';
 import { formatDistanceToNow } from 'date-fns';
 
@@ -52,7 +52,7 @@ type Thread = {
 };
 
 export function ChatContainer() {
-	const [connectedAddress, setConnectedAddress] = useState<string>();
+	const { connectedAddress, connect, disconnect } = useWallet();
 	const [activeThreadId, setActiveThreadId] = useState<string>('');
 	const [messages, setMessages] = useState<Record<string, Message[]>>({});
 	const [threads, setThreads] = useState<Thread[]>([]);
@@ -66,21 +66,6 @@ export function ChatContainer() {
 	const [userPublicKey, setUserPublicKey] = useState<string>('');
 
 	const { profile, isRegistered, refresh } = useWhisperChain(connectedAddress);
-
-	// Auto-update last seen every 30 seconds
-	useEffect(() => {
-		if (!connectedAddress || !isRegistered) return;
-
-		const interval = setInterval(async () => {
-			try {
-				await updateLastSeen();
-			} catch (error) {
-				console.error('Failed to update last seen:', error);
-			}
-		}, 30000);
-
-		return () => clearInterval(interval);
-	}, [connectedAddress, isRegistered]);
 
 	// Load user public key
 	useEffect(() => {
@@ -129,6 +114,22 @@ export function ChatContainer() {
 			const messageIds = await fetchUserMessages(connectedAddress);
 			const conversationIds = await getUserConversations(connectedAddress);
 
+			// Load all conversations first
+			const conversations = await Promise.all(
+				conversationIds.slice(0, 20).map(async (id) => {
+					try {
+						const conv = await fetchConversation(id);
+						const idStr = typeof id === 'string' ? id : ethers.hexlify(id);
+						return { id: idStr, conversation: conv };
+					} catch {
+						return null;
+					}
+				})
+			);
+
+			const validConversations = conversations.filter((c): c is { id: string; conversation: any } => c !== null);
+
+			// Load messages and group by conversation
 			const messageData = await Promise.all(
 				messageIds.slice(0, 100).map(async (id) => {
 					try {
@@ -136,67 +137,161 @@ export function ChatContainer() {
 						const isSelf = msg.sender.toLowerCase() === connectedAddress.toLowerCase();
 						const otherAddress = isSelf ? msg.recipient : msg.sender;
 
+						// Find which conversation this message belongs to
+						let conversationId: string | null = null;
+						for (const conv of validConversations) {
+							const participants = conv.conversation.participants.map((p: string) => p.toLowerCase());
+							if (participants.includes(msg.sender.toLowerCase()) && participants.includes(msg.recipient.toLowerCase())) {
+								conversationId = conv.id;
+								break;
+							}
+						}
+
+						// If no conversation found, create a 1-on-1 thread ID
+						if (!conversationId) {
+							conversationId = otherAddress.toLowerCase();
+						}
+
+						// Determine message body based on media type
+						let body = 'Message';
+						if (Number(msg.mediaType) === 0) {
+							// TEXT message - retrieve from contract's textContent field
+							// Check if textContent is available (new contract structure)
+							if ((msg as any).textContent && (msg as any).textContent.length > 0) {
+								body = (msg as any).textContent;
+							} else if (msg.ipfsHash && msg.ipfsHash.length > 0 && !msg.ipfsHash.startsWith('text-')) {
+								// Legacy text message stored on IPFS - try to download
+								try {
+									const { downloadTextFromIPFS } = await import('@WhisperChain/lib/ipfs');
+									body = await downloadTextFromIPFS(msg.ipfsHash);
+								} catch {
+									body = `Message (IPFS: ${msg.ipfsHash.slice(0, 12)}...)`;
+								}
+							} else {
+								// Fallback: try to get textContent from contract
+								try {
+									const { getTextContent } = await import('@WhisperChain/lib/whisperchainActions');
+									const textContent = await getTextContent(id);
+									if (textContent && textContent.length > 0) {
+										body = textContent;
+									} else {
+										body = '[Text message]';
+									}
+								} catch {
+									body = '[Text message]';
+								}
+							}
+						} else if (msg.ipfsHash && msg.ipfsHash.length > 0) {
+							// Media message (IMAGE, VIDEO, DOCUMENT) - stored on IPFS
+							const { getMediaTypeName, getIPFSUrl } = await import('@WhisperChain/lib/ipfs');
+							const mediaTypeName = getMediaTypeName(Number(msg.mediaType));
+							body = `${mediaTypeName}: ${getIPFSUrl(msg.ipfsHash)}`;
+						}
+
 						return {
 							id: id,
 							messageId: id,
-							author: isSelf ? 'You' : otherAddress.slice(0, 6) + '...',
+							author: isSelf ? 'You' : otherAddress.slice(0, 6) + '...' + otherAddress.slice(-4),
 							timestamp: Number(msg.timestamp),
-							body: msg.ipfsHash ? `Media: ${msg.ipfsHash.slice(0, 12)}...` : 'Message',
+							body: body,
 							isSelf: isSelf,
 							status: msg.read ? 'read' : msg.delivered ? 'delivered' : 'pending',
 							messageHash: msg.messageHash,
 							ipfsHash: msg.ipfsHash,
 							mediaType: Number(msg.mediaType),
 							fileSize: msg.fileSize,
-						} as Message;
+							conversationId: conversationId,
+							sender: msg.sender,
+							recipient: msg.recipient,
+						} as Message & { conversationId: string; sender: string; recipient: string };
 					} catch {
 						return null;
 					}
 				})
 			);
 
-			const validMessages = messageData.filter((m): m is Message => m !== null);
+			const validMessages = messageData.filter((m): m is Message & { conversationId: string; sender: string; recipient: string } => m !== null);
 			const messagesByThread: Record<string, Message[]> = {};
 
+			// Group messages by conversation ID
 			validMessages.forEach((msg) => {
-				const otherAddress = msg.isSelf
-					? (validMessages.find((m) => m.messageId === msg.messageId && !m.isSelf)?.author || activeThreadId || 'default')
-					: (msg.messageId?.toString() || connectedAddress || 'default');
-
-				if (!messagesByThread[otherAddress]) {
-					messagesByThread[otherAddress] = [];
+				const threadId = msg.conversationId;
+				if (!messagesByThread[threadId]) {
+					messagesByThread[threadId] = [];
 				}
-				messagesByThread[otherAddress].push(msg);
+				messagesByThread[threadId].push(msg);
+			});
+
+			// Sort messages by timestamp
+			Object.keys(messagesByThread).forEach((threadId) => {
+				messagesByThread[threadId].sort((a, b) => {
+					const timeA = typeof a.timestamp === 'number' ? a.timestamp : 0;
+					const timeB = typeof b.timestamp === 'number' ? b.timestamp : 0;
+					return timeA - timeB;
+				});
 			});
 
 			setMessages(messagesByThread);
 
-			const conversationData = await Promise.all(
-				conversationIds.slice(0, 20).map(async (id) => {
-					try {
-						const conv = await fetchConversation(id);
-						const idStr = typeof id === 'string' ? id : ethers.hexlify(id);
-						const lastMsg = messagesByThread[idStr]?.[messagesByThread[idStr].length - 1];
-						return {
-							id: idStr,
-							title: `Conversation ${idStr.slice(0, 8)}`,
-							subtitle: `${conv.participants.length} participants`,
-							unreadCount: 0,
-							lastMessage: lastMsg?.body || 'No messages',
-							timestamp: formatDistanceToNow(new Date(Number(conv.createdAt) * 1000), { addSuffix: true }),
-							participants: conv.participants,
-						} as Thread;
-					} catch {
-						return null;
+			// Create thread list from conversations
+			const threadData = validConversations.map((conv) => {
+				const idStr = conv.id;
+				const lastMsg = messagesByThread[idStr]?.[messagesByThread[idStr].length - 1];
+				const otherParticipants = conv.conversation.participants
+					.filter((p: string) => p.toLowerCase() !== connectedAddress.toLowerCase())
+					.map((p: string) => p.slice(0, 6) + '...' + p.slice(-4));
+
+				return {
+					id: idStr,
+					title: otherParticipants.length === 1
+						? otherParticipants[0]
+						: `${conv.conversation.participants.length} participants`,
+					subtitle: `${conv.conversation.participants.length} participants`,
+					unreadCount: 0,
+					lastMessage: lastMsg?.body || 'No messages yet',
+					timestamp: formatDistanceToNow(new Date(Number(conv.conversation.createdAt) * 1000), { addSuffix: true }),
+					participants: conv.conversation.participants,
+				} as Thread;
+			});
+
+			// Also add 1-on-1 threads from messages that don't belong to conversations
+			const oneOnOneThreads = new Map<string, { lastMsg: Message; otherAddress: string }>();
+			validMessages.forEach((msg) => {
+				if (!validConversations.find(c => c.id === msg.conversationId)) {
+					const otherAddress = msg.isSelf ? msg.recipient : msg.sender;
+					const existing = oneOnOneThreads.get(otherAddress);
+					if (!existing || (typeof msg.timestamp === 'number' && typeof existing.lastMsg.timestamp === 'number' && msg.timestamp > existing.lastMsg.timestamp)) {
+						oneOnOneThreads.set(otherAddress, { lastMsg: msg, otherAddress });
 					}
-				})
-			);
+				}
+			});
 
-			const validThreads = conversationData.filter((t): t is Thread => t !== null);
-			setThreads(validThreads);
+			oneOnOneThreads.forEach((data, otherAddress) => {
+				threadData.push({
+					id: otherAddress.toLowerCase(),
+					title: otherAddress.slice(0, 6) + '...' + otherAddress.slice(-4),
+					unreadCount: 0,
+					lastMessage: data.lastMsg.body,
+					timestamp: typeof data.lastMsg.timestamp === 'number'
+						? formatDistanceToNow(new Date(data.lastMsg.timestamp * 1000), { addSuffix: true })
+						: 'Just now',
+					participants: [connectedAddress, otherAddress],
+				} as Thread);
+			});
 
-			if (validThreads.length > 0 && !activeThreadId) {
-				setActiveThreadId(validThreads[0].id);
+			// Sort threads by last message timestamp
+			threadData.sort((a, b) => {
+				const msgA = messagesByThread[a.id]?.[messagesByThread[a.id].length - 1];
+				const msgB = messagesByThread[b.id]?.[messagesByThread[b.id].length - 1];
+				const timeA = msgA && typeof msgA.timestamp === 'number' ? msgA.timestamp : 0;
+				const timeB = msgB && typeof msgB.timestamp === 'number' ? msgB.timestamp : 0;
+				return timeB - timeA;
+			});
+
+			setThreads(threadData);
+
+			if (threadData.length > 0 && !activeThreadId) {
+				setActiveThreadId(threadData[0].id);
 			}
 		} catch (err: any) {
 			setError(err.message || 'Failed to load data');
@@ -226,9 +321,17 @@ export function ChatContainer() {
 		setError(null);
 
 		const messageHash = ethers.keccak256(ethers.toUtf8Bytes(args.text));
-		const ipfsHash = args.ipfsHash || `ipfs-${Date.now()}`;
+
+		const isTextMessage = !args.ipfsHash && (!args.mediaType || args.mediaType === 0);
+
+		// For TEXT messages, use empty IPFS hash (contract allows it now)
+		// For media messages, IPFS hash is required
+		const ipfsHash = args.ipfsHash || (isTextMessage ? '' : `ipfs-${Date.now()}`);
 		const mediaType = args.mediaType ?? 0;
-		const fileSize = args.fileSize ?? BigInt(args.text.length);
+		// For text messages, fileSize should be 0 since we're not storing on IPFS
+		const fileSize = isTextMessage ? BigInt(0) : (args.fileSize ?? BigInt(0));
+		// For TEXT messages, store text content directly in the contract
+		const textContent = isTextMessage ? args.text : '';
 
 		const pendingMessage: Message = {
 			id: `pending-${Date.now()}`,
@@ -246,8 +349,25 @@ export function ChatContainer() {
 		}));
 
 		try {
+			// Find the active thread to get recipient(s)
+			const activeThread = threads.find(t => t.id === activeThreadId);
+			if (!activeThread) {
+				throw new Error('Conversation not found');
+			}
+
+
+			const otherParticipants = activeThread.participants?.filter(
+				(p: string) => p.toLowerCase() !== connectedAddress.toLowerCase()
+			) || [];
+
+			if (otherParticipants.length === 0) {
+				throw new Error('No recipients in conversation');
+			}
+
+			const recipient = otherParticipants[0];
+
 			const tx = await sendWhisper({
-				recipient: activeThreadId,
+				recipient: recipient,
 				messageHash: messageHash,
 				ipfsHash: ipfsHash,
 				mediaType: mediaType,
@@ -255,6 +375,7 @@ export function ChatContainer() {
 				paymentToken: args.paymentToken,
 				paymentAmount: args.paymentAmount,
 				value: args.paymentToken === '0x0000000000000000000000000000000000000000' ? args.paymentAmount : undefined,
+				textContent: textContent,
 			});
 
 			const receipt = await waitForTransaction(Promise.resolve(tx));
@@ -266,7 +387,7 @@ export function ChatContainer() {
 					updated[idx] = {
 						...updated[idx],
 						status: 'delivered',
-						messageHash: receipt.hash,
+
 					};
 				}
 				return { ...prev, [activeThreadId]: updated };
@@ -297,9 +418,11 @@ export function ChatContainer() {
 					alignItems: 'center',
 					justifyContent: 'center',
 					background: '#0f0f0f',
+					position: 'relative',
+					zIndex: 1000,
 				}}
 			>
-				<div style={{ width: '100%', maxWidth: '28rem' }}>
+				<div style={{ width: '100%', maxWidth: '28rem', position: 'relative', zIndex: 1001 }}>
 					<UserRegistration
 						address={connectedAddress}
 						onRegistered={() => {
@@ -319,7 +442,7 @@ export function ChatContainer() {
 				display: 'flex',
 				height: '100vh',
 				background: '#0f0f0f',
-				color: '#e5e5e5',
+				color: '#ffffff',
 				position: 'relative',
 				overflow: 'hidden',
 			}}
@@ -328,7 +451,23 @@ export function ChatContainer() {
 				isOpen={sidebarOpen}
 				onToggle={() => setSidebarOpen(!sidebarOpen)}
 				connectedAddress={connectedAddress}
-				onConnect={setConnectedAddress}
+				onConnect={async () => {
+					try {
+						await connect();
+					} catch (error) {
+						// Error handled by useWallet hook
+					}
+				}}
+				onDisconnect={() => {
+					disconnect();
+					// Clear state on disconnect
+					setActiveThreadId('');
+					setMessages({});
+					setThreads([]);
+				}}
+				threads={threads}
+				activeThreadId={activeThreadId}
+				onThreadSelect={setActiveThreadId}
 				profile={profile ? { ...profile, publicKey: userPublicKey } : undefined}
 				onNewChat={() => setShowCreateConversation(true)}
 				onBatchSend={() => setShowBatchMessaging(true)}
@@ -369,34 +508,6 @@ export function ChatContainer() {
 				)}
 			</main>
 
-			{/* Right Sidebar - Threads */}
-			{sidebarOpen && (
-				<div
-					style={{
-						width: '16rem',
-						background: '#1a1a1a',
-						borderLeft: '1px solid rgba(255, 255, 255, 0.08)',
-						padding: '1rem',
-						overflowY: 'auto',
-					}}
-				>
-					<h3
-						style={{
-							fontSize: '0.875rem',
-							fontWeight: 600,
-							marginBottom: '1rem',
-							color: 'rgba(255, 255, 255, 0.7)',
-						}}
-					>
-						Conversations
-					</h3>
-					<ThreadList
-						threads={threads}
-						activeThreadId={activeThreadId}
-						onSelectThread={setActiveThreadId}
-					/>
-				</div>
-			)}
 
 			{/* Modals */}
 			{showCreateConversation && connectedAddress && (

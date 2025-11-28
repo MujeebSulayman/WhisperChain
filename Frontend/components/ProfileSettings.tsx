@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { User, Key, Loader2, CheckCircle2 } from 'lucide-react';
+import { User, Key, Loader2, CheckCircle2, X, Clock } from 'lucide-react';
 import { updatePublicKey, updateLastSeen, waitForTransaction } from '@WhisperChain/lib/whisperchainActions';
 import { ethers } from 'ethers';
 
@@ -28,7 +28,7 @@ export function ProfileSettings({ onUpdate, onClose }: ProfileSettingsProps) {
         try {
             const publicKeyBytes = ethers.hexlify(ethers.toUtf8Bytes(newPublicKey));
             const tx = await updatePublicKey(publicKeyBytes);
-            await waitForTransaction(tx);
+            await waitForTransaction(Promise.resolve(tx));
             setSuccess(true);
             setTimeout(() => {
                 onUpdate();
@@ -47,7 +47,7 @@ export function ProfileSettings({ onUpdate, onClose }: ProfileSettingsProps) {
 
         try {
             const tx = await updateLastSeen();
-            await waitForTransaction(tx);
+            await waitForTransaction(Promise.resolve(tx));
             setSuccess(true);
             setTimeout(() => {
                 onUpdate();
@@ -62,26 +62,64 @@ export function ProfileSettings({ onUpdate, onClose }: ProfileSettingsProps) {
 
     if (success) {
         return (
-            <div className="rounded-2xl border border-emerald-500/30 bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 p-6 text-center animate-in fade-in slide-in-from-top-2">
-                <CheckCircle2 className="mx-auto mb-3 size-12 text-emerald-400" />
-                <p className="text-lg font-semibold text-emerald-300">Updated Successfully!</p>
+            <div
+                style={{
+                    borderRadius: '0.5rem',
+                    border: '1px solid rgba(16, 185, 129, 0.3)',
+                    background: 'rgba(16, 185, 129, 0.1)',
+                    padding: '2rem',
+                    textAlign: 'center',
+                }}
+            >
+                <CheckCircle2 style={{ width: '3rem', height: '3rem', margin: '0 auto 1rem', color: '#10b981' }} />
+                <p style={{ fontSize: '1rem', fontWeight: 600, color: '#10b981' }}>Updated Successfully!</p>
             </div>
         );
     }
 
     return (
-        <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-slate-900/90 to-slate-800/90 p-6 backdrop-blur-sm">
-            <div className="mb-6 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                    <User className="size-5 text-sky-400" />
-                    <h3 className="text-lg font-semibold text-white">Profile Settings</h3>
+        <div
+            style={{
+                borderRadius: '0.5rem',
+                border: '1px solid rgba(255, 255, 255, 0.08)',
+                background: 'rgba(26, 26, 26, 0.95)',
+                padding: '1.5rem',
+                backdropFilter: 'blur(10px)',
+            }}
+        >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <User style={{ width: '1.25rem', height: '1.25rem', color: 'rgba(255, 255, 255, 0.7)' }} />
+                    <h3 style={{ fontSize: '1.125rem', fontWeight: 600, color: '#ffffff' }}>Profile Settings</h3>
                 </div>
+                <button
+                    onClick={onClose}
+                    style={{
+                        padding: '0.375rem',
+                        borderRadius: '0.5rem',
+                        background: 'transparent',
+                        border: 'none',
+                        color: 'rgba(255, 255, 255, 0.7)',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s',
+                    }}
+                    onMouseEnter={(e) => {
+                        e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
+                        e.currentTarget.style.color = '#ffffff';
+                    }}
+                    onMouseLeave={(e) => {
+                        e.currentTarget.style.background = 'transparent';
+                        e.currentTarget.style.color = 'rgba(255, 255, 255, 0.7)';
+                    }}
+                >
+                    <X style={{ width: '1rem', height: '1rem' }} />
+                </button>
             </div>
 
-            <div className="space-y-4">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-2">
-                        <Key className="inline size-4 mr-1" />
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', fontWeight: 500, color: 'rgba(255, 255, 255, 0.7)', marginBottom: '0.5rem' }}>
+                        <Key style={{ width: '1rem', height: '1rem' }} />
                         Update Public Key
                     </label>
                     <input
@@ -89,42 +127,109 @@ export function ProfileSettings({ onUpdate, onClose }: ProfileSettingsProps) {
                         value={newPublicKey}
                         onChange={(e) => setNewPublicKey(e.target.value)}
                         placeholder="Enter new public key"
-                        className="w-full rounded-xl border border-white/10 bg-slate-800/50 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:border-sky-500/50 focus:outline-none focus:ring-2 focus:ring-sky-500/20 transition-all font-mono"
+                        style={{
+                            width: '100%',
+                            borderRadius: '0.5rem',
+                            border: '1px solid rgba(255, 255, 255, 0.1)',
+                            background: 'rgba(255, 255, 255, 0.03)',
+                            padding: '0.75rem',
+                            fontSize: '0.875rem',
+                            color: '#ffffff',
+                            fontFamily: 'monospace',
+                            outline: 'none',
+                            transition: 'all 0.2s',
+                        }}
+                        onFocus={(e) => {
+                            e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+                        }}
+                        onBlur={(e) => {
+                            e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+                        }}
                     />
                     <button
                         onClick={handleUpdatePublicKey}
                         disabled={isUpdating || !newPublicKey.trim()}
-                        className="mt-2 w-full rounded-xl bg-gradient-to-r from-sky-500 to-sky-600 px-4 py-2.5 text-sm font-semibold text-white transition-all hover:from-sky-400 hover:to-sky-500 disabled:opacity-50"
+                        style={{
+                            marginTop: '0.5rem',
+                            width: '100%',
+                            borderRadius: '0.5rem',
+                            background: '#ffffff',
+                            border: 'none',
+                            padding: '0.75rem 1rem',
+                            fontSize: '0.875rem',
+                            fontWeight: 600,
+                            color: '#0f0f0f',
+                            cursor: isUpdating || !newPublicKey.trim() ? 'not-allowed' : 'pointer',
+                            opacity: isUpdating || !newPublicKey.trim() ? 0.6 : 1,
+                            transition: 'opacity 0.2s',
+                        }}
                     >
                         {isUpdating ? (
-                            <Loader2 className="mx-auto size-4 animate-spin" />
+                            <Loader2 style={{ width: '1rem', height: '1rem', margin: '0 auto', animation: 'spin 1s linear infinite' }} />
                         ) : (
                             'Update Public Key'
                         )}
                     </button>
                 </div>
 
-                <div className="border-t border-white/10 pt-4">
+                <div style={{ borderTop: '1px solid rgba(255, 255, 255, 0.08)', paddingTop: '1rem' }}>
                     <button
                         onClick={handleUpdateLastSeen}
                         disabled={isUpdating}
-                        className="w-full rounded-xl border border-white/10 bg-slate-800/50 px-4 py-2.5 text-sm font-medium text-slate-300 transition-all hover:bg-slate-800 hover:text-white disabled:opacity-50"
+                        style={{
+                            width: '100%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '0.5rem',
+                            borderRadius: '0.5rem',
+                            border: '1px solid rgba(255, 255, 255, 0.1)',
+                            background: 'rgba(255, 255, 255, 0.03)',
+                            padding: '0.75rem 1rem',
+                            fontSize: '0.875rem',
+                            fontWeight: 500,
+                            color: 'rgba(255, 255, 255, 0.7)',
+                            cursor: isUpdating ? 'not-allowed' : 'pointer',
+                            opacity: isUpdating ? 0.5 : 1,
+                            transition: 'all 0.2s',
+                        }}
+                        onMouseEnter={(e) => {
+                            if (!isUpdating) {
+                                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
+                                e.currentTarget.style.color = '#ffffff';
+                            }
+                        }}
+                        onMouseLeave={(e) => {
+                            if (!isUpdating) {
+                                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)';
+                                e.currentTarget.style.color = 'rgba(255, 255, 255, 0.7)';
+                            }
+                        }}
                     >
                         {isUpdating ? (
-                            <Loader2 className="mx-auto size-4 animate-spin" />
+                            <Loader2 style={{ width: '1rem', height: '1rem', animation: 'spin 1s linear infinite' }} />
                         ) : (
-                            'Update Last Seen'
+                            <>
+                                <Clock style={{ width: '1rem', height: '1rem' }} />
+                                Update Last Seen
+                            </>
                         )}
                     </button>
                 </div>
 
                 {error && (
-                    <div className="rounded-lg bg-red-500/10 border border-red-500/20 px-4 py-2">
-                        <p className="text-xs text-red-400">{error}</p>
+                    <div
+                        style={{
+                            borderRadius: '0.5rem',
+                            background: 'rgba(239, 68, 68, 0.1)',
+                            border: '1px solid rgba(239, 68, 68, 0.2)',
+                            padding: '0.75rem',
+                        }}
+                    >
+                        <p style={{ fontSize: '0.75rem', color: '#fca5a5' }}>{error}</p>
                     </div>
                 )}
             </div>
         </div>
     );
 }
-

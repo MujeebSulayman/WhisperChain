@@ -1,17 +1,19 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { Upload, X, Image, Video, Music, FileText, Loader2 } from 'lucide-react';
+import { Upload, X, Image, Video, Music, FileText, Loader2, AlertCircle } from 'lucide-react';
 import { uploadToIPFS, getMediaTypeFromFile } from '@WhisperChain/lib/ipfs';
 import { isIPFSHashUsed } from '@WhisperChain/lib/whisperchainActions';
+
+// Contract constant
+const MAX_FILE_SIZE = 50000000; // 50MB
 
 type FileUploadProps = {
     onUploadComplete: (ipfsHash: string, mediaType: number, fileSize: bigint) => void;
     onCancel?: () => void;
-    maxSize?: number;
 };
 
-export function FileUpload({ onUploadComplete, onCancel, maxSize = 50 * 1024 * 1024 }: FileUploadProps) {
+export function FileUpload({ onUploadComplete, onCancel }: FileUploadProps) {
     const [file, setFile] = useState<File | null>(null);
     const [isUploading, setIsUploading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -21,8 +23,8 @@ export function FileUpload({ onUploadComplete, onCancel, maxSize = 50 * 1024 * 1
         const selectedFile = e.target.files?.[0];
         if (!selectedFile) return;
 
-        if (selectedFile.size > maxSize) {
-            setError(`File size exceeds ${(maxSize / 1024 / 1024).toFixed(0)}MB limit`);
+        if (selectedFile.size > MAX_FILE_SIZE) {
+            setError(`File size exceeds ${(MAX_FILE_SIZE / 1024 / 1024).toFixed(0)}MB limit (contract limit)`);
             return;
         }
 
@@ -58,10 +60,10 @@ export function FileUpload({ onUploadComplete, onCancel, maxSize = 50 * 1024 * 1
 
     const getFileIcon = (file: File) => {
         const type = file.type.toLowerCase();
-        if (type.startsWith('image/')) return <Image style={{ width: '1.25rem', height: '1.25rem', color: '#00ffff' }} />;
-        if (type.startsWith('video/')) return <Video style={{ width: '1.25rem', height: '1.25rem', color: '#ff00ff' }} />;
-        if (type.startsWith('audio/')) return <Music style={{ width: '1.25rem', height: '1.25rem', color: '#8b00ff' }} />;
-        return <FileText style={{ width: '1.25rem', height: '1.25rem', color: '#00ffff' }} />;
+        if (type.startsWith('image/')) return <Image style={{ width: '1.25rem', height: '1.25rem', color: 'rgba(255, 255, 255, 0.7)' }} />;
+        if (type.startsWith('video/')) return <Video style={{ width: '1.25rem', height: '1.25rem', color: 'rgba(255, 255, 255, 0.7)' }} />;
+        if (type.startsWith('audio/')) return <Music style={{ width: '1.25rem', height: '1.25rem', color: 'rgba(255, 255, 255, 0.7)' }} />;
+        return <FileText style={{ width: '1.25rem', height: '1.25rem', color: 'rgba(255, 255, 255, 0.7)' }} />;
     };
 
     const formatFileSize = (bytes: number) => {
@@ -73,12 +75,11 @@ export function FileUpload({ onUploadComplete, onCancel, maxSize = 50 * 1024 * 1
     return (
         <div
             style={{
-                borderRadius: '0.75rem',
-                border: '1px solid rgba(0, 255, 255, 0.2)',
-                background: 'rgba(10, 10, 15, 0.95)',
+                borderRadius: '0.5rem',
+                border: '1px solid rgba(255, 255, 255, 0.08)',
+                background: 'rgba(26, 26, 26, 0.95)',
                 padding: '1rem',
                 backdropFilter: 'blur(10px)',
-                boxShadow: '0 0 20px rgba(0, 255, 255, 0.1)',
             }}
         >
             {!file ? (
@@ -91,29 +92,27 @@ export function FileUpload({ onUploadComplete, onCancel, maxSize = 50 * 1024 * 1
                         justifyContent: 'center',
                         gap: '0.75rem',
                         borderRadius: '0.5rem',
-                        border: '2px dashed rgba(0, 255, 255, 0.3)',
+                        border: '2px dashed rgba(255, 255, 255, 0.1)',
                         padding: '2rem',
                         cursor: 'pointer',
                         transition: 'all 0.2s',
                     }}
                     onMouseEnter={(e) => {
-                        e.currentTarget.style.borderColor = 'rgba(0, 255, 255, 0.5)';
-                        e.currentTarget.style.background = 'rgba(0, 255, 255, 0.05)';
-                        e.currentTarget.style.boxShadow = '0 0 20px rgba(0, 255, 255, 0.2)';
+                        e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+                        e.currentTarget.style.background = 'rgba(255, 255, 255, 0.02)';
                     }}
                     onMouseLeave={(e) => {
-                        e.currentTarget.style.borderColor = 'rgba(0, 255, 255, 0.3)';
+                        e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)';
                         e.currentTarget.style.background = 'transparent';
-                        e.currentTarget.style.boxShadow = 'none';
                     }}
                 >
-                    <Upload style={{ width: '2rem', height: '2rem', color: 'rgba(0, 255, 255, 0.6)' }} />
+                    <Upload style={{ width: '2rem', height: '2rem', color: 'rgba(255, 255, 255, 0.5)' }} />
                     <div style={{ textAlign: 'center' }}>
-                        <p style={{ fontSize: '0.875rem', fontWeight: 600, color: '#00ffff', marginBottom: '0.25rem' }}>
+                        <p style={{ fontSize: '0.875rem', fontWeight: 500, color: '#ffffff', marginBottom: '0.25rem' }}>
                             Click to upload file
                         </p>
-                        <p style={{ fontSize: '0.75rem', color: 'rgba(0, 255, 255, 0.5)', fontFamily: 'monospace' }}>
-                            Max size: {(maxSize / 1024 / 1024).toFixed(0)}MB
+                        <p style={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.5)' }}>
+                            Max size: {(MAX_FILE_SIZE / 1024 / 1024).toFixed(0)}MB (contract limit)
                         </p>
                     </div>
                     <input
@@ -132,8 +131,8 @@ export function FileUpload({ onUploadComplete, onCancel, maxSize = 50 * 1024 * 1
                             alignItems: 'center',
                             gap: '0.75rem',
                             borderRadius: '0.5rem',
-                            border: '1px solid rgba(0, 255, 255, 0.2)',
-                            background: 'rgba(0, 255, 255, 0.05)',
+                            border: '1px solid rgba(255, 255, 255, 0.08)',
+                            background: 'rgba(255, 255, 255, 0.03)',
                             padding: '0.75rem',
                         }}
                     >
@@ -142,8 +141,8 @@ export function FileUpload({ onUploadComplete, onCancel, maxSize = 50 * 1024 * 1
                             <p
                                 style={{
                                     fontSize: '0.875rem',
-                                    fontWeight: 600,
-                                    color: '#00ffff',
+                                    fontWeight: 500,
+                                    color: '#ffffff',
                                     overflow: 'hidden',
                                     textOverflow: 'ellipsis',
                                     whiteSpace: 'nowrap',
@@ -151,7 +150,7 @@ export function FileUpload({ onUploadComplete, onCancel, maxSize = 50 * 1024 * 1
                             >
                                 {file.name}
                             </p>
-                            <p style={{ fontSize: '0.75rem', color: 'rgba(0, 255, 255, 0.5)', fontFamily: 'monospace' }}>
+                            <p style={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.5)' }}>
                                 {formatFileSize(file.size)}
                             </p>
                         </div>
@@ -161,13 +160,13 @@ export function FileUpload({ onUploadComplete, onCancel, maxSize = 50 * 1024 * 1
                                 borderRadius: '0.5rem',
                                 padding: '0.375rem',
                                 background: 'transparent',
-                                border: '1px solid rgba(0, 255, 255, 0.3)',
-                                color: '#00ffff',
+                                border: '1px solid rgba(255, 255, 255, 0.1)',
+                                color: 'rgba(255, 255, 255, 0.7)',
                                 cursor: 'pointer',
                                 transition: 'all 0.2s',
                             }}
                             onMouseEnter={(e) => {
-                                e.currentTarget.style.background = 'rgba(0, 255, 255, 0.1)';
+                                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
                             }}
                             onMouseLeave={(e) => {
                                 e.currentTarget.style.background = 'transparent';
@@ -180,12 +179,16 @@ export function FileUpload({ onUploadComplete, onCancel, maxSize = 50 * 1024 * 1
                     {error && (
                         <div
                             style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.5rem',
+                                padding: '0.75rem',
                                 borderRadius: '0.5rem',
                                 background: 'rgba(239, 68, 68, 0.1)',
-                                border: '1px solid rgba(239, 68, 68, 0.3)',
-                                padding: '0.75rem',
+                                border: '1px solid rgba(239, 68, 68, 0.2)',
                             }}
                         >
+                            <AlertCircle style={{ width: '1rem', height: '1rem', color: '#f87171', flexShrink: 0 }} />
                             <p style={{ fontSize: '0.75rem', color: '#fca5a5' }}>{error}</p>
                         </div>
                     )}
@@ -197,37 +200,26 @@ export function FileUpload({ onUploadComplete, onCancel, maxSize = 50 * 1024 * 1
                             style={{
                                 flex: 1,
                                 borderRadius: '0.5rem',
-                                background: 'linear-gradient(135deg, #00ffff 0%, #8b00ff 100%)',
+                                background: '#ffffff',
                                 border: 'none',
                                 padding: '0.75rem 1rem',
                                 fontSize: '0.875rem',
-                                fontWeight: 700,
-                                color: '#0a0a0f',
+                                fontWeight: 600,
+                                color: '#0f0f0f',
                                 cursor: isUploading ? 'not-allowed' : 'pointer',
-                                opacity: isUploading ? 0.5 : 1,
-                                boxShadow: '0 0 20px rgba(0, 255, 255, 0.4)',
-                                transition: 'all 0.2s',
-                            }}
-                            onMouseEnter={(e) => {
-                                if (!isUploading) {
-                                    e.currentTarget.style.boxShadow = '0 0 30px rgba(0, 255, 255, 0.6)';
-                                }
-                            }}
-                            onMouseLeave={(e) => {
-                                if (!isUploading) {
-                                    e.currentTarget.style.boxShadow = '0 0 20px rgba(0, 255, 255, 0.4)';
-                                }
+                                opacity: isUploading ? 0.6 : 1,
+                                transition: 'opacity 0.2s',
                             }}
                         >
                             {isUploading ? (
                                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
                                     <Loader2 style={{ width: '1rem', height: '1rem', animation: 'spin 1s linear infinite' }} />
-                                    <span>UPLOADING...</span>
+                                    <span>Uploading...</span>
                                 </div>
                             ) : (
                                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
                                     <Upload style={{ width: '1rem', height: '1rem' }} />
-                                    <span>UPLOAD TO IPFS</span>
+                                    <span>Upload to IPFS</span>
                                 </div>
                             )}
                         </button>
@@ -237,28 +229,30 @@ export function FileUpload({ onUploadComplete, onCancel, maxSize = 50 * 1024 * 1
                                 disabled={isUploading}
                                 style={{
                                     borderRadius: '0.5rem',
-                                    border: '1px solid rgba(0, 255, 255, 0.3)',
+                                    border: '1px solid rgba(255, 255, 255, 0.1)',
                                     background: 'transparent',
                                     padding: '0.75rem 1rem',
                                     fontSize: '0.875rem',
                                     fontWeight: 500,
-                                    color: '#00ffff',
+                                    color: 'rgba(255, 255, 255, 0.7)',
                                     cursor: isUploading ? 'not-allowed' : 'pointer',
                                     opacity: isUploading ? 0.5 : 1,
                                     transition: 'all 0.2s',
                                 }}
                                 onMouseEnter={(e) => {
                                     if (!isUploading) {
-                                        e.currentTarget.style.background = 'rgba(0, 255, 255, 0.1)';
+                                        e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
+                                        e.currentTarget.style.color = '#ffffff';
                                     }
                                 }}
                                 onMouseLeave={(e) => {
                                     if (!isUploading) {
                                         e.currentTarget.style.background = 'transparent';
+                                        e.currentTarget.style.color = 'rgba(255, 255, 255, 0.7)';
                                     }
                                 }}
                             >
-                                CANCEL
+                                Cancel
                             </button>
                         )}
                     </div>

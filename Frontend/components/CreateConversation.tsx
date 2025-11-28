@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Users, Plus, X, Loader2 } from 'lucide-react';
 import { createConversation, waitForTransaction } from '@WhisperChain/lib/whisperchainActions';
 import { ethers } from 'ethers';
-import type { AddressLike, BytesLike } from 'ethers';
+import type { AddressLike } from 'ethers';
 
 type CreateConversationProps = {
     onCreated: (conversationId: string) => void;
@@ -19,7 +19,6 @@ export function CreateConversation({
 }: CreateConversationProps) {
     const [participants, setParticipants] = useState<string[]>([]);
     const [newParticipant, setNewParticipant] = useState('');
-    const [conversationKey, setConversationKey] = useState('');
     const [isCreating, setIsCreating] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -52,12 +51,7 @@ export function CreateConversation({
 
     const handleCreate = async () => {
         if (participants.length < 1) {
-            setError('Add at least one participant');
-            return;
-        }
-
-        if (!conversationKey.trim()) {
-            setError('Enter a conversation key');
+            setError('Add at least one participant (contract requires minimum 2 participants including you)');
             return;
         }
 
@@ -65,7 +59,9 @@ export function CreateConversation({
         setError(null);
 
         try {
-            const keyHash = ethers.keccak256(ethers.toUtf8Bytes(conversationKey));
+            // Auto-generate a conversation key (using participants + timestamp + random)
+            const keyToUse = `${currentUser}-${participants.join('-')}-${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;
+            const keyHash = ethers.keccak256(ethers.toUtf8Bytes(keyToUse));
             const allParticipants = [currentUser, ...participants] as AddressLike[];
 
             const tx = await createConversation({
@@ -73,7 +69,7 @@ export function CreateConversation({
                 conversationKeyHash: keyHash,
             });
 
-            const receipt = await waitForTransaction(tx);
+            const receipt = await waitForTransaction(Promise.resolve(tx));
             onCreated(receipt.hash);
         } catch (err: any) {
             setError(err.message || 'Failed to create conversation');
@@ -83,71 +79,136 @@ export function CreateConversation({
     };
 
     return (
-        <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-slate-900/90 to-slate-800/90 p-6 backdrop-blur-sm">
-            <div className="mb-4 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                    <Users className="size-5 text-sky-400" />
-                    <h3 className="text-lg font-semibold text-white">Create Conversation</h3>
+        <div
+            style={{
+                borderRadius: '0.5rem',
+                border: '1px solid rgba(255, 255, 255, 0.08)',
+                background: 'rgba(26, 26, 26, 0.95)',
+                padding: '1.5rem',
+                backdropFilter: 'blur(10px)',
+            }}
+        >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <Users style={{ width: '1.25rem', height: '1.25rem', color: 'rgba(255, 255, 255, 0.7)' }} />
+                    <h3 style={{ fontSize: '1.125rem', fontWeight: 600, color: '#ffffff' }}>Create Conversation</h3>
                 </div>
                 <button
                     onClick={onCancel}
-                    className="rounded-lg p-1 text-slate-400 hover:text-white transition-colors"
+                    style={{
+                        padding: '0.375rem',
+                        borderRadius: '0.5rem',
+                        background: 'transparent',
+                        border: 'none',
+                        color: 'rgba(255, 255, 255, 0.7)',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s',
+                    }}
+                    onMouseEnter={(e) => {
+                        e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
+                        e.currentTarget.style.color = '#ffffff';
+                    }}
+                    onMouseLeave={(e) => {
+                        e.currentTarget.style.background = 'transparent';
+                        e.currentTarget.style.color = 'rgba(255, 255, 255, 0.7)';
+                    }}
                 >
-                    <X className="size-5" />
+                    <X style={{ width: '1rem', height: '1rem' }} />
                 </button>
             </div>
 
-            <div className="space-y-4">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-2">
-                        Conversation Key
+                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: 'rgba(255, 255, 255, 0.7)', marginBottom: '0.5rem' }}>
+                        Participants (minimum 2 including you)
                     </label>
-                    <input
-                        type="text"
-                        value={conversationKey}
-                        onChange={(e) => setConversationKey(e.target.value)}
-                        placeholder="Enter encryption key"
-                        className="w-full rounded-xl border border-white/10 bg-slate-800/50 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:border-sky-500/50 focus:outline-none focus:ring-2 focus:ring-sky-500/20 transition-all"
-                    />
-                    <p className="mt-1 text-xs text-slate-500">
-                        This key will be used for encrypted messaging
-                    </p>
-                </div>
-
-                <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-2">
-                        Participants
-                    </label>
-                    <div className="flex gap-2 mb-2">
+                    <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
                         <input
                             type="text"
                             value={newParticipant}
                             onChange={(e) => setNewParticipant(e.target.value)}
                             onKeyDown={(e) => e.key === 'Enter' && addParticipant()}
                             placeholder="0x..."
-                            className="flex-1 rounded-xl border border-white/10 bg-slate-800/50 px-4 py-2.5 text-sm text-white placeholder:text-slate-500 focus:border-sky-500/50 focus:outline-none focus:ring-2 focus:ring-sky-500/20 transition-all font-mono"
+                            style={{
+                                flex: 1,
+                                borderRadius: '0.5rem',
+                                border: '1px solid rgba(255, 255, 255, 0.1)',
+                                background: 'rgba(255, 255, 255, 0.03)',
+                                padding: '0.625rem 0.75rem',
+                                fontSize: '0.875rem',
+                                color: '#ffffff',
+                                fontFamily: 'monospace',
+                                outline: 'none',
+                                transition: 'all 0.2s',
+                            }}
+                            onFocus={(e) => {
+                                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+                            }}
+                            onBlur={(e) => {
+                                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+                            }}
                         />
                         <button
                             onClick={addParticipant}
-                            className="rounded-xl bg-sky-500/20 border border-sky-500/30 px-4 py-2.5 text-sky-300 hover:bg-sky-500/30 transition-colors"
+                            style={{
+                                borderRadius: '0.5rem',
+                                border: '1px solid rgba(255, 255, 255, 0.1)',
+                                background: 'rgba(255, 255, 255, 0.05)',
+                                padding: '0.625rem 0.75rem',
+                                color: 'rgba(255, 255, 255, 0.7)',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s',
+                            }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)';
+                                e.currentTarget.style.color = '#ffffff';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
+                                e.currentTarget.style.color = 'rgba(255, 255, 255, 0.7)';
+                            }}
                         >
-                            <Plus className="size-4" />
+                            <Plus style={{ width: '1rem', height: '1rem' }} />
                         </button>
                     </div>
 
                     {participants.length > 0 && (
-                        <div className="space-y-2">
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                             {participants.map((address) => (
                                 <div
                                     key={address}
-                                    className="flex items-center justify-between rounded-lg border border-white/10 bg-slate-800/50 px-3 py-2"
+                                    style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'space-between',
+                                        borderRadius: '0.5rem',
+                                        border: '1px solid rgba(255, 255, 255, 0.08)',
+                                        background: 'rgba(255, 255, 255, 0.03)',
+                                        padding: '0.625rem 0.75rem',
+                                    }}
                                 >
-                                    <p className="text-xs font-mono text-slate-300 truncate">{address}</p>
+                                    <p style={{ fontSize: '0.75rem', fontFamily: 'monospace', color: 'rgba(255, 255, 255, 0.7)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>
+                                        {address}
+                                    </p>
                                     <button
                                         onClick={() => removeParticipant(address)}
-                                        className="rounded p-1 text-slate-400 hover:text-red-400 transition-colors"
+                                        style={{
+                                            borderRadius: '0.25rem',
+                                            padding: '0.25rem',
+                                            background: 'transparent',
+                                            border: 'none',
+                                            color: 'rgba(255, 255, 255, 0.5)',
+                                            cursor: 'pointer',
+                                            transition: 'all 0.2s',
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            e.currentTarget.style.color = '#ef4444';
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.currentTarget.style.color = 'rgba(255, 255, 255, 0.5)';
+                                        }}
                                     >
-                                        <X className="size-3" />
+                                        <X style={{ width: '0.875rem', height: '0.875rem' }} />
                                     </button>
                                 </div>
                             ))}
@@ -156,24 +217,43 @@ export function CreateConversation({
                 </div>
 
                 {error && (
-                    <div className="rounded-lg bg-red-500/10 border border-red-500/20 px-4 py-2">
-                        <p className="text-xs text-red-400">{error}</p>
+                    <div
+                        style={{
+                            borderRadius: '0.5rem',
+                            background: 'rgba(239, 68, 68, 0.1)',
+                            border: '1px solid rgba(239, 68, 68, 0.2)',
+                            padding: '0.75rem',
+                        }}
+                    >
+                        <p style={{ fontSize: '0.75rem', color: '#fca5a5' }}>{error}</p>
                     </div>
                 )}
 
                 <button
                     onClick={handleCreate}
                     disabled={isCreating || participants.length < 1}
-                    className="w-full rounded-xl bg-gradient-to-r from-sky-500 to-sky-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-sky-500/30 transition-all hover:from-sky-400 hover:to-sky-500 hover:shadow-xl hover:shadow-sky-500/40 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                    style={{
+                        width: '100%',
+                        borderRadius: '0.5rem',
+                        background: '#ffffff',
+                        border: 'none',
+                        padding: '0.75rem 1rem',
+                        fontSize: '0.875rem',
+                        fontWeight: 600,
+                        color: '#0f0f0f',
+                        cursor: isCreating || participants.length < 1 ? 'not-allowed' : 'pointer',
+                        opacity: isCreating || participants.length < 1 ? 0.6 : 1,
+                        transition: 'opacity 0.2s',
+                    }}
                 >
                     {isCreating ? (
-                        <div className="flex items-center justify-center gap-2">
-                            <Loader2 className="size-4 animate-spin" />
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                            <Loader2 style={{ width: '1rem', height: '1rem', animation: 'spin 1s linear infinite' }} />
                             <span>Creating...</span>
                         </div>
                     ) : (
-                        <div className="flex items-center justify-center gap-2">
-                            <Users className="size-4" />
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                            <Users style={{ width: '1rem', height: '1rem' }} />
                             <span>Create Conversation</span>
                         </div>
                     )}
@@ -182,4 +262,3 @@ export function CreateConversation({
         </div>
     );
 }
-

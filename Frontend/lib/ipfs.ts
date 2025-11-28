@@ -1,7 +1,7 @@
 'use client';
 
 const IPFS_GATEWAY =
-	process.env.NEXT_PUBLIC_IPFS_GATEWAY || 'https://gateway.pinata.cloud/ipfs/';
+	process.env.NEXT_PUBLIC_IPFS_GATEWAY || 'https://gateway.pinata.cloud/ipfs';
 const PINATA_API_KEY = process.env.NEXT_PUBLIC_PINATA_API_KEY;
 const PINATA_SECRET_KEY = process.env.NEXT_PUBLIC_PINATA_SECRET_KEY;
 
@@ -91,7 +91,12 @@ export function getIPFSUrl(hash: string): string {
 	if (hash.startsWith('ipfs://')) {
 		hash = hash.replace('ipfs://', '');
 	}
-	return `${IPFS_GATEWAY}${hash}`;
+	// Ensure hash doesn't start with / and gateway ends with /
+	const cleanHash = hash.startsWith('/') ? hash.slice(1) : hash;
+	const cleanGateway = IPFS_GATEWAY.endsWith('/')
+		? IPFS_GATEWAY
+		: `${IPFS_GATEWAY}/`;
+	return `${cleanGateway}${cleanHash}`;
 }
 
 export async function uploadTextToIPFS(text: string): Promise<string> {

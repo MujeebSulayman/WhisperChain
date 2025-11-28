@@ -12,14 +12,13 @@ type UserRegistrationProps = {
 
 export function UserRegistration({ onRegistered, address }: UserRegistrationProps) {
     const [username, setUsername] = useState('');
-    const [publicKey, setPublicKey] = useState('');
     const [isRegistering, setIsRegistering] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
 
     const handleRegister = async () => {
-        if (!username.trim() || !publicKey.trim()) {
-            setError('Username and public key are required');
+        if (!username.trim()) {
+            setError('Username is required');
             return;
         }
 
@@ -27,13 +26,17 @@ export function UserRegistration({ onRegistered, address }: UserRegistrationProp
         setError(null);
 
         try {
-            const publicKeyBytes = ethers.hexlify(ethers.toUtf8Bytes(publicKey));
+            // Auto-generate a unique public key based on address and timestamp
+            // This ensures it's unique and non-zero (contract requirement)
+            const uniqueKey = `${address}-${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;
+            const publicKeyBytes = ethers.keccak256(ethers.toUtf8Bytes(uniqueKey));
+
             const tx = await registerUser({
                 publicKey: publicKeyBytes,
                 username: username.trim(),
             });
 
-            await waitForTransaction(tx);
+            await waitForTransaction(Promise.resolve(tx));
             setSuccess(true);
             setTimeout(() => {
                 onRegistered();
@@ -47,29 +50,57 @@ export function UserRegistration({ onRegistered, address }: UserRegistrationProp
 
     if (success) {
         return (
-            <div className="rounded-2xl border border-emerald-500/30 bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 p-6 text-center animate-in fade-in slide-in-from-top-2">
-                <CheckCircle2 className="mx-auto mb-3 size-12 text-emerald-400" />
-                <p className="text-lg font-semibold text-emerald-300">Registration Successful!</p>
-                <p className="text-sm text-slate-400 mt-2">Welcome to WhisperChain</p>
+            <div
+                style={{
+                    borderRadius: '0.5rem',
+                    border: '1px solid rgba(16, 185, 129, 0.3)',
+                    background: 'rgba(16, 185, 129, 0.1)',
+                    padding: '2rem',
+                    textAlign: 'center',
+                }}
+            >
+                <CheckCircle2 style={{ width: '3rem', height: '3rem', margin: '0 auto 1rem', color: '#10b981' }} />
+                <p style={{ fontSize: '1rem', fontWeight: 600, color: '#10b981', marginBottom: '0.5rem' }}>Registration Successful!</p>
+                <p style={{ fontSize: '0.875rem', color: 'rgba(255, 255, 255, 0.5)' }}>Welcome to WhisperChain</p>
             </div>
         );
     }
 
     return (
-        <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-slate-900/90 to-slate-800/90 p-6 backdrop-blur-sm">
-            <div className="mb-4 flex items-center gap-3">
-                <div className="rounded-full bg-sky-500/20 p-2">
-                    <UserPlus className="size-5 text-sky-400" />
+        <div
+            style={{
+                borderRadius: '0.5rem',
+                border: '1px solid rgba(255, 255, 255, 0.08)',
+                background: 'rgba(26, 26, 26, 0.95)',
+                padding: '1.5rem',
+                backdropFilter: 'blur(10px)',
+                position: 'relative',
+                zIndex: 1,
+            }}
+        >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
+                <div
+                    style={{
+                        width: '2.5rem',
+                        height: '2.5rem',
+                        borderRadius: '50%',
+                        background: 'rgba(255, 255, 255, 0.1)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                    }}
+                >
+                    <UserPlus style={{ width: '1.25rem', height: '1.25rem', color: 'rgba(255, 255, 255, 0.7)' }} />
                 </div>
                 <div>
-                    <h3 className="text-lg font-semibold text-white">Register on WhisperChain</h3>
-                    <p className="text-xs text-slate-400">Create your profile to start messaging</p>
+                    <h3 style={{ fontSize: '1.125rem', fontWeight: 600, color: '#ffffff', marginBottom: '0.25rem' }}>Register on WhisperChain</h3>
+                    <p style={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.5)' }}>Create your profile to start messaging</p>
                 </div>
             </div>
 
-            <div className="space-y-4">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-2">
+                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: 'rgba(255, 255, 255, 0.7)', marginBottom: '0.5rem' }}>
                         Username
                     </label>
                     <input
@@ -77,45 +108,78 @@ export function UserRegistration({ onRegistered, address }: UserRegistrationProp
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
                         placeholder="Enter your username"
-                        className="w-full rounded-xl border border-white/10 bg-slate-800/50 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:border-sky-500/50 focus:outline-none focus:ring-2 focus:ring-sky-500/20 transition-all"
+                        disabled={isRegistering}
+                        autoFocus
+                        style={{
+                            width: '100%',
+                            borderRadius: '0.5rem',
+                            border: '1px solid rgba(255, 255, 255, 0.1)',
+                            background: 'rgba(255, 255, 255, 0.03)',
+                            padding: '0.75rem',
+                            fontSize: '0.875rem',
+                            color: '#ffffff',
+                            outline: 'none',
+                            transition: 'all 0.2s',
+                            cursor: isRegistering ? 'not-allowed' : 'text',
+                            opacity: isRegistering ? 0.6 : 1,
+                            pointerEvents: isRegistering ? 'none' : 'auto',
+                            WebkitAppearance: 'none',
+                            appearance: 'none',
+                        }}
+                        onFocus={(e) => {
+                            if (!isRegistering) {
+                                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.3)';
+                                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
+                            }
+                        }}
+                        onBlur={(e) => {
+                            e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+                            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)';
+                        }}
                     />
-                </div>
-
-                <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-2">
-                        Public Key
-                    </label>
-                    <input
-                        type="text"
-                        value={publicKey}
-                        onChange={(e) => setPublicKey(e.target.value)}
-                        placeholder="Enter your public encryption key"
-                        className="w-full rounded-xl border border-white/10 bg-slate-800/50 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:border-sky-500/50 focus:outline-none focus:ring-2 focus:ring-sky-500/20 transition-all font-mono"
-                    />
-                    <p className="mt-1 text-xs text-slate-500">
-                        This will be used for encrypted messaging
+                    <p style={{ marginTop: '0.5rem', fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.5)' }}>
+                        A unique public key will be auto-generated for you
                     </p>
                 </div>
 
                 {error && (
-                    <div className="rounded-lg bg-red-500/10 border border-red-500/20 px-4 py-2">
-                        <p className="text-xs text-red-400">{error}</p>
+                    <div
+                        style={{
+                            borderRadius: '0.5rem',
+                            background: 'rgba(239, 68, 68, 0.1)',
+                            border: '1px solid rgba(239, 68, 68, 0.2)',
+                            padding: '0.75rem',
+                        }}
+                    >
+                        <p style={{ fontSize: '0.75rem', color: '#fca5a5' }}>{error}</p>
                     </div>
                 )}
 
                 <button
                     onClick={handleRegister}
-                    disabled={isRegistering || !username.trim() || !publicKey.trim()}
-                    className="w-full rounded-xl bg-gradient-to-r from-sky-500 to-sky-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-sky-500/30 transition-all hover:from-sky-400 hover:to-sky-500 hover:shadow-xl hover:shadow-sky-500/40 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                    disabled={isRegistering || !username.trim()}
+                    style={{
+                        width: '100%',
+                        borderRadius: '0.5rem',
+                        background: '#ffffff',
+                        border: 'none',
+                        padding: '0.75rem 1rem',
+                        fontSize: '0.875rem',
+                        fontWeight: 600,
+                        color: '#0f0f0f',
+                        cursor: isRegistering || !username.trim() ? 'not-allowed' : 'pointer',
+                        opacity: isRegistering || !username.trim() ? 0.6 : 1,
+                        transition: 'opacity 0.2s',
+                    }}
                 >
                     {isRegistering ? (
-                        <div className="flex items-center justify-center gap-2">
-                            <Loader2 className="size-4 animate-spin" />
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                            <Loader2 style={{ width: '1rem', height: '1rem', animation: 'spin 1s linear infinite' }} />
                             <span>Registering...</span>
                         </div>
                     ) : (
-                        <div className="flex items-center justify-center gap-2">
-                            <UserPlus className="size-4" />
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                            <UserPlus style={{ width: '1rem', height: '1rem' }} />
                             <span>Register</span>
                         </div>
                     )}
@@ -124,4 +188,3 @@ export function UserRegistration({ onRegistered, address }: UserRegistrationProp
         </div>
     );
 }
-

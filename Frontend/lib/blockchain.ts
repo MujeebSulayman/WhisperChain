@@ -13,13 +13,13 @@ import type { WhisperChain } from '@WhisperChain/typechain/WhisperChain';
 export type { WhisperChain } from '@WhisperChain/typechain/WhisperChain';
 
 export const BASE_CHAIN = {
-	id: 8453,
-	name: 'Base',
-	rpcUrl: process.env.NEXT_PUBLIC_BASE_RPC ?? 'https://mainnet.base.org',
-	explorer: 'https://basescan.org',
+	id: 84532,
+	name: 'Base Sepolia',
+	rpcUrl: process.env.NEXT_PUBLIC_BASE_RPC ?? 'https://sepolia.base.org',
+	explorer: 'https://sepolia.basescan.org',
 } as const;
 
-const DEPLOYED_ADDRESS_FALLBACK = '0xCCA7f351fA1689b33F22b66A8a69509F6b428718';
+const DEPLOYED_ADDRESS_FALLBACK = '0x89343A3d8BFb9dea288b5aEF9773892F34c60665';
 
 export const WHISPERCHAIN_ADDRESS =
 	process.env.NEXT_PUBLIC_WHISPERCHAIN_ADDRESS ?? DEPLOYED_ADDRESS_FALLBACK;
@@ -58,7 +58,46 @@ export async function connectWhisperChain(): Promise<ConnectResult> {
 		throw new Error('No EIP-1193 wallet detected');
 	}
 
+	// Create provider - Base Sepolia doesn't support ENS, so we'll handle errors gracefully
 	const provider = new BrowserProvider(ethereum);
+
+	// Check and switch network if needed
+	try {
+		const network = await provider.getNetwork();
+		if (Number(network.chainId) !== BASE_CHAIN.id) {
+			try {
+				await ethereum.request({
+					method: 'wallet_switchEthereumChain',
+					params: [{ chainId: `0x${BASE_CHAIN.id.toString(16)}` }],
+				});
+			} catch (switchError: any) {
+				// If the chain doesn't exist, add it
+				if (switchError.code === 4902) {
+					await ethereum.request({
+						method: 'wallet_addEthereumChain',
+						params: [
+							{
+								chainId: `0x${BASE_CHAIN.id.toString(16)}`,
+								chainName: BASE_CHAIN.name,
+								nativeCurrency: {
+									name: 'ETH',
+									symbol: 'ETH',
+									decimals: 18,
+								},
+								rpcUrls: [BASE_CHAIN.rpcUrl],
+								blockExplorerUrls: [BASE_CHAIN.explorer],
+							},
+						],
+					});
+				} else {
+					throw switchError;
+				}
+			}
+		}
+	} catch (error: any) {
+		throw new Error(`Failed to switch to ${BASE_CHAIN.name}: ${error.message}`);
+	}
+
 	const signer = await provider.getSigner();
 
 	return {
