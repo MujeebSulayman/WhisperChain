@@ -5,18 +5,33 @@ import { MessageSquarePlus, Settings, Send, Menu, X, Hash } from 'lucide-react';
 import { WalletConnect } from './WalletConnect';
 import { UserStats } from './UserStats';
 import { StorageManagement } from './StorageManagement';
+import { ThreadList } from './ThreadList';
 import type { AddressLike } from 'ethers';
+
+type Thread = {
+    id: string;
+    title: string;
+    subtitle?: string;
+    unreadCount?: number;
+    lastMessage: string;
+    timestamp: string;
+    participants?: string[];
+};
 
 type SidebarProps = {
     isOpen: boolean;
     onToggle: () => void;
     connectedAddress?: string;
-    onConnect: (address: string) => void;
+    onConnect: () => void | Promise<void>;
+    onDisconnect?: () => void;
     profile?: {
         username?: string;
         publicKey?: string;
         lastSeen?: bigint;
     };
+    threads?: Thread[];
+    activeThreadId?: string;
+    onThreadSelect?: (threadId: string) => void;
     onNewChat: () => void;
     onBatchSend: () => void;
     onSettings: () => void;
@@ -27,7 +42,11 @@ export function Sidebar({
     onToggle,
     connectedAddress,
     onConnect,
+    onDisconnect,
     profile,
+    threads = [],
+    activeThreadId,
+    onThreadSelect,
     onNewChat,
     onBatchSend,
     onSettings,
@@ -102,7 +121,11 @@ export function Sidebar({
                     </button>
                 </div>
 
-                <WalletConnect connectedAddress={connectedAddress} onConnect={onConnect} />
+                <WalletConnect
+                    connectedAddress={connectedAddress}
+                    onConnect={onConnect}
+                    onDisconnect={onDisconnect}
+                />
             </div>
 
             {/* User Profile */}
@@ -264,9 +287,30 @@ export function Sidebar({
                 </div>
             )}
 
+            {/* Conversations */}
+            {connectedAddress && threads.length > 0 && (
+                <div style={{ padding: '1rem', flex: 1, overflowY: 'auto', borderTop: '1px solid rgba(255, 255, 255, 0.08)' }}>
+                    <h3
+                        style={{
+                            fontSize: '0.875rem',
+                            fontWeight: 600,
+                            marginBottom: '1rem',
+                            color: 'rgba(255, 255, 255, 0.7)',
+                        }}
+                    >
+                        Conversations
+                    </h3>
+                    <ThreadList
+                        threads={threads}
+                        activeThreadId={activeThreadId}
+                        onSelectThread={onThreadSelect || (() => { })}
+                    />
+                </div>
+            )}
+
             {/* Storage */}
             {connectedAddress && (
-                <div style={{ padding: '1rem', flex: 1, overflowY: 'auto' }}>
+                <div style={{ padding: '1rem', borderTop: '1px solid rgba(255, 255, 255, 0.08)' }}>
                     <StorageManagement
                         userAddress={connectedAddress}
                         onUpdate={() => { }}

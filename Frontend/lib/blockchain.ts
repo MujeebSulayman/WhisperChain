@@ -58,6 +58,7 @@ export async function connectWhisperChain(): Promise<ConnectResult> {
 		throw new Error('No EIP-1193 wallet detected');
 	}
 
+	// Create provider - Base Sepolia doesn't support ENS, so we'll handle errors gracefully
 	const provider = new BrowserProvider(ethereum);
 
 	// Check and switch network if needed

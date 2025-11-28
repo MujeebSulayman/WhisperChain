@@ -61,10 +61,13 @@ export async function sendWhisper(args: {
 	paymentToken?: AddressLike;
 	paymentAmount?: BigNumberish;
 	value?: BigNumberish;
+	textContent?: string;
 }) {
 	const contract = await getSignerContract();
 	const paymentToken = args.paymentToken ?? ZeroAddress;
 	const paymentAmount = args.paymentAmount ?? BigInt(0);
+	const mediaType = toMediaType(args.mediaType);
+	const textContent = args.textContent ?? '';
 	const overrides =
 		args.value !== undefined
 			? { value: args.value }
@@ -79,8 +82,9 @@ export async function sendWhisper(args: {
 			paymentToken,
 			paymentAmount,
 			args.ipfsHash,
-			toMediaType(args.mediaType),
+			mediaType,
 			args.fileSize,
+			textContent,
 			overrides
 		);
 	}
@@ -91,8 +95,9 @@ export async function sendWhisper(args: {
 		paymentToken,
 		paymentAmount,
 		args.ipfsHash,
-		toMediaType(args.mediaType),
-		args.fileSize
+		mediaType,
+		args.fileSize,
+		textContent
 	);
 }
 
@@ -261,6 +266,7 @@ export async function sendBatchMessages(args: {
 	paymentTokens?: AddressLike[];
 	paymentAmounts?: BigNumberish[];
 	value?: BigNumberish;
+	textContents?: string[];
 }) {
 	const contract = await getSignerContract();
 	const paymentTokens =
@@ -268,6 +274,7 @@ export async function sendBatchMessages(args: {
 	const paymentAmounts =
 		args.paymentAmounts ?? args.recipients.map(() => BigInt(0));
 	const mediaTypes = args.mediaTypes ?? args.recipients.map(() => 0);
+	const textContents = args.textContents ?? args.recipients.map(() => '');
 
 	const overrides =
 		args.value !== undefined ? { value: args.value } : undefined;
@@ -281,6 +288,7 @@ export async function sendBatchMessages(args: {
 			args.ipfsHashes,
 			mediaTypes,
 			args.fileSizes,
+			textContents,
 			overrides
 		);
 	}
@@ -292,7 +300,8 @@ export async function sendBatchMessages(args: {
 		paymentAmounts,
 		args.ipfsHashes,
 		mediaTypes,
-		args.fileSizes
+		args.fileSizes,
+		textContents
 	);
 }
 
@@ -347,6 +356,15 @@ export async function getFileSize(messageId: BytesLike) {
 		return await contract.getFileSize(messageId);
 	} catch (error: any) {
 		throw new Error(`Failed to fetch file size: ${error.message}`);
+	}
+}
+
+export async function getTextContent(messageId: BytesLike) {
+	try {
+		const contract = getReadOnlyContract();
+		return await contract.getTextContent(messageId);
+	} catch (error: any) {
+		throw new Error(`Failed to fetch text content: ${error.message}`);
 	}
 }
 

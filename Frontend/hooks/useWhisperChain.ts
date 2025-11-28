@@ -42,6 +42,7 @@ type Message = {
 	ipfsHash: string;
 	mediaType: number;
 	fileSize: bigint;
+	textContent: string;
 };
 
 type Conversation = {
@@ -99,6 +100,7 @@ export function useWhisperChain(userAddress?: string) {
 					ipfsHash: msg.ipfsHash,
 					mediaType: Number(msg.mediaType),
 					fileSize: msg.fileSize,
+					textContent: (msg as any).textContent || '',
 				}))
 			);
 		} catch (err: any) {

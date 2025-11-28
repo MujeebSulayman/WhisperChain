@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Send, Plus, X, Loader2, AlertCircle } from 'lucide-react';
 import { sendBatchMessages, waitForTransaction } from '@WhisperChain/lib/whisperchainActions';
-import { uploadTextToIPFS } from '@WhisperChain/lib/ipfs';
+// Text messages are not stored on IPFS, only media files are
 import { ethers } from 'ethers';
 import type { AddressLike } from 'ethers';
 
@@ -79,20 +79,20 @@ export function BatchMessaging({ onComplete, onCancel }: BatchMessagingProps) {
         setError(null);
 
         try {
-            const ipfsHashes = await Promise.all(
-                messages.map((msg) => uploadTextToIPFS(msg))
-            );
-
+            // For text messages, don't upload to IPFS - store text content directly in contract
             const messageHashes = messages.map((msg) =>
                 ethers.keccak256(ethers.toUtf8Bytes(msg))
             );
+            // Use empty IPFS hashes for text messages (contract allows it now)
+            const ipfsHashes = messages.map(() => '');
 
             const tx = await sendBatchMessages({
                 recipients: recipients.map(r => r.trim()) as AddressLike[],
                 messageHashes: messageHashes,
                 ipfsHashes: ipfsHashes,
-                mediaTypes: messages.map(() => 0),
-                fileSizes: messages.map((msg) => BigInt(msg.length)),
+                mediaTypes: messages.map(() => 0), // TEXT
+                fileSizes: messages.map(() => BigInt(0)), // No file size for text messages
+                textContents: messages, // Pass text content directly
             });
 
             await waitForTransaction(Promise.resolve(tx));

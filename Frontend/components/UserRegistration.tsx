@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { UserPlus, Loader2, CheckCircle2, Key } from 'lucide-react';
+import { UserPlus, Loader2, CheckCircle2 } from 'lucide-react';
 import { registerUser, waitForTransaction } from '@WhisperChain/lib/whisperchainActions';
 import { ethers } from 'ethers';
 
@@ -12,19 +12,13 @@ type UserRegistrationProps = {
 
 export function UserRegistration({ onRegistered, address }: UserRegistrationProps) {
     const [username, setUsername] = useState('');
-    const [publicKey, setPublicKey] = useState('');
     const [isRegistering, setIsRegistering] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
 
     const handleRegister = async () => {
-        if (!username.trim() || !publicKey.trim()) {
-            setError('Username and public key are required');
-            return;
-        }
-
-        if (publicKey.trim().length === 0) {
-            setError('Public key cannot be empty (contract requirement)');
+        if (!username.trim()) {
+            setError('Username is required');
             return;
         }
 
@@ -32,7 +26,11 @@ export function UserRegistration({ onRegistered, address }: UserRegistrationProp
         setError(null);
 
         try {
-            const publicKeyBytes = ethers.hexlify(ethers.toUtf8Bytes(publicKey));
+            // Auto-generate a unique public key based on address and timestamp
+            // This ensures it's unique and non-zero (contract requirement)
+            const uniqueKey = `${address}-${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;
+            const publicKeyBytes = ethers.keccak256(ethers.toUtf8Bytes(uniqueKey));
+
             const tx = await registerUser({
                 publicKey: publicKeyBytes,
                 username: username.trim(),
@@ -76,6 +74,8 @@ export function UserRegistration({ onRegistered, address }: UserRegistrationProp
                 background: 'rgba(26, 26, 26, 0.95)',
                 padding: '1.5rem',
                 backdropFilter: 'blur(10px)',
+                position: 'relative',
+                zIndex: 1,
             }}
         >
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
@@ -108,6 +108,8 @@ export function UserRegistration({ onRegistered, address }: UserRegistrationProp
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
                         placeholder="Enter your username"
+                        disabled={isRegistering}
+                        autoFocus
                         style={{
                             width: '100%',
                             borderRadius: '0.5rem',
@@ -118,47 +120,25 @@ export function UserRegistration({ onRegistered, address }: UserRegistrationProp
                             color: '#ffffff',
                             outline: 'none',
                             transition: 'all 0.2s',
+                            cursor: isRegistering ? 'not-allowed' : 'text',
+                            opacity: isRegistering ? 0.6 : 1,
+                            pointerEvents: isRegistering ? 'none' : 'auto',
+                            WebkitAppearance: 'none',
+                            appearance: 'none',
                         }}
                         onFocus={(e) => {
-                            e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+                            if (!isRegistering) {
+                                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.3)';
+                                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
+                            }
                         }}
                         onBlur={(e) => {
                             e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)';
-                        }}
-                    />
-                </div>
-
-                <div>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', fontWeight: 500, color: 'rgba(255, 255, 255, 0.7)', marginBottom: '0.5rem' }}>
-                        <Key style={{ width: '1rem', height: '1rem' }} />
-                        Public Key (required)
-                    </label>
-                    <input
-                        type="text"
-                        value={publicKey}
-                        onChange={(e) => setPublicKey(e.target.value)}
-                        placeholder="Enter your public encryption key"
-                        style={{
-                            width: '100%',
-                            borderRadius: '0.5rem',
-                            border: '1px solid rgba(255, 255, 255, 0.1)',
-                            background: 'rgba(255, 255, 255, 0.03)',
-                            padding: '0.75rem',
-                            fontSize: '0.875rem',
-                            color: '#ffffff',
-                            fontFamily: 'monospace',
-                            outline: 'none',
-                            transition: 'all 0.2s',
-                        }}
-                        onFocus={(e) => {
-                            e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.2)';
-                        }}
-                        onBlur={(e) => {
-                            e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+                            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)';
                         }}
                     />
                     <p style={{ marginTop: '0.5rem', fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.5)' }}>
-                        This will be used for encrypted messaging (contract requirement: cannot be empty)
+                        A unique public key will be auto-generated for you
                     </p>
                 </div>
 
@@ -177,7 +157,7 @@ export function UserRegistration({ onRegistered, address }: UserRegistrationProp
 
                 <button
                     onClick={handleRegister}
-                    disabled={isRegistering || !username.trim() || !publicKey.trim()}
+                    disabled={isRegistering || !username.trim()}
                     style={{
                         width: '100%',
                         borderRadius: '0.5rem',
@@ -187,8 +167,8 @@ export function UserRegistration({ onRegistered, address }: UserRegistrationProp
                         fontSize: '0.875rem',
                         fontWeight: 600,
                         color: '#0f0f0f',
-                        cursor: isRegistering || !username.trim() || !publicKey.trim() ? 'not-allowed' : 'pointer',
-                        opacity: isRegistering || !username.trim() || !publicKey.trim() ? 0.6 : 1,
+                        cursor: isRegistering || !username.trim() ? 'not-allowed' : 'pointer',
+                        opacity: isRegistering || !username.trim() ? 0.6 : 1,
                         transition: 'opacity 0.2s',
                     }}
                 >

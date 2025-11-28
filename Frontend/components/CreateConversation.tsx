@@ -19,7 +19,6 @@ export function CreateConversation({
 }: CreateConversationProps) {
     const [participants, setParticipants] = useState<string[]>([]);
     const [newParticipant, setNewParticipant] = useState('');
-    const [conversationKey, setConversationKey] = useState('');
     const [isCreating, setIsCreating] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -56,16 +55,13 @@ export function CreateConversation({
             return;
         }
 
-        if (!conversationKey.trim()) {
-            setError('Enter a conversation key');
-            return;
-        }
-
         setIsCreating(true);
         setError(null);
 
         try {
-            const keyHash = ethers.keccak256(ethers.toUtf8Bytes(conversationKey));
+            // Auto-generate a conversation key (using participants + timestamp + random)
+            const keyToUse = `${currentUser}-${participants.join('-')}-${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;
+            const keyHash = ethers.keccak256(ethers.toUtf8Bytes(keyToUse));
             const allParticipants = [currentUser, ...participants] as AddressLike[];
 
             const tx = await createConversation({
@@ -122,38 +118,6 @@ export function CreateConversation({
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                <div>
-                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: 'rgba(255, 255, 255, 0.7)', marginBottom: '0.5rem' }}>
-                        Conversation Key
-                    </label>
-                    <input
-                        type="text"
-                        value={conversationKey}
-                        onChange={(e) => setConversationKey(e.target.value)}
-                        placeholder="Enter encryption key"
-                        style={{
-                            width: '100%',
-                            borderRadius: '0.5rem',
-                            border: '1px solid rgba(255, 255, 255, 0.1)',
-                            background: 'rgba(255, 255, 255, 0.03)',
-                            padding: '0.75rem',
-                            fontSize: '0.875rem',
-                            color: '#ffffff',
-                            outline: 'none',
-                            transition: 'all 0.2s',
-                        }}
-                        onFocus={(e) => {
-                            e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.2)';
-                        }}
-                        onBlur={(e) => {
-                            e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)';
-                        }}
-                    />
-                    <p style={{ marginTop: '0.5rem', fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.5)' }}>
-                        This key will be used for encrypted messaging
-                    </p>
-                </div>
-
                 <div>
                     <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: 'rgba(255, 255, 255, 0.7)', marginBottom: '0.5rem' }}>
                         Participants (minimum 2 including you)
