@@ -1,9 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { HardDrive, Trash2, Loader2, AlertTriangle } from 'lucide-react';
+import { HardDrive, Trash2, Loader2, AlertTriangle, Wallet } from 'lucide-react';
 import { clearStorage, withdrawBalance, waitForTransaction } from '@WhisperChain/lib/whisperchainActions';
 import type { AddressLike } from 'ethers';
+
+// Contract constants
+const MAX_STORAGE_PER_USER = 1000000000; // 1GB
 
 type StorageManagementProps = {
     userAddress: AddressLike;
@@ -16,7 +19,7 @@ export function StorageManagement({ userAddress, onUpdate }: StorageManagementPr
     const [error, setError] = useState<string | null>(null);
 
     const handleClearStorage = async () => {
-        if (!confirm('Are you sure you want to clear all storage? This cannot be undone.')) {
+        if (!confirm('Are you sure you want to clear all storage? This will reset your storage usage to 0. This cannot be undone.')) {
             return;
         }
 
@@ -25,7 +28,7 @@ export function StorageManagement({ userAddress, onUpdate }: StorageManagementPr
 
         try {
             const tx = await clearStorage();
-            await waitForTransaction(tx);
+            await waitForTransaction(Promise.resolve(tx));
             onUpdate();
         } catch (err: any) {
             setError(err.message || 'Failed to clear storage');
@@ -40,7 +43,7 @@ export function StorageManagement({ userAddress, onUpdate }: StorageManagementPr
 
         try {
             const tx = await withdrawBalance();
-            await waitForTransaction(tx);
+            await waitForTransaction(Promise.resolve(tx));
             onUpdate();
         } catch (err: any) {
             setError(err.message || 'Failed to withdraw balance');
@@ -49,30 +52,94 @@ export function StorageManagement({ userAddress, onUpdate }: StorageManagementPr
         }
     };
 
+    const formatBytes = (bytes: number) => {
+        const mb = bytes / 1024 / 1024;
+        const gb = mb / 1024;
+        if (gb >= 1) return `${gb.toFixed(2)} GB`;
+        return `${mb.toFixed(2)} MB`;
+    };
+
     return (
-        <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-slate-900/90 to-slate-800/90 p-4 backdrop-blur-sm">
-            <div className="mb-4 flex items-center gap-2">
-                <HardDrive className="size-4 text-sky-400" />
-                <h3 className="text-sm font-semibold text-white">Storage Management</h3>
+        <div
+            style={{
+                borderRadius: '0.5rem',
+                border: '1px solid rgba(255, 255, 255, 0.08)',
+                background: 'rgba(255, 255, 255, 0.03)',
+                padding: '1rem',
+            }}
+        >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
+                <HardDrive style={{ width: '1rem', height: '1rem', color: 'rgba(255, 255, 255, 0.7)' }} />
+                <h3 style={{ fontSize: '0.875rem', fontWeight: 600, color: '#ffffff' }}>Storage Management</h3>
+            </div>
+
+            <div
+                style={{
+                    marginBottom: '1rem',
+                    padding: '0.75rem',
+                    borderRadius: '0.5rem',
+                    background: 'rgba(255, 255, 255, 0.02)',
+                    border: '1px solid rgba(255, 255, 255, 0.05)',
+                }}
+            >
+                <p style={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.6)', marginBottom: '0.25rem' }}>Storage Limit</p>
+                <p style={{ fontSize: '0.875rem', color: '#ffffff', fontFamily: 'monospace' }}>{formatBytes(MAX_STORAGE_PER_USER)}</p>
             </div>
 
             {error && (
-                <div className="mb-3 rounded-lg bg-red-500/10 border border-red-500/20 px-3 py-2 flex items-center gap-2">
-                    <AlertTriangle className="size-4 text-red-400" />
-                    <p className="text-xs text-red-400">{error}</p>
+                <div
+                    style={{
+                        marginBottom: '1rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                        padding: '0.75rem',
+                        borderRadius: '0.5rem',
+                        background: 'rgba(239, 68, 68, 0.1)',
+                        border: '1px solid rgba(239, 68, 68, 0.2)',
+                    }}
+                >
+                    <AlertTriangle style={{ width: '1rem', height: '1rem', color: '#f87171', flexShrink: 0 }} />
+                    <p style={{ fontSize: '0.75rem', color: '#fca5a5' }}>{error}</p>
                 </div>
             )}
 
-            <div className="space-y-2">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                 <button
                     onClick={handleClearStorage}
                     disabled={isClearing}
-                    className="w-full flex items-center justify-center gap-2 rounded-xl border border-orange-500/30 bg-orange-500/10 px-4 py-2.5 text-sm font-medium text-orange-300 transition-all hover:bg-orange-500/20 disabled:opacity-50"
+                    style={{
+                        width: '100%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '0.5rem',
+                        padding: '0.625rem 1rem',
+                        borderRadius: '0.5rem',
+                        border: '1px solid rgba(239, 68, 68, 0.3)',
+                        background: 'rgba(239, 68, 68, 0.1)',
+                        color: '#f87171',
+                        cursor: isClearing ? 'not-allowed' : 'pointer',
+                        fontSize: '0.875rem',
+                        fontWeight: 500,
+                        opacity: isClearing ? 0.5 : 1,
+                        transition: 'all 0.2s',
+                    }}
+                    onMouseEnter={(e) => {
+                        if (!isClearing) {
+                            e.currentTarget.style.background = 'rgba(239, 68, 68, 0.15)';
+                        }
+                    }}
+                    onMouseLeave={(e) => {
+                        if (!isClearing) {
+                            e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)';
+                        }
+                    }}
                 >
                     {isClearing ? (
-                        <Loader2 className="size-4 animate-spin" />
+                        <Loader2 style={{ width: '1rem', height: '1rem', animation: 'spin 1s linear infinite' }} />
                     ) : (
-                        <Trash2 className="size-4" />
+                        <Trash2 style={{ width: '1rem', height: '1rem' }} />
                     )}
                     Clear Storage
                 </button>
@@ -80,12 +147,40 @@ export function StorageManagement({ userAddress, onUpdate }: StorageManagementPr
                 <button
                     onClick={handleWithdraw}
                     disabled={isWithdrawing}
-                    className="w-full flex items-center justify-center gap-2 rounded-xl border border-sky-500/30 bg-sky-500/10 px-4 py-2.5 text-sm font-medium text-sky-300 transition-all hover:bg-sky-500/20 disabled:opacity-50"
+                    style={{
+                        width: '100%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '0.5rem',
+                        padding: '0.625rem 1rem',
+                        borderRadius: '0.5rem',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        background: 'rgba(255, 255, 255, 0.05)',
+                        color: 'rgba(255, 255, 255, 0.7)',
+                        cursor: isWithdrawing ? 'not-allowed' : 'pointer',
+                        fontSize: '0.875rem',
+                        fontWeight: 500,
+                        opacity: isWithdrawing ? 0.5 : 1,
+                        transition: 'all 0.2s',
+                    }}
+                    onMouseEnter={(e) => {
+                        if (!isWithdrawing) {
+                            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)';
+                            e.currentTarget.style.color = '#ffffff';
+                        }
+                    }}
+                    onMouseLeave={(e) => {
+                        if (!isWithdrawing) {
+                            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
+                            e.currentTarget.style.color = 'rgba(255, 255, 255, 0.7)';
+                        }
+                    }}
                 >
                     {isWithdrawing ? (
-                        <Loader2 className="size-4 animate-spin" />
+                        <Loader2 style={{ width: '1rem', height: '1rem', animation: 'spin 1s linear infinite' }} />
                     ) : (
-                        <HardDrive className="size-4" />
+                        <Wallet style={{ width: '1rem', height: '1rem' }} />
                     )}
                     Withdraw Balance
                 </button>
@@ -93,4 +188,3 @@ export function StorageManagement({ userAddress, onUpdate }: StorageManagementPr
         </div>
     );
 }
-

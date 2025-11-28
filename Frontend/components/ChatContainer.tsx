@@ -319,7 +319,7 @@ export function ChatContainer() {
 				display: 'flex',
 				height: '100vh',
 				background: '#0f0f0f',
-				color: '#e5e5e5',
+				color: '#ffffff',
 				position: 'relative',
 				overflow: 'hidden',
 			}}

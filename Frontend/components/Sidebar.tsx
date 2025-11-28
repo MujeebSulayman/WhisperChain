@@ -84,7 +84,7 @@ export function Sidebar({
                             padding: '0.375rem',
                             borderRadius: '0.5rem',
                             background: 'transparent',
-                            border: 'none',
+                            border: '1px solid rgba(255, 255, 255, 0.08)',
                             color: 'rgba(255, 255, 255, 0.7)',
                             cursor: 'pointer',
                             transition: 'all 0.2s',

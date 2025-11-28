@@ -88,7 +88,13 @@ export function MessageInput({
     };
 
     return (
-        <div style={{ borderTop: '1px solid rgba(255, 255, 255, 0.1)', background: '#111118', padding: '1rem' }}>
+        <div
+            style={{
+                borderTop: '1px solid rgba(255, 255, 255, 0.08)',
+                background: '#1a1a1a',
+                padding: '1rem',
+            }}
+        >
             {(showFileUpload || showPayment) && (
                 <div style={{ marginBottom: '1rem' }}>
                     {showFileUpload && (
@@ -115,35 +121,89 @@ export function MessageInput({
             )}
 
             {(ipfsHash || paymentAmount) && (
-                <div style={{ marginBottom: '0.75rem', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '0.5rem' }}>
+                <div
+                    style={{
+                        marginBottom: '0.75rem',
+                        display: 'flex',
+                        flexWrap: 'wrap',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                    }}
+                >
                     {ipfsHash && (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.375rem 0.75rem', borderRadius: '0.5rem', background: 'rgba(99, 102, 241, 0.2)', border: '1px solid rgba(99, 102, 241, 0.3)' }}>
-                            <span style={{ fontSize: '0.75rem', color: '#c7d2fe' }}>File: {ipfsHash.slice(0, 12)}...</span>
+                        <div
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.5rem',
+                                padding: '0.5rem 0.75rem',
+                                borderRadius: '0.5rem',
+                                background: 'rgba(255, 255, 255, 0.05)',
+                                border: '1px solid rgba(255, 255, 255, 0.1)',
+                            }}
+                        >
+                            <span style={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.7)', fontFamily: 'monospace' }}>
+                                File: {ipfsHash.slice(0, 12)}...
+                            </span>
                             <button
                                 onClick={() => {
                                     setIpfsHash(null);
                                     setMediaType(0);
                                     setFileSize(BigInt(0));
                                 }}
-                                style={{ background: 'transparent', border: 'none', color: '#818cf8', cursor: 'pointer', padding: 0 }}
-                                onMouseEnter={(e) => e.currentTarget.style.color = '#6366f1'}
-                                onMouseLeave={(e) => e.currentTarget.style.color = '#818cf8'}
+                                style={{
+                                    background: 'transparent',
+                                    border: 'none',
+                                    color: 'rgba(255, 255, 255, 0.5)',
+                                    cursor: 'pointer',
+                                    padding: 0,
+                                    transition: 'color 0.2s',
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.color = '#ef4444';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.color = 'rgba(255, 255, 255, 0.5)';
+                                }}
                             >
                                 <X style={{ width: '0.875rem', height: '0.875rem' }} />
                             </button>
                         </div>
                     )}
                     {paymentAmount && (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.375rem 0.75rem', borderRadius: '0.5rem', background: 'rgba(99, 102, 241, 0.2)', border: '1px solid rgba(99, 102, 241, 0.3)' }}>
-                            <span style={{ fontSize: '0.75rem', color: '#c7d2fe' }}>Payment: {paymentAmount.toString()} wei</span>
+                        <div
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.5rem',
+                                padding: '0.5rem 0.75rem',
+                                borderRadius: '0.5rem',
+                                background: 'rgba(255, 255, 255, 0.05)',
+                                border: '1px solid rgba(255, 255, 255, 0.1)',
+                            }}
+                        >
+                            <span style={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.7)', fontFamily: 'monospace' }}>
+                                Payment: {paymentAmount.toString()} wei
+                            </span>
                             <button
                                 onClick={() => {
                                     setPaymentAmount(undefined);
                                     setPaymentToken(undefined);
                                 }}
-                                style={{ background: 'transparent', border: 'none', color: '#818cf8', cursor: 'pointer', padding: 0 }}
-                                onMouseEnter={(e) => e.currentTarget.style.color = '#6366f1'}
-                                onMouseLeave={(e) => e.currentTarget.style.color = '#818cf8'}
+                                style={{
+                                    background: 'transparent',
+                                    border: 'none',
+                                    color: 'rgba(255, 255, 255, 0.5)',
+                                    cursor: 'pointer',
+                                    padding: 0,
+                                    transition: 'color 0.2s',
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.color = '#ef4444';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.color = 'rgba(255, 255, 255, 0.5)';
+                                }}
                             >
                                 <X style={{ width: '0.875rem', height: '0.875rem' }} />
                             </button>
@@ -163,14 +223,23 @@ export function MessageInput({
                         style={{
                             padding: '0.625rem',
                             borderRadius: '0.5rem',
-                            background: showFileUpload ? 'rgba(99, 102, 241, 0.2)' : 'transparent',
-                            border: showFileUpload ? '1px solid rgba(99, 102, 241, 0.3)' : 'none',
-                            color: showFileUpload ? '#818cf8' : 'rgba(255, 255, 255, 0.6)',
+                            background: showFileUpload ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
+                            border: `1px solid ${showFileUpload ? 'rgba(255, 255, 255, 0.2)' : 'rgba(255, 255, 255, 0.08)'}`,
+                            color: showFileUpload ? '#ffffff' : 'rgba(255, 255, 255, 0.6)',
                             cursor: disabled ? 'not-allowed' : 'pointer',
                             opacity: disabled ? 0.5 : 1,
+                            transition: 'all 0.2s',
                         }}
-                        onMouseEnter={(e) => !disabled && !showFileUpload && (e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)')}
-                        onMouseLeave={(e) => !disabled && !showFileUpload && (e.currentTarget.style.background = 'transparent')}
+                        onMouseEnter={(e) => {
+                            if (!disabled && !showFileUpload) {
+                                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
+                            }
+                        }}
+                        onMouseLeave={(e) => {
+                            if (!disabled && !showFileUpload) {
+                                e.currentTarget.style.background = 'transparent';
+                            }
+                        }}
                     >
                         <Paperclip style={{ width: '1rem', height: '1rem' }} />
                     </button>
@@ -183,20 +252,37 @@ export function MessageInput({
                         style={{
                             padding: '0.625rem',
                             borderRadius: '0.5rem',
-                            background: showPayment ? 'rgba(99, 102, 241, 0.2)' : 'transparent',
-                            border: showPayment ? '1px solid rgba(99, 102, 241, 0.3)' : 'none',
-                            color: showPayment ? '#818cf8' : 'rgba(255, 255, 255, 0.6)',
+                            background: showPayment ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
+                            border: `1px solid ${showPayment ? 'rgba(255, 255, 255, 0.2)' : 'rgba(255, 255, 255, 0.08)'}`,
+                            color: showPayment ? '#ffffff' : 'rgba(255, 255, 255, 0.6)',
                             cursor: disabled ? 'not-allowed' : 'pointer',
                             opacity: disabled ? 0.5 : 1,
+                            transition: 'all 0.2s',
                         }}
-                        onMouseEnter={(e) => !disabled && !showPayment && (e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)')}
-                        onMouseLeave={(e) => !disabled && !showPayment && (e.currentTarget.style.background = 'transparent')}
+                        onMouseEnter={(e) => {
+                            if (!disabled && !showPayment) {
+                                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
+                            }
+                        }}
+                        onMouseLeave={(e) => {
+                            if (!disabled && !showPayment) {
+                                e.currentTarget.style.background = 'transparent';
+                            }
+                        }}
                     >
                         <Coins style={{ width: '1rem', height: '1rem' }} />
                     </button>
                 </div>
 
-                <div style={{ flex: 1, borderRadius: '0.5rem', background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)', padding: '0.75rem' }}>
+                <div
+                    style={{
+                        flex: 1,
+                        borderRadius: '0.5rem',
+                        background: 'rgba(255, 255, 255, 0.03)',
+                        border: '1px solid rgba(255, 255, 255, 0.08)',
+                        padding: '0.75rem',
+                    }}
+                >
                     <textarea
                         ref={textareaRef}
                         value={input}
@@ -225,21 +311,12 @@ export function MessageInput({
                     style={{
                         padding: '0.75rem',
                         borderRadius: '0.5rem',
-                        background: '#6366f1',
+                        background: '#ffffff',
                         border: 'none',
-                        color: '#ffffff',
+                        color: '#0f0f0f',
                         cursor: (!input.trim() && !ipfsHash) || isSending || disabled ? 'not-allowed' : 'pointer',
-                        opacity: (!input.trim() && !ipfsHash) || isSending || disabled ? 0.5 : 1,
-                    }}
-                    onMouseEnter={(e) => {
-                        if (!(!input.trim() && !ipfsHash) && !isSending && !disabled) {
-                            e.currentTarget.style.background = '#4f46e5';
-                        }
-                    }}
-                    onMouseLeave={(e) => {
-                        if (!(!input.trim() && !ipfsHash) && !isSending && !disabled) {
-                            e.currentTarget.style.background = '#6366f1';
-                        }
+                        opacity: (!input.trim() && !ipfsHash) || isSending || disabled ? 0.6 : 1,
+                        transition: 'opacity 0.2s',
                     }}
                 >
                     {isSending ? (

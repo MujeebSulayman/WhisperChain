@@ -1,11 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { Send, Plus, X, Loader2 } from 'lucide-react';
+import { Send, Plus, X, Loader2, AlertCircle } from 'lucide-react';
 import { sendBatchMessages, waitForTransaction } from '@WhisperChain/lib/whisperchainActions';
 import { uploadTextToIPFS } from '@WhisperChain/lib/ipfs';
 import { ethers } from 'ethers';
 import type { AddressLike } from 'ethers';
+
+// Contract constant
+const MAX_BATCH_MESSAGES = 10;
 
 type BatchMessagingProps = {
     onComplete: () => void;
@@ -19,25 +22,33 @@ export function BatchMessaging({ onComplete, onCancel }: BatchMessagingProps) {
     const [error, setError] = useState<string | null>(null);
 
     const addRecipient = () => {
+        if (recipients.length >= MAX_BATCH_MESSAGES) {
+            setError(`Maximum ${MAX_BATCH_MESSAGES} messages allowed (contract limit)`);
+            return;
+        }
         setRecipients([...recipients, '']);
         setMessages([...messages, '']);
+        setError(null);
     };
 
     const removeRecipient = (index: number) => {
         setRecipients(recipients.filter((_, i) => i !== index));
         setMessages(messages.filter((_, i) => i !== index));
+        setError(null);
     };
 
     const updateRecipient = (index: number, value: string) => {
         const updated = [...recipients];
         updated[index] = value;
         setRecipients(updated);
+        setError(null);
     };
 
     const updateMessage = (index: number, value: string) => {
         const updated = [...messages];
         updated[index] = value;
         setMessages(updated);
+        setError(null);
     };
 
     const handleSend = async () => {
@@ -51,9 +62,17 @@ export function BatchMessaging({ onComplete, onCancel }: BatchMessagingProps) {
             return;
         }
 
-        if (recipients.length > 10) {
-            setError('Maximum 10 recipients allowed');
+        if (recipients.length > MAX_BATCH_MESSAGES) {
+            setError(`Maximum ${MAX_BATCH_MESSAGES} messages allowed (contract limit)`);
             return;
+        }
+
+        // Validate addresses
+        for (const recipient of recipients) {
+            if (!ethers.isAddress(recipient.trim())) {
+                setError(`Invalid address: ${recipient}`);
+                return;
+            }
         }
 
         setIsSending(true);
@@ -69,14 +88,14 @@ export function BatchMessaging({ onComplete, onCancel }: BatchMessagingProps) {
             );
 
             const tx = await sendBatchMessages({
-                recipients: recipients as AddressLike[],
+                recipients: recipients.map(r => r.trim()) as AddressLike[],
                 messageHashes: messageHashes,
                 ipfsHashes: ipfsHashes,
                 mediaTypes: messages.map(() => 0),
                 fileSizes: messages.map((msg) => BigInt(msg.length)),
             });
 
-            await waitForTransaction(tx);
+            await waitForTransaction(Promise.resolve(tx));
             onComplete();
         } catch (err: any) {
             setError(err.message || 'Failed to send batch messages');
@@ -86,28 +105,85 @@ export function BatchMessaging({ onComplete, onCancel }: BatchMessagingProps) {
     };
 
     return (
-        <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-slate-900/90 to-slate-800/90 p-6 backdrop-blur-sm max-h-[80vh] overflow-y-auto">
-            <div className="mb-4 flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-white">Batch Messaging</h3>
+        <div
+            style={{
+                borderRadius: '0.5rem',
+                border: '1px solid rgba(255, 255, 255, 0.08)',
+                background: 'rgba(26, 26, 26, 0.95)',
+                padding: '1.5rem',
+                backdropFilter: 'blur(10px)',
+                maxHeight: '80vh',
+                overflowY: 'auto',
+            }}
+        >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <Send style={{ width: '1.25rem', height: '1.25rem', color: 'rgba(255, 255, 255, 0.7)' }} />
+                    <h3 style={{ fontSize: '1.125rem', fontWeight: 600, color: '#ffffff' }}>Batch Messaging</h3>
+                </div>
                 <button
                     onClick={onCancel}
-                    className="rounded-lg p-1 text-slate-400 hover:text-white transition-colors"
+                    style={{
+                        padding: '0.375rem',
+                        borderRadius: '0.5rem',
+                        background: 'transparent',
+                        border: 'none',
+                        color: 'rgba(255, 255, 255, 0.7)',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s',
+                    }}
+                    onMouseEnter={(e) => {
+                        e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
+                        e.currentTarget.style.color = '#ffffff';
+                    }}
+                    onMouseLeave={(e) => {
+                        e.currentTarget.style.background = 'transparent';
+                        e.currentTarget.style.color = 'rgba(255, 255, 255, 0.7)';
+                    }}
                 >
-                    <X className="size-5" />
+                    <X style={{ width: '1.25rem', height: '1.25rem' }} />
                 </button>
             </div>
 
-            <div className="space-y-4">
+            <div style={{ marginBottom: '1rem', padding: '0.75rem', borderRadius: '0.5rem', background: 'rgba(255, 255, 255, 0.02)', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                <p style={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.6)' }}>
+                    Maximum {MAX_BATCH_MESSAGES} messages per batch (contract limit)
+                </p>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 {recipients.map((recipient, index) => (
-                    <div key={index} className="rounded-xl border border-white/10 bg-slate-800/50 p-4">
-                        <div className="mb-3 flex items-center justify-between">
-                            <span className="text-xs font-medium text-slate-400">Message {index + 1}</span>
+                    <div
+                        key={index}
+                        style={{
+                            borderRadius: '0.5rem',
+                            border: '1px solid rgba(255, 255, 255, 0.08)',
+                            background: 'rgba(255, 255, 255, 0.03)',
+                            padding: '1rem',
+                        }}
+                    >
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
+                            <span style={{ fontSize: '0.75rem', fontWeight: 500, color: 'rgba(255, 255, 255, 0.7)' }}>Message {index + 1}</span>
                             {recipients.length > 1 && (
                                 <button
                                     onClick={() => removeRecipient(index)}
-                                    className="rounded p-1 text-slate-400 hover:text-red-400 transition-colors"
+                                    style={{
+                                        borderRadius: '0.25rem',
+                                        padding: '0.25rem',
+                                        background: 'transparent',
+                                        border: 'none',
+                                        color: 'rgba(255, 255, 255, 0.5)',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.2s',
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        e.currentTarget.style.color = '#ef4444';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.currentTarget.style.color = 'rgba(255, 255, 255, 0.5)';
+                                    }}
                                 >
-                                    <X className="size-4" />
+                                    <X style={{ width: '1rem', height: '1rem' }} />
                                 </button>
                             )}
                         </div>
@@ -116,47 +192,130 @@ export function BatchMessaging({ onComplete, onCancel }: BatchMessagingProps) {
                             value={recipient}
                             onChange={(e) => updateRecipient(index, e.target.value)}
                             placeholder="Recipient address (0x...)"
-                            className="mb-2 w-full rounded-lg border border-white/10 bg-slate-900/50 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:border-sky-500/50 focus:outline-none font-mono"
+                            style={{
+                                width: '100%',
+                                marginBottom: '0.5rem',
+                                borderRadius: '0.5rem',
+                                border: '1px solid rgba(255, 255, 255, 0.1)',
+                                background: 'rgba(255, 255, 255, 0.03)',
+                                padding: '0.625rem 0.75rem',
+                                fontSize: '0.875rem',
+                                color: '#ffffff',
+                                fontFamily: 'monospace',
+                                outline: 'none',
+                                transition: 'all 0.2s',
+                            }}
+                            onFocus={(e) => {
+                                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+                            }}
+                            onBlur={(e) => {
+                                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+                            }}
                         />
                         <textarea
                             value={messages[index]}
                             onChange={(e) => updateMessage(index, e.target.value)}
                             placeholder="Message content"
                             rows={3}
-                            className="w-full rounded-lg border border-white/10 bg-slate-900/50 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:border-sky-500/50 focus:outline-none resize-none"
+                            style={{
+                                width: '100%',
+                                borderRadius: '0.5rem',
+                                border: '1px solid rgba(255, 255, 255, 0.1)',
+                                background: 'rgba(255, 255, 255, 0.03)',
+                                padding: '0.625rem 0.75rem',
+                                fontSize: '0.875rem',
+                                color: '#ffffff',
+                                outline: 'none',
+                                resize: 'none',
+                                transition: 'all 0.2s',
+                            }}
+                            onFocus={(e) => {
+                                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+                            }}
+                            onBlur={(e) => {
+                                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+                            }}
                         />
                     </div>
                 ))}
 
-                {recipients.length < 10 && (
+                {recipients.length < MAX_BATCH_MESSAGES && (
                     <button
                         onClick={addRecipient}
-                        className="w-full rounded-xl border border-dashed border-white/20 bg-slate-800/30 px-4 py-3 text-sm font-medium text-slate-300 transition-all hover:border-sky-500/50 hover:bg-sky-500/10 hover:text-sky-300 flex items-center justify-center gap-2"
+                        style={{
+                            width: '100%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '0.5rem',
+                            borderRadius: '0.5rem',
+                            border: '2px dashed rgba(255, 255, 255, 0.1)',
+                            background: 'rgba(255, 255, 255, 0.02)',
+                            padding: '0.75rem 1rem',
+                            fontSize: '0.875rem',
+                            fontWeight: 500,
+                            color: 'rgba(255, 255, 255, 0.7)',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s',
+                        }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+                            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
+                            e.currentTarget.style.color = '#ffffff';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+                            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.02)';
+                            e.currentTarget.style.color = 'rgba(255, 255, 255, 0.7)';
+                        }}
                     >
-                        <Plus className="size-4" />
+                        <Plus style={{ width: '1rem', height: '1rem' }} />
                         Add Another Message
                     </button>
                 )}
 
                 {error && (
-                    <div className="rounded-lg bg-red-500/10 border border-red-500/20 px-4 py-2">
-                        <p className="text-xs text-red-400">{error}</p>
+                    <div
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.5rem',
+                            borderRadius: '0.5rem',
+                            background: 'rgba(239, 68, 68, 0.1)',
+                            border: '1px solid rgba(239, 68, 68, 0.2)',
+                            padding: '0.75rem',
+                        }}
+                    >
+                        <AlertCircle style={{ width: '1rem', height: '1rem', color: '#f87171', flexShrink: 0 }} />
+                        <p style={{ fontSize: '0.75rem', color: '#fca5a5' }}>{error}</p>
                     </div>
                 )}
 
                 <button
                     onClick={handleSend}
-                    disabled={isSending || recipients.length === 0}
-                    className="w-full rounded-xl bg-gradient-to-r from-sky-500 to-sky-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-sky-500/30 transition-all hover:from-sky-400 hover:to-sky-500 hover:shadow-xl hover:shadow-sky-500/40 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                    disabled={isSending || recipients.length === 0 || recipients.some(r => !r.trim()) || messages.some(m => !m.trim())}
+                    style={{
+                        width: '100%',
+                        borderRadius: '0.5rem',
+                        background: '#ffffff',
+                        border: 'none',
+                        padding: '0.75rem 1rem',
+                        fontSize: '0.875rem',
+                        fontWeight: 600,
+                        color: '#0f0f0f',
+                        cursor: isSending || recipients.length === 0 ? 'not-allowed' : 'pointer',
+                        opacity: isSending || recipients.length === 0 ? 0.6 : 1,
+                        transition: 'opacity 0.2s',
+                    }}
                 >
                     {isSending ? (
-                        <div className="flex items-center justify-center gap-2">
-                            <Loader2 className="size-4 animate-spin" />
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                            <Loader2 style={{ width: '1rem', height: '1rem', animation: 'spin 1s linear infinite' }} />
                             <span>Sending {recipients.length} messages...</span>
                         </div>
                     ) : (
-                        <div className="flex items-center justify-center gap-2">
-                            <Send className="size-4" />
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                            <Send style={{ width: '1rem', height: '1rem' }} />
                             <span>Send Batch ({recipients.length} messages)</span>
                         </div>
                     )}
@@ -165,4 +324,3 @@ export function BatchMessaging({ onComplete, onCancel }: BatchMessagingProps) {
         </div>
     );
 }
-
