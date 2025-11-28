@@ -1,7 +1,7 @@
 'use client';
 
 const IPFS_GATEWAY =
-	process.env.NEXT_PUBLIC_IPFS_GATEWAY || 'https://ipfs.io/ipfs/';
+	process.env.NEXT_PUBLIC_IPFS_GATEWAY || 'https://gateway.pinata.cloud/ipfs/';
 const PINATA_API_KEY = process.env.NEXT_PUBLIC_PINATA_API_KEY;
 const PINATA_SECRET_KEY = process.env.NEXT_PUBLIC_PINATA_SECRET_KEY;
 
@@ -36,11 +36,14 @@ export async function uploadToIPFS(
 	file: File | Blob,
 	filename?: string
 ): Promise<string> {
+	if (!PINATA_API_KEY || !PINATA_SECRET_KEY) {
+		throw new Error(
+			'Pinata API keys are required. Please set NEXT_PUBLIC_PINATA_API_KEY and NEXT_PUBLIC_PINATA_SECRET_KEY in your .env.local file.'
+		);
+	}
+
 	try {
-		if (PINATA_API_KEY && PINATA_SECRET_KEY) {
-			return await uploadToPinata(file, filename);
-		}
-		return await uploadToPublicGateway(file, filename);
+		return await uploadToPinata(file, filename);
 	} catch (error: any) {
 		throw new Error(`IPFS upload failed: ${error.message}`);
 	}
@@ -71,26 +74,6 @@ async function uploadToPinata(
 
 	const data = await response.json();
 	return data.IpfsHash;
-}
-
-async function uploadToPublicGateway(
-	file: File | Blob,
-	filename?: string
-): Promise<string> {
-	const formData = new FormData();
-	formData.append('file', file, filename);
-
-	const response = await fetch('https://ipfs.infura.io:5001/api/v0/add', {
-		method: 'POST',
-		body: formData,
-	});
-
-	if (!response.ok) {
-		throw new Error('IPFS upload failed');
-	}
-
-	const data = await response.json();
-	return data.Hash;
 }
 
 export function getIPFSUrl(hash: string): string {
