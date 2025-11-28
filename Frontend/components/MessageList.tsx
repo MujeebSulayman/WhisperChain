@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { MessageBubble } from './MessageBubble';
 
 type Message = {
@@ -20,25 +20,55 @@ type MessageListProps = {
     emptyMessage?: string;
 };
 
+function SkeletonMessage() {
+    return (
+        <div className="mb-4 flex flex-col gap-2 animate-pulse">
+            <div className="h-3 w-24 rounded bg-slate-800" />
+            <div className="h-20 w-3/4 rounded-3xl bg-slate-800" />
+            <div className="h-3 w-32 rounded bg-slate-800" />
+        </div>
+    );
+}
+
 export function MessageList({
     messages,
     isLoading,
     emptyMessage = 'No messages yet. Start the conversation!',
 }: MessageListProps) {
     const scrollRef = useRef<HTMLDivElement>(null);
+    const [isAtBottom, setIsAtBottom] = useState(true);
+    const prevMessagesLength = useRef(messages.length);
 
     useEffect(() => {
-        if (scrollRef.current) {
-            scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+        if (scrollRef.current && isAtBottom) {
+            scrollRef.current.scrollTo({
+                top: scrollRef.current.scrollHeight,
+                behavior: prevMessagesLength.current < messages.length ? 'smooth' : 'auto',
+            });
         }
-    }, [messages]);
+        prevMessagesLength.current = messages.length;
+    }, [messages, isAtBottom]);
+
+    useEffect(() => {
+        const container = scrollRef.current;
+        if (!container) return;
+
+        const handleScroll = () => {
+            const { scrollTop, scrollHeight, clientHeight } = container;
+            setIsAtBottom(scrollHeight - scrollTop - clientHeight < 100);
+        };
+
+        container.addEventListener('scroll', handleScroll);
+        return () => container.removeEventListener('scroll', handleScroll);
+    }, []);
 
     if (isLoading) {
         return (
-            <div className="flex h-full items-center justify-center">
-                <div className="text-center">
-                    <div className="mb-2 inline-block size-6 animate-spin rounded-full border-2 border-sky-500 border-t-transparent" />
-                    <p className="text-sm text-slate-400">Loading messages...</p>
+            <div className="flex h-full items-center justify-center p-6">
+                <div className="w-full max-w-2xl space-y-4">
+                    {[1, 2, 3].map((i) => (
+                        <SkeletonMessage key={i} />
+                    ))}
                 </div>
             </div>
         );
@@ -46,8 +76,13 @@ export function MessageList({
 
     if (messages.length === 0) {
         return (
-            <div className="flex h-full items-center justify-center">
-                <p className="text-sm text-slate-500">{emptyMessage}</p>
+            <div className="flex h-full items-center justify-center p-6">
+                <div className="text-center animate-in fade-in slide-in-from-bottom-4 duration-500">
+                    <div className="mx-auto mb-4 size-16 rounded-full bg-gradient-to-br from-sky-500/20 to-violet-500/20 flex items-center justify-center">
+                        <div className="size-8 rounded-full bg-gradient-to-br from-sky-500 to-violet-500 opacity-50" />
+                    </div>
+                    <p className="text-sm font-medium text-slate-400">{emptyMessage}</p>
+                </div>
             </div>
         );
     }
@@ -55,12 +90,15 @@ export function MessageList({
     return (
         <div
             ref={scrollRef}
-            className="flex h-full flex-col gap-2 overflow-y-auto px-4 py-6"
+            className="flex h-full flex-col gap-2 overflow-y-auto px-4 py-6 scroll-smooth"
+            style={{
+                scrollbarWidth: 'thin',
+                scrollbarColor: 'rgba(148, 163, 184, 0.3) transparent',
+            }}
         >
-            {messages.map((message) => (
-                <MessageBubble key={message.id} message={message} />
+            {messages.map((message, index) => (
+                <MessageBubble key={message.id} message={message} index={index} />
             ))}
         </div>
     );
 }
-
