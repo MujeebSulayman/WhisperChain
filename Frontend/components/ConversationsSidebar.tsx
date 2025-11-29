@@ -48,7 +48,7 @@ export function ConversationsSidebar({
                 transition: 'width 0.3s ease-out, min-width 0.3s ease-out',
                 background: '#1a1a1a',
                 borderLeft: '1px solid rgba(255, 255, 255, 0.08)',
-                display: 'flex',
+                display: isMobile && !isOpen ? 'none' : 'flex',
                 flexDirection: 'column',
                 overflow: 'hidden',
                 position: isMobile ? 'fixed' : 'relative',

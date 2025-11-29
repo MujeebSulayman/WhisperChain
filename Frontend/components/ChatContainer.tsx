@@ -69,7 +69,7 @@ export function ChatContainer() {
 	const [showProfileSettings, setShowProfileSettings] = useState(false);
 	const [showBatchMessaging, setShowBatchMessaging] = useState(false);
 	const [sidebarOpen, setSidebarOpen] = useState(!isMobile);
-	const [conversationsSidebarOpen, setConversationsSidebarOpen] = useState(!isMobile);
+	const [conversationsSidebarOpen, setConversationsSidebarOpen] = useState(!isMobile || (isMobile && !!connectedAddress));
 	const [userPublicKey, setUserPublicKey] = useState<string>('');
 	const [pendingTransactions, setPendingTransactions] = useState<Set<string>>(new Set());
 	const [paymentNotification, setPaymentNotification] = useState<{
@@ -90,6 +90,26 @@ export function ChatContainer() {
 			setConversationsSidebarOpen(false);
 		}
 	}, [isMobile, activeThreadId]);
+
+	// Show conversations sidebar on mobile when wallet is connected
+	useEffect(() => {
+		if (isMobile && connectedAddress && !activeThreadId) {
+			setConversationsSidebarOpen(true);
+		}
+	}, [isMobile, connectedAddress, activeThreadId]);
+
+	// Ensure only one sidebar is open at a time on mobile
+	useEffect(() => {
+		if (isMobile && sidebarOpen && conversationsSidebarOpen) {
+			setConversationsSidebarOpen(false);
+		}
+	}, [isMobile, sidebarOpen]);
+
+	useEffect(() => {
+		if (isMobile && conversationsSidebarOpen && sidebarOpen) {
+			setSidebarOpen(false);
+		}
+	}, [isMobile, conversationsSidebarOpen]);
 
 	// Load user public key
 	useEffect(() => {
@@ -576,7 +596,12 @@ export function ChatContainer() {
 
 			<Sidebar
 				isOpen={sidebarOpen}
-				onToggle={() => setSidebarOpen(!sidebarOpen)}
+				onToggle={() => {
+					if (isMobile && conversationsSidebarOpen) {
+						setConversationsSidebarOpen(false);
+					}
+					setSidebarOpen(!sidebarOpen);
+				}}
 				connectedAddress={connectedAddress}
 				onConnect={async () => {
 					try {
@@ -620,11 +645,12 @@ export function ChatContainer() {
 			<main style={{ flex: 1, display: 'flex', flexDirection: 'column', position: 'relative', background: '#0a0a0a', minWidth: 0 }}>
 				{error && <ErrorToast message={error} onDismiss={() => setError(null)} />}
 
-				{activeThreadId && (
+				{/* Always show header on mobile, or when there's an active thread */}
+				{(isMobile || activeThreadId) && (
 					<ChatHeader
-						threadTitle={threads.find((t) => t.id === activeThreadId)?.title}
+						threadTitle={activeThreadId ? threads.find((t) => t.id === activeThreadId)?.title : undefined}
 						onMenuClick={() => setSidebarOpen(true)}
-						showMenu={isMobile && !sidebarOpen}
+						showMenu={isMobile}
 						onConversationsClick={() => setConversationsSidebarOpen(!conversationsSidebarOpen)}
 						showConversations={conversationsSidebarOpen}
 						isMobile={isMobile}
