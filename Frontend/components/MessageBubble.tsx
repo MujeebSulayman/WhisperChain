@@ -23,6 +23,7 @@ type Message = {
     recipient?: string;
     paymentAmount?: bigint;
     paymentToken?: string;
+    paymentSettled?: boolean;
 };
 
 type MessageBubbleProps = {
@@ -397,74 +398,48 @@ export function MessageBubble({ message, index = 0, showAvatar = true, isGrouped
                     )}
 
                     {/* Payment Indicator */}
-                    {message.paymentAmount && message.paymentAmount > BigInt(0) && (
+                    {message.paymentAmount !== undefined && message.paymentAmount !== null && message.paymentAmount > BigInt(0) && (
                         <div
                             style={{
-                                marginTop: message.body || (message.ipfsHash && message.mediaType !== undefined) ? '0.75rem' : '0',
-                                paddingTop: message.body || (message.ipfsHash && message.mediaType !== undefined) ? '0.75rem' : '0',
-                                borderTop: message.body || (message.ipfsHash && message.mediaType !== undefined)
-                                    ? `1px solid ${isSelf ? 'rgba(99, 102, 241, 0.2)' : 'rgba(255, 255, 255, 0.1)'}`
+                                marginTop: (message.body || (message.ipfsHash && message.mediaType !== undefined && message.mediaType > 0)) ? '0.875rem' : '0',
+                                paddingTop: (message.body || (message.ipfsHash && message.mediaType !== undefined && message.mediaType > 0)) ? '0.875rem' : '0',
+                                borderTop: (message.body || (message.ipfsHash && message.mediaType !== undefined && message.mediaType > 0))
+                                    ? `1px solid ${isSelf ? 'rgba(255, 255, 255, 0.2)' : 'rgba(255, 255, 255, 0.1)'}`
                                     : 'none',
+                                padding: '0.75rem 1rem',
                                 display: 'flex',
                                 alignItems: 'center',
                                 gap: '0.5rem',
-                                padding: '0.625rem 0.875rem',
-                                borderRadius: '0.5rem',
-                                background: isSelf
-                                    ? 'rgba(245, 158, 11, 0.15)'
-                                    : message.status === 'delivered' || message.status === 'read'
-                                        ? 'rgba(16, 185, 129, 0.15)'
+                                background: message.paymentSettled
+                                    ? 'rgba(16, 185, 129, 0.1)'
+                                    : isSelf
+                                        ? 'rgba(99, 102, 241, 0.1)'
                                         : 'rgba(245, 158, 11, 0.1)',
-                                border: `1px solid ${isSelf
-                                    ? 'rgba(245, 158, 11, 0.3)'
-                                    : message.status === 'delivered' || message.status === 'read'
-                                        ? 'rgba(16, 185, 129, 0.3)'
+                                borderRadius: '0.5rem',
+                                border: `1px solid ${message.paymentSettled
+                                    ? 'rgba(16, 185, 129, 0.2)'
+                                    : isSelf
+                                        ? 'rgba(99, 102, 241, 0.2)'
                                         : 'rgba(245, 158, 11, 0.2)'
                                     }`,
                             }}
                         >
-                            <Coins
-                                style={{
-                                    width: '1rem',
-                                    height: '1rem',
-                                    color: isSelf
-                                        ? '#fbbf24'
-                                        : message.status === 'delivered' || message.status === 'read'
-                                            ? '#10b981'
-                                            : '#fbbf24',
-                                    flexShrink: 0,
-                                }}
-                            />
-                            <div style={{ flex: 1, minWidth: 0 }}>
-                                <div
-                                    style={{
-                                        fontSize: '0.8125rem',
-                                        fontWeight: 600,
-                                        color: '#ffffff',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '0.375rem',
-                                    }}
-                                >
-                                    {isSelf ? 'Sent' : message.status === 'delivered' || message.status === 'read' ? 'Received' : 'Pending'}
-                                    {formatEther(message.paymentAmount)} {message.paymentToken && message.paymentToken !== ZeroAddress ? 'Tokens' : 'Base ETH'}
-                                    {(message.status === 'delivered' || message.status === 'read') && !isSelf && (
-                                        <CheckCircle2 style={{ width: '0.875rem', height: '0.875rem', color: '#10b981', flexShrink: 0 }} />
-                                    )}
-                                </div>
-                                {message.paymentToken && message.paymentToken !== ZeroAddress && (
-                                    <div
-                                        style={{
-                                            fontSize: '0.6875rem',
-                                            color: 'rgba(255, 255, 255, 0.6)',
-                                            fontFamily: 'monospace',
-                                            marginTop: '0.125rem',
-                                        }}
-                                    >
-                                        {String(message.paymentToken).slice(0, 6)}...{String(message.paymentToken).slice(-4)}
-                                    </div>
-                                )}
-                            </div>
+                            <Coins style={{
+                                width: '1rem',
+                                height: '1rem',
+                                color: message.paymentSettled
+                                    ? '#34d399'
+                                    : isSelf
+                                        ? '#a5b4fc'
+                                        : '#fbbf24',
+                            }} />
+                            <span style={{ fontSize: '0.8125rem', fontWeight: 500, color: '#ffffff' }}>
+                                {isSelf ? 'Sent' : 'Received'} {formatEther(message.paymentAmount)}{' '}
+                                {message.paymentToken === ZeroAddress ? 'Base ETH' : 'Tokens'}
+                            </span>
+                            {message.paymentSettled && (
+                                <CheckCheck style={{ width: '0.75rem', height: '0.75rem', color: '#34d399', flexShrink: 0 }} />
+                            )}
                         </div>
                     )}
 
