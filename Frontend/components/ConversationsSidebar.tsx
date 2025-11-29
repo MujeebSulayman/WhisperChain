@@ -1,6 +1,6 @@
 'use client';
 
-import { MessageSquare, X, Menu, Search } from 'lucide-react';
+import { MessageSquare, Search } from 'lucide-react';
 import { ThreadList } from './ThreadList';
 import { useState } from 'react';
 
@@ -52,8 +52,8 @@ export function ConversationsSidebar({
                 flexDirection: 'column',
                 overflow: 'hidden',
                 position: isMobile ? 'fixed' : 'relative',
-                right: 0,
-                top: 0,
+                right: isMobile ? 0 : 'auto',
+                top: isMobile ? 0 : 'auto',
                 zIndex: isMobile ? 50 : 'auto',
                 flexShrink: 0,
                 height: '100vh',
@@ -88,9 +88,9 @@ export function ConversationsSidebar({
                         style={{
                             padding: isMobile ? '0.625rem' : '0.375rem',
                             borderRadius: '0.5rem',
-                            background: 'transparent',
-                            border: '1px solid rgba(255, 255, 255, 0.08)',
-                            color: 'rgba(255, 255, 255, 0.7)',
+                            background: isOpen ? 'rgba(99, 102, 241, 0.15)' : 'transparent',
+                            border: `1px solid ${isOpen ? 'rgba(99, 102, 241, 0.3)' : 'rgba(255, 255, 255, 0.08)'}`,
+                            color: isOpen ? '#a5b4fc' : 'rgba(255, 255, 255, 0.7)',
                             cursor: 'pointer',
                             transition: 'all 0.2s',
                             display: 'flex',
@@ -101,25 +101,25 @@ export function ConversationsSidebar({
                             minHeight: isMobile ? '2.75rem' : 'auto',
                         }}
                         onMouseEnter={(e) => {
-                            if (!isMobile) {
+                            if (!isMobile && !isOpen) {
                                 e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
                                 e.currentTarget.style.color = '#ffffff';
                             }
                         }}
                         onMouseLeave={(e) => {
-                            if (!isMobile) {
+                            if (!isMobile && !isOpen) {
                                 e.currentTarget.style.background = 'transparent';
                                 e.currentTarget.style.color = 'rgba(255, 255, 255, 0.7)';
                             }
                         }}
                         onTouchStart={(e) => {
-                            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
+                            e.currentTarget.style.background = isOpen ? 'rgba(99, 102, 241, 0.2)' : 'rgba(255, 255, 255, 0.1)';
                         }}
                         onTouchEnd={(e) => {
-                            e.currentTarget.style.background = 'transparent';
+                            e.currentTarget.style.background = isOpen ? 'rgba(99, 102, 241, 0.15)' : 'transparent';
                         }}
                     >
-                        {isOpen ? <X style={{ width: '1rem', height: '1rem' }} /> : <Menu style={{ width: '1rem', height: '1rem' }} />}
+                        <MessageSquare style={{ width: isMobile ? '1.25rem' : '1rem', height: isMobile ? '1.25rem' : '1rem' }} />
                     </button>
                 </div>
 

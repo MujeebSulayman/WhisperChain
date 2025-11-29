@@ -1,6 +1,6 @@
 'use client';
 
-import { Menu, MessageSquare, Circle } from 'lucide-react';
+import { Menu, Circle } from 'lucide-react';
 
 type ChatHeaderProps = {
     threadTitle?: string;
@@ -129,45 +129,6 @@ export function ChatHeader({ threadTitle, onMenuClick, showMenu = false, onConve
                     )}
                 </div>
             </div>
-            {onConversationsClick && (
-                <button
-                    onClick={onConversationsClick}
-                    style={{
-                        padding: isMobile ? '0.75rem' : '0.625rem',
-                        borderRadius: '0.5rem',
-                        background: showConversations ? 'rgba(99, 102, 241, 0.15)' : 'transparent',
-                        border: `1px solid ${showConversations ? 'rgba(99, 102, 241, 0.3)' : 'rgba(255, 255, 255, 0.08)'}`,
-                        color: showConversations ? '#a5b4fc' : 'rgba(255, 255, 255, 0.6)',
-                        cursor: 'pointer',
-                        transition: 'all 0.2s',
-                        flexShrink: 0,
-                        touchAction: 'manipulation',
-                        minWidth: isMobile ? '2.75rem' : 'auto',
-                        minHeight: isMobile ? '2.75rem' : 'auto',
-                    }}
-                    onMouseEnter={(e) => {
-                        if (!isMobile && !showConversations) {
-                            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
-                            e.currentTarget.style.color = '#ffffff';
-                        }
-                    }}
-                    onMouseLeave={(e) => {
-                        if (!isMobile && !showConversations) {
-                            e.currentTarget.style.background = 'transparent';
-                            e.currentTarget.style.color = 'rgba(255, 255, 255, 0.6)';
-                        }
-                    }}
-                    onTouchStart={(e) => {
-                        e.currentTarget.style.background = showConversations ? 'rgba(99, 102, 241, 0.2)' : 'rgba(255, 255, 255, 0.1)';
-                    }}
-                    onTouchEnd={(e) => {
-                        e.currentTarget.style.background = showConversations ? 'rgba(99, 102, 241, 0.15)' : 'transparent';
-                    }}
-                    title={showConversations ? 'Hide conversations' : 'Show conversations'}
-                >
-                    <MessageSquare style={{ width: isMobile ? '1.25rem' : '1.125rem', height: isMobile ? '1.25rem' : '1.125rem' }} />
-                </button>
-            )}
         </div>
     );
 }

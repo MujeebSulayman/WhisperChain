@@ -594,6 +594,10 @@ export function ChatContainer() {
 				}}
 				profile={profile ? { ...profile, publicKey: userPublicKey } : undefined}
 				onNewChat={() => {
+					if (!connectedAddress) {
+						setError('Please connect your wallet to create a new conversation');
+						return;
+					}
 					setShowCreateConversation(true);
 					if (isMobile) setSidebarOpen(false);
 				}}
@@ -613,14 +617,14 @@ export function ChatContainer() {
 			/>
 
 			{/* Main Chat Area */}
-			<main style={{ flex: 1, display: 'flex', flexDirection: 'column', position: 'relative', background: '#0a0a0a', minWidth: 0, width: isMobile && (sidebarOpen || conversationsSidebarOpen) ? 0 : 'auto' }}>
+			<main style={{ flex: 1, display: 'flex', flexDirection: 'column', position: 'relative', background: '#0a0a0a', minWidth: 0 }}>
 				{error && <ErrorToast message={error} onDismiss={() => setError(null)} />}
 
 				{activeThreadId && (
 					<ChatHeader
 						threadTitle={threads.find((t) => t.id === activeThreadId)?.title}
 						onMenuClick={() => setSidebarOpen(true)}
-						showMenu={!sidebarOpen}
+						showMenu={isMobile && !sidebarOpen}
 						onConversationsClick={() => setConversationsSidebarOpen(!conversationsSidebarOpen)}
 						showConversations={conversationsSidebarOpen}
 						isMobile={isMobile}
@@ -646,7 +650,13 @@ export function ChatContainer() {
 						/>
 					</>
 				) : (
-					<EmptyState onNewConversation={() => setShowCreateConversation(true)} />
+					<EmptyState onNewConversation={() => {
+						if (!connectedAddress) {
+							setError('Please connect your wallet to create a new conversation');
+							return;
+						}
+						setShowCreateConversation(true);
+					}} />
 				)}
 			</main>
 
