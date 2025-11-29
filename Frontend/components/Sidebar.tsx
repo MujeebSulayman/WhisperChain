@@ -522,23 +522,22 @@ export function Sidebar({
                         <UserStats userAddress={connectedAddress} />
                     </div>
                 )}
-            </div>
 
-            {/* Storage - Fixed at bottom, only show when open */}
-            {connectedAddress && isOpen && (
-                <div
-                    style={{
-                        padding: '1rem',
-                        borderTop: '1px solid rgba(255, 255, 255, 0.08)',
-                        flexShrink: 0,
-                    }}
-                >
-                    <StorageManagement
-                        userAddress={connectedAddress}
-                        onUpdate={() => { }}
-                    />
-                </div>
-            )}
+                {/* Storage Management - Inside scrollable area, only show when open */}
+                {connectedAddress && isOpen && (
+                    <div
+                        style={{
+                            padding: '1rem',
+                            borderTop: '1px solid rgba(255, 255, 255, 0.08)',
+                        }}
+                    >
+                        <StorageManagement
+                            userAddress={connectedAddress}
+                            onUpdate={() => { }}
+                        />
+                    </div>
+                )}
+            </div>
         </aside>
     );
 }
