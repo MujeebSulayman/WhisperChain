@@ -1,6 +1,6 @@
 'use client';
 
-import { Menu, MessageSquare, Circle } from 'lucide-react';
+import { Menu, Circle } from 'lucide-react';
 
 type ChatHeaderProps = {
     threadTitle?: string;
@@ -8,9 +8,10 @@ type ChatHeaderProps = {
     showMenu?: boolean;
     onConversationsClick?: () => void;
     showConversations?: boolean;
+    isMobile?: boolean;
 };
 
-export function ChatHeader({ threadTitle, onMenuClick, showMenu = false, onConversationsClick, showConversations = true }: ChatHeaderProps) {
+export function ChatHeader({ threadTitle, onMenuClick, showMenu = false, onConversationsClick, showConversations = true, isMobile = false }: ChatHeaderProps) {
     const getInitials = (title?: string) => {
         if (!title) return 'C';
         const parts = title.split(' ');
@@ -30,11 +31,11 @@ export function ChatHeader({ threadTitle, onMenuClick, showMenu = false, onConve
     return (
         <div
             style={{
-                height: '4.5rem',
+                height: isMobile ? '3.5rem' : '4.5rem',
                 borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
                 background: 'rgba(15, 15, 15, 0.8)',
                 backdropFilter: 'blur(10px)',
-                padding: '0 1.25rem',
+                padding: isMobile ? '0 0.75rem' : '0 1.25rem',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
@@ -48,7 +49,7 @@ export function ChatHeader({ threadTitle, onMenuClick, showMenu = false, onConve
                     <button
                         onClick={onMenuClick}
                         style={{
-                            padding: '0.5rem',
+                            padding: isMobile ? '0.625rem' : '0.5rem',
                             borderRadius: '0.5rem',
                             background: 'transparent',
                             border: 'none',
@@ -56,23 +57,36 @@ export function ChatHeader({ threadTitle, onMenuClick, showMenu = false, onConve
                             cursor: 'pointer',
                             transition: 'all 0.2s',
                             flexShrink: 0,
+                            touchAction: 'manipulation',
+                            minWidth: isMobile ? '2.75rem' : 'auto',
+                            minHeight: isMobile ? '2.75rem' : 'auto',
                         }}
                         onMouseEnter={(e) => {
-                            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
-                            e.currentTarget.style.color = '#ffffff';
+                            if (!isMobile) {
+                                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
+                                e.currentTarget.style.color = '#ffffff';
+                            }
                         }}
                         onMouseLeave={(e) => {
+                            if (!isMobile) {
+                                e.currentTarget.style.background = 'transparent';
+                                e.currentTarget.style.color = 'rgba(255, 255, 255, 0.6)';
+                            }
+                        }}
+                        onTouchStart={(e) => {
+                            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
+                        }}
+                        onTouchEnd={(e) => {
                             e.currentTarget.style.background = 'transparent';
-                            e.currentTarget.style.color = 'rgba(255, 255, 255, 0.6)';
                         }}
                     >
-                        <Menu style={{ width: '1.25rem', height: '1.25rem' }} />
+                        <Menu style={{ width: isMobile ? '1.5rem' : '1.25rem', height: isMobile ? '1.5rem' : '1.25rem' }} />
                     </button>
                 )}
                 <div
                     style={{
-                        width: '2.75rem',
-                        height: '2.75rem',
+                        width: isMobile ? '2.25rem' : '2.75rem',
+                        height: isMobile ? '2.25rem' : '2.75rem',
                         borderRadius: '50%',
                         background: getAvatarColor(threadTitle),
                         display: 'flex',
@@ -80,7 +94,7 @@ export function ChatHeader({ threadTitle, onMenuClick, showMenu = false, onConve
                         justifyContent: 'center',
                         color: '#ffffff',
                         fontWeight: 600,
-                        fontSize: '0.875rem',
+                        fontSize: isMobile ? '0.75rem' : '0.875rem',
                         flexShrink: 0,
                     }}
                 >
@@ -90,7 +104,7 @@ export function ChatHeader({ threadTitle, onMenuClick, showMenu = false, onConve
                     <h2
                         style={{
                             fontWeight: 600,
-                            fontSize: '1rem',
+                            fontSize: isMobile ? '0.875rem' : '1rem',
                             color: '#ffffff',
                             margin: 0,
                             overflow: 'hidden',
@@ -100,49 +114,21 @@ export function ChatHeader({ threadTitle, onMenuClick, showMenu = false, onConve
                     >
                         {threadTitle || 'New Conversation'}
                     </h2>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.125rem' }}>
-                        <Circle style={{ width: '0.5rem', height: '0.5rem', color: '#10b981', fill: '#10b981' }} />
-                        <span
-                            style={{
-                                fontSize: '0.75rem',
-                                color: 'rgba(255, 255, 255, 0.5)',
-                            }}
-                        >
-                            Active
-                        </span>
-                    </div>
+                    {!isMobile && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.125rem' }}>
+                            <Circle style={{ width: '0.5rem', height: '0.5rem', color: '#10b981', fill: '#10b981' }} />
+                            <span
+                                style={{
+                                    fontSize: '0.75rem',
+                                    color: 'rgba(255, 255, 255, 0.5)',
+                                }}
+                            >
+                                Active
+                            </span>
+                        </div>
+                    )}
                 </div>
             </div>
-            {onConversationsClick && (
-                <button
-                    onClick={onConversationsClick}
-                    style={{
-                        padding: '0.625rem',
-                        borderRadius: '0.5rem',
-                        background: showConversations ? 'rgba(99, 102, 241, 0.15)' : 'transparent',
-                        border: `1px solid ${showConversations ? 'rgba(99, 102, 241, 0.3)' : 'rgba(255, 255, 255, 0.08)'}`,
-                        color: showConversations ? '#a5b4fc' : 'rgba(255, 255, 255, 0.6)',
-                        cursor: 'pointer',
-                        transition: 'all 0.2s',
-                        flexShrink: 0,
-                    }}
-                    onMouseEnter={(e) => {
-                        if (!showConversations) {
-                            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
-                            e.currentTarget.style.color = '#ffffff';
-                        }
-                    }}
-                    onMouseLeave={(e) => {
-                        if (!showConversations) {
-                            e.currentTarget.style.background = 'transparent';
-                            e.currentTarget.style.color = 'rgba(255, 255, 255, 0.6)';
-                        }
-                    }}
-                    title={showConversations ? 'Hide conversations' : 'Show conversations'}
-                >
-                    <MessageSquare style={{ width: '1.125rem', height: '1.125rem' }} />
-                </button>
-            )}
         </div>
     );
 }

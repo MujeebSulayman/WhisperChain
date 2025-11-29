@@ -26,6 +26,7 @@ import {
 } from '@WhisperChain/lib/whisperchainActions';
 import { useWhisperChain } from '../hooks/useWhisperChain';
 import { useWallet } from '../hooks/useWallet';
+import { useIsMobile } from '../hooks/useMediaQuery';
 import { ethers } from 'ethers';
 import { formatDistanceToNow } from 'date-fns';
 
@@ -57,6 +58,7 @@ type Thread = {
 
 export function ChatContainer() {
 	const { connectedAddress, connect, disconnect } = useWallet();
+	const isMobile = useIsMobile();
 	const [activeThreadId, setActiveThreadId] = useState<string>('');
 	const [messages, setMessages] = useState<Record<string, Message[]>>({});
 	const [threads, setThreads] = useState<Thread[]>([]);
@@ -66,8 +68,8 @@ export function ChatContainer() {
 	const [showCreateConversation, setShowCreateConversation] = useState(false);
 	const [showProfileSettings, setShowProfileSettings] = useState(false);
 	const [showBatchMessaging, setShowBatchMessaging] = useState(false);
-	const [sidebarOpen, setSidebarOpen] = useState(true);
-	const [conversationsSidebarOpen, setConversationsSidebarOpen] = useState(true);
+	const [sidebarOpen, setSidebarOpen] = useState(!isMobile);
+	const [conversationsSidebarOpen, setConversationsSidebarOpen] = useState(!isMobile);
 	const [userPublicKey, setUserPublicKey] = useState<string>('');
 	const [pendingTransactions, setPendingTransactions] = useState<Set<string>>(new Set());
 	const [paymentNotification, setPaymentNotification] = useState<{
@@ -80,6 +82,14 @@ export function ChatContainer() {
 	const [showPaymentHistory, setShowPaymentHistory] = useState(false);
 
 	const { profile, isRegistered, refresh } = useWhisperChain(connectedAddress);
+
+	// Close sidebars on mobile when thread is selected
+	useEffect(() => {
+		if (isMobile && activeThreadId) {
+			setSidebarOpen(false);
+			setConversationsSidebarOpen(false);
+		}
+	}, [isMobile, activeThreadId]);
 
 	// Load user public key
 	useEffect(() => {
@@ -547,6 +557,23 @@ export function ChatContainer() {
 				overflow: 'hidden',
 			}}
 		>
+			{/* Mobile Backdrop */}
+			{isMobile && (sidebarOpen || conversationsSidebarOpen) && (
+				<div
+					style={{
+						position: 'fixed',
+						inset: 0,
+						background: 'rgba(0, 0, 0, 0.7)',
+						backdropFilter: 'blur(4px)',
+						zIndex: 40,
+					}}
+					onClick={() => {
+						setSidebarOpen(false);
+						setConversationsSidebarOpen(false);
+					}}
+				/>
+			)}
+
 			<Sidebar
 				isOpen={sidebarOpen}
 				onToggle={() => setSidebarOpen(!sidebarOpen)}
@@ -566,10 +593,27 @@ export function ChatContainer() {
 					setThreads([]);
 				}}
 				profile={profile ? { ...profile, publicKey: userPublicKey } : undefined}
-				onNewChat={() => setShowCreateConversation(true)}
-				onBatchSend={() => setShowBatchMessaging(true)}
-				onSettings={() => setShowProfileSettings(true)}
-				onPaymentHistory={() => setShowPaymentHistory(true)}
+				onNewChat={() => {
+					if (!connectedAddress) {
+						setError('Please connect your wallet to create a new conversation');
+						return;
+					}
+					setShowCreateConversation(true);
+					if (isMobile) setSidebarOpen(false);
+				}}
+				onBatchSend={() => {
+					setShowBatchMessaging(true);
+					if (isMobile) setSidebarOpen(false);
+				}}
+				onSettings={() => {
+					setShowProfileSettings(true);
+					if (isMobile) setSidebarOpen(false);
+				}}
+				onPaymentHistory={() => {
+					setShowPaymentHistory(true);
+					if (isMobile) setSidebarOpen(false);
+				}}
+				isMobile={isMobile}
 			/>
 
 			{/* Main Chat Area */}
@@ -580,9 +624,10 @@ export function ChatContainer() {
 					<ChatHeader
 						threadTitle={threads.find((t) => t.id === activeThreadId)?.title}
 						onMenuClick={() => setSidebarOpen(true)}
-						showMenu={!sidebarOpen}
+						showMenu={isMobile && !sidebarOpen}
 						onConversationsClick={() => setConversationsSidebarOpen(!conversationsSidebarOpen)}
 						showConversations={conversationsSidebarOpen}
+						isMobile={isMobile}
 					/>
 				)}
 
@@ -605,7 +650,13 @@ export function ChatContainer() {
 						/>
 					</>
 				) : (
-					<EmptyState onNewConversation={() => setShowCreateConversation(true)} />
+					<EmptyState onNewConversation={() => {
+						if (!connectedAddress) {
+							setError('Please connect your wallet to create a new conversation');
+							return;
+						}
+						setShowCreateConversation(true);
+					}} />
 				)}
 			</main>
 
@@ -615,8 +666,12 @@ export function ChatContainer() {
 				onToggle={() => setConversationsSidebarOpen(!conversationsSidebarOpen)}
 				threads={threads}
 				activeThreadId={activeThreadId}
-				onSelectThread={setActiveThreadId}
+				onSelectThread={(threadId) => {
+					setActiveThreadId(threadId);
+					if (isMobile) setConversationsSidebarOpen(false);
+				}}
 				connectedAddress={connectedAddress}
+				isMobile={isMobile}
 			/>
 
 			{/* Payment Notification */}

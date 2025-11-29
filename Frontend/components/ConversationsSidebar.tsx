@@ -1,6 +1,6 @@
 'use client';
 
-import { MessageSquare, X, Menu, Search } from 'lucide-react';
+import { MessageSquare, Search } from 'lucide-react';
 import { ThreadList } from './ThreadList';
 import { useState } from 'react';
 
@@ -21,6 +21,7 @@ type ConversationsSidebarProps = {
     activeThreadId?: string;
     onSelectThread: (threadId: string) => void;
     connectedAddress?: string;
+    isMobile?: boolean;
 };
 
 export function ConversationsSidebar({
@@ -30,6 +31,7 @@ export function ConversationsSidebar({
     activeThreadId,
     onSelectThread,
     connectedAddress,
+    isMobile = false,
 }: ConversationsSidebarProps) {
     const [searchQuery, setSearchQuery] = useState('');
 
@@ -41,17 +43,21 @@ export function ConversationsSidebar({
     return (
         <aside
             style={{
-                width: isOpen ? '20rem' : '4rem',
-                minWidth: isOpen ? '20rem' : '4rem',
+                width: isMobile ? (isOpen ? '20rem' : '0') : (isOpen ? '20rem' : '4rem'),
+                minWidth: isMobile ? (isOpen ? '20rem' : '0') : (isOpen ? '20rem' : '4rem'),
                 transition: 'width 0.3s ease-out, min-width 0.3s ease-out',
                 background: '#1a1a1a',
                 borderLeft: '1px solid rgba(255, 255, 255, 0.08)',
                 display: 'flex',
                 flexDirection: 'column',
                 overflow: 'hidden',
-                position: 'relative',
+                position: isMobile ? 'fixed' : 'relative',
+                right: isMobile ? 0 : 'auto',
+                top: isMobile ? 0 : 'auto',
+                zIndex: isMobile ? 50 : 'auto',
                 flexShrink: 0,
                 height: '100vh',
+                boxShadow: isMobile && isOpen ? '-4px 0 24px rgba(0, 0, 0, 0.5)' : 'none',
             }}
         >
             {/* Header - Fixed */}
@@ -80,27 +86,40 @@ export function ConversationsSidebar({
                     <button
                         onClick={onToggle}
                         style={{
-                            padding: '0.375rem',
+                            padding: isMobile ? '0.625rem' : '0.375rem',
                             borderRadius: '0.5rem',
-                            background: 'transparent',
-                            border: '1px solid rgba(255, 255, 255, 0.08)',
-                            color: 'rgba(255, 255, 255, 0.7)',
+                            background: isOpen ? 'rgba(99, 102, 241, 0.15)' : 'transparent',
+                            border: `1px solid ${isOpen ? 'rgba(99, 102, 241, 0.3)' : 'rgba(255, 255, 255, 0.08)'}`,
+                            color: isOpen ? '#a5b4fc' : 'rgba(255, 255, 255, 0.7)',
                             cursor: 'pointer',
                             transition: 'all 0.2s',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
+                            touchAction: 'manipulation',
+                            minWidth: isMobile ? '2.75rem' : 'auto',
+                            minHeight: isMobile ? '2.75rem' : 'auto',
                         }}
                         onMouseEnter={(e) => {
-                            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
-                            e.currentTarget.style.color = '#ffffff';
+                            if (!isMobile && !isOpen) {
+                                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
+                                e.currentTarget.style.color = '#ffffff';
+                            }
                         }}
                         onMouseLeave={(e) => {
-                            e.currentTarget.style.background = 'transparent';
-                            e.currentTarget.style.color = 'rgba(255, 255, 255, 0.7)';
+                            if (!isMobile && !isOpen) {
+                                e.currentTarget.style.background = 'transparent';
+                                e.currentTarget.style.color = 'rgba(255, 255, 255, 0.7)';
+                            }
+                        }}
+                        onTouchStart={(e) => {
+                            e.currentTarget.style.background = isOpen ? 'rgba(99, 102, 241, 0.2)' : 'rgba(255, 255, 255, 0.1)';
+                        }}
+                        onTouchEnd={(e) => {
+                            e.currentTarget.style.background = isOpen ? 'rgba(99, 102, 241, 0.15)' : 'transparent';
                         }}
                     >
-                        {isOpen ? <X style={{ width: '1rem', height: '1rem' }} /> : <Menu style={{ width: '1rem', height: '1rem' }} />}
+                        <MessageSquare style={{ width: isMobile ? '1.25rem' : '1rem', height: isMobile ? '1.25rem' : '1rem' }} />
                     </button>
                 </div>
 
