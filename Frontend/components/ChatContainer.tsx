@@ -2,12 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { Sidebar } from './Sidebar';
+import { ConversationsSidebar } from './ConversationsSidebar';
 import { ChatHeader } from './ChatHeader';
 import { EmptyState } from './EmptyState';
 import { ErrorToast } from './ErrorToast';
 import { MessageList } from './MessageList';
 import { MessageInput } from './MessageInput';
-import { ThreadList } from './ThreadList';
 import { UserRegistration } from './UserRegistration';
 import { CreateConversation } from './CreateConversation';
 import { ProfileSettings } from './ProfileSettings';
@@ -63,7 +63,9 @@ export function ChatContainer() {
 	const [showProfileSettings, setShowProfileSettings] = useState(false);
 	const [showBatchMessaging, setShowBatchMessaging] = useState(false);
 	const [sidebarOpen, setSidebarOpen] = useState(true);
+	const [conversationsSidebarOpen, setConversationsSidebarOpen] = useState(true);
 	const [userPublicKey, setUserPublicKey] = useState<string>('');
+	const [pendingTransactions, setPendingTransactions] = useState<Set<string>>(new Set());
 
 	const { profile, isRegistered, refresh } = useWhisperChain(connectedAddress);
 
@@ -96,6 +98,90 @@ export function ChatContainer() {
 			loadUserData();
 		}
 	}, [connectedAddress]);
+
+	// Set up event listeners separately
+	useEffect(() => {
+		if (!connectedAddress) return;
+
+		let cleanup: (() => void) | undefined;
+
+		setupEventListeners().then((cleanupFn) => {
+			cleanup = cleanupFn;
+		});
+
+		return () => {
+			if (cleanup) {
+				cleanup();
+			}
+		};
+	}, [connectedAddress]);
+
+	// Set up real-time event listeners
+	const setupEventListeners = async () => {
+		if (!connectedAddress) return;
+
+		try {
+			const { getReadOnlyContract } = await import('@WhisperChain/lib/blockchain');
+			const contract = getReadOnlyContract();
+
+			// Listen for new messages
+			const handleMessageSent = async (messageId: string, sender: string, recipient: string) => {
+				const senderLower = sender.toLowerCase();
+				const recipientLower = recipient.toLowerCase();
+				const connectedLower = connectedAddress.toLowerCase();
+
+				// Only process if message is for or from the connected user
+				if (senderLower === connectedLower || recipientLower === connectedLower) {
+					// Small delay to ensure transaction is mined
+					setTimeout(() => {
+						loadUserData();
+					}, 1000);
+				}
+			};
+
+			// Listen for MessageSent events using proper TypeChain event types
+			const messageSentEvent = contract.getEvent('MessageSent');
+			contract.on(messageSentEvent, (messageId, sender, recipient, timestamp, paymentAmount, event) => {
+				handleMessageSent(messageId, sender, recipient);
+			});
+
+			// Listen for MessageDelivered events
+			const messageDeliveredEvent = contract.getEvent('MessageDelivered');
+			contract.on(messageDeliveredEvent, () => {
+				setTimeout(() => {
+					loadUserData();
+				}, 500);
+			});
+
+			// Listen for MessageRead events
+			const messageReadEvent = contract.getEvent('MessageRead');
+			contract.on(messageReadEvent, () => {
+				setTimeout(() => {
+					loadUserData();
+				}, 500);
+			});
+
+			// Cleanup function
+			return () => {
+				contract.removeAllListeners(messageSentEvent);
+				contract.removeAllListeners(messageDeliveredEvent);
+				contract.removeAllListeners(messageReadEvent);
+			};
+		} catch (error) {
+			console.error('Failed to setup event listeners:', error);
+		}
+	};
+
+	// Polling fallback for real-time updates (every 10 seconds)
+	useEffect(() => {
+		if (!connectedAddress || !activeThreadId) return;
+
+		const pollInterval = setInterval(() => {
+			loadUserData();
+		}, 10000); // Poll every 10 seconds
+
+		return () => clearInterval(pollInterval);
+	}, [connectedAddress, activeThreadId]);
 
 	const checkRegistration = async () => {
 		if (!connectedAddress) return;
@@ -156,9 +242,9 @@ export function ChatContainer() {
 						let body = 'Message';
 						if (Number(msg.mediaType) === 0) {
 							// TEXT message - retrieve from contract's textContent field
-							// Check if textContent is available (new contract structure)
-							if ((msg as any).textContent && (msg as any).textContent.length > 0) {
-								body = (msg as any).textContent;
+							// The contract now stores text directly in textContent field
+							if (msg.textContent && msg.textContent.length > 0) {
+								body = msg.textContent;
 							} else if (msg.ipfsHash && msg.ipfsHash.length > 0 && !msg.ipfsHash.startsWith('text-')) {
 								// Legacy text message stored on IPFS - try to download
 								try {
@@ -168,7 +254,7 @@ export function ChatContainer() {
 									body = `Message (IPFS: ${msg.ipfsHash.slice(0, 12)}...)`;
 								}
 							} else {
-								// Fallback: try to get textContent from contract
+								// Fallback: try to get textContent from contract using getTextContent
 								try {
 									const { getTextContent } = await import('@WhisperChain/lib/whisperchainActions');
 									const textContent = await getTextContent(id);
@@ -333,20 +419,10 @@ export function ChatContainer() {
 		// For TEXT messages, store text content directly in the contract
 		const textContent = isTextMessage ? args.text : '';
 
-		const pendingMessage: Message = {
-			id: `pending-${Date.now()}`,
-			author: 'You',
-			timestamp: Math.floor(Date.now() / 1000),
-			body: args.text,
-			isSelf: true,
-			status: 'pending',
-			messageHash: messageHash,
-		};
-
-		setMessages((prev) => ({
-			...prev,
-			[activeThreadId]: [...(prev[activeThreadId] ?? []), pendingMessage],
-		}));
+		// Don't add message optimistically - wait for transaction confirmation
+		// Track pending transaction
+		const txHash = `pending-${Date.now()}`;
+		setPendingTransactions((prev) => new Set([...prev, txHash]));
 
 		try {
 			// Find the active thread to get recipient(s)
@@ -380,30 +456,24 @@ export function ChatContainer() {
 
 			const receipt = await waitForTransaction(Promise.resolve(tx));
 
-			setMessages((prev) => {
-				const updated = [...(prev[activeThreadId] ?? [])];
-				const idx = updated.findIndex((m) => m.id === pendingMessage.id);
-				if (idx >= 0) {
-					updated[idx] = {
-						...updated[idx],
-						status: 'delivered',
-
-					};
-				}
-				return { ...prev, [activeThreadId]: updated };
+			// Remove from pending transactions
+			setPendingTransactions((prev) => {
+				const next = new Set(prev);
+				next.delete(txHash);
+				return next;
 			});
 
+			// Reload messages to get the new message from blockchain
+			// Event listener will also trigger, but this ensures immediate update
+			await loadUserData();
 			refresh();
-			loadUserData();
 		} catch (error: any) {
 			setError(error.message || 'Failed to send message');
-			setMessages((prev) => {
-				const updated = [...(prev[activeThreadId] ?? [])];
-				const idx = updated.findIndex((m) => m.id === pendingMessage.id);
-				if (idx >= 0) {
-					updated.splice(idx, 1);
-				}
-				return { ...prev, [activeThreadId]: updated };
+			// Remove from pending transactions
+			setPendingTransactions((prev) => {
+				const next = new Set(prev);
+				next.delete(txHash);
+				return next;
 			});
 			throw error;
 		}
@@ -465,9 +535,6 @@ export function ChatContainer() {
 					setMessages({});
 					setThreads([]);
 				}}
-				threads={threads}
-				activeThreadId={activeThreadId}
-				onThreadSelect={setActiveThreadId}
 				profile={profile ? { ...profile, publicKey: userPublicKey } : undefined}
 				onNewChat={() => setShowCreateConversation(true)}
 				onBatchSend={() => setShowBatchMessaging(true)}
@@ -475,7 +542,7 @@ export function ChatContainer() {
 			/>
 
 			{/* Main Chat Area */}
-			<main style={{ flex: 1, display: 'flex', flexDirection: 'column', position: 'relative', background: '#0f0f0f' }}>
+			<main style={{ flex: 1, display: 'flex', flexDirection: 'column', position: 'relative', background: '#0f0f0f', minWidth: 0 }}>
 				{error && <ErrorToast message={error} onDismiss={() => setError(null)} />}
 
 				{activeThreadId && (
@@ -483,6 +550,8 @@ export function ChatContainer() {
 						threadTitle={threads.find((t) => t.id === activeThreadId)?.title}
 						onMenuClick={() => setSidebarOpen(true)}
 						showMenu={!sidebarOpen}
+						onConversationsClick={() => setConversationsSidebarOpen(!conversationsSidebarOpen)}
+						showConversations={conversationsSidebarOpen}
 					/>
 				)}
 
@@ -508,6 +577,15 @@ export function ChatContainer() {
 				)}
 			</main>
 
+			{/* Right Sidebar - Conversations */}
+			<ConversationsSidebar
+				isOpen={conversationsSidebarOpen}
+				onToggle={() => setConversationsSidebarOpen(!conversationsSidebarOpen)}
+				threads={threads}
+				activeThreadId={activeThreadId}
+				onSelectThread={setActiveThreadId}
+				connectedAddress={connectedAddress}
+			/>
 
 			{/* Modals */}
 			{showCreateConversation && connectedAddress && (

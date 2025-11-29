@@ -15,6 +15,8 @@ type Message = {
     ipfsHash?: string;
     mediaType?: number;
     fileSize?: bigint;
+    sender?: string;
+    recipient?: string;
 };
 
 type MessageListProps = {
@@ -84,14 +86,26 @@ export function MessageList({
                 </div>
             ) : (
                 <div style={{ maxWidth: '48rem', margin: '0 auto' }}>
-                    {messages.map((message, index) => (
-                        <MessageBubble
-                            key={message.id}
-                            message={message}
-                            index={index}
-                            onUpdate={onMessageUpdate}
-                        />
-                    ))}
+                    {messages.map((message, index) => {
+                        // Determine if this message should be grouped with the previous one
+                        const prevMessage = index > 0 ? messages[index - 1] : null;
+                        const isGrouped = prevMessage !== null &&
+                            prevMessage.isSelf === message.isSelf &&
+                            prevMessage.sender === message.sender &&
+                            typeof prevMessage.timestamp === 'number' &&
+                            typeof message.timestamp === 'number' &&
+                            (message.timestamp - prevMessage.timestamp) < 300; // 5 minutes
+
+                        return (
+                            <MessageBubble
+                                key={message.id}
+                                message={message}
+                                index={index}
+                                showAvatar={!isGrouped}
+                                isGrouped={isGrouped}
+                            />
+                        );
+                    })}
                 </div>
             )}
         </div>

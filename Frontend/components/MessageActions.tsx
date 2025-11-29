@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { CheckCheck, Eye, Trash2, Loader2 } from 'lucide-react';
-import { markDelivered, markRead, deleteWhisper, waitForTransaction } from '@WhisperChain/lib/whisperchainActions';
+import { Eye, Trash2, Loader2 } from 'lucide-react';
+import { markRead, deleteWhisper, waitForTransaction } from '@WhisperChain/lib/whisperchainActions';
 import type { BytesLike } from 'ethers';
 
 type MessageActionsProps = {
@@ -21,19 +21,6 @@ export function MessageActions({
     onUpdate,
 }: MessageActionsProps) {
     const [isLoading, setIsLoading] = useState<string | null>(null);
-
-    const handleMarkDelivered = async () => {
-        setIsLoading('delivered');
-        try {
-            const tx = await markDelivered(messageId);
-            await waitForTransaction(Promise.resolve(tx));
-            onUpdate();
-        } catch (error) {
-            console.error('Failed to mark as delivered:', error);
-        } finally {
-            setIsLoading(null);
-        }
-    };
 
     const handleMarkRead = async () => {
         setIsLoading('read');
@@ -65,23 +52,7 @@ export function MessageActions({
 
     return (
         <div className="flex items-center gap-2">
-            {!isSelf && !isDelivered && (
-                <button
-                    onClick={handleMarkDelivered}
-                    disabled={isLoading !== null}
-                    className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-slate-800/50 px-3 py-1.5 text-xs font-medium text-slate-300 transition-all hover:bg-slate-800 hover:text-white disabled:opacity-50"
-                    title="Mark as delivered"
-                >
-                    {isLoading === 'delivered' ? (
-                        <Loader2 className="size-3 animate-spin" />
-                    ) : (
-                        <CheckCheck className="size-3" />
-                    )}
-                    Delivered
-                </button>
-            )}
-
-            {!isSelf && isDelivered && !isRead && (
+            {!isSelf && !isRead && (
                 <button
                     onClick={handleMarkRead}
                     disabled={isLoading !== null}

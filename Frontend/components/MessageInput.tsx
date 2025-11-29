@@ -1,9 +1,12 @@
 'use client';
 
-import { Send, Paperclip, Loader2, Coins, X } from 'lucide-react';
+import { Send, Paperclip, Loader2, Coins, X, Image, Video, Music, FileText } from 'lucide-react';
 import { useState, KeyboardEvent, useRef, useEffect } from 'react';
 import { FileUpload } from './FileUpload';
 import { PaymentOptions } from './PaymentOptions';
+import { uploadToIPFS, getMediaTypeFromFile } from '@WhisperChain/lib/ipfs';
+import { isIPFSHashUsed } from '@WhisperChain/lib/whisperchainActions';
+import { formatEther } from 'ethers';
 import type { AddressLike, BigNumberish } from 'ethers';
 
 type MessageInputProps = {
@@ -28,9 +31,7 @@ export function MessageInput({
     const [isSending, setIsSending] = useState(false);
     const [showFileUpload, setShowFileUpload] = useState(false);
     const [showPayment, setShowPayment] = useState(false);
-    const [ipfsHash, setIpfsHash] = useState<string | null>(null);
-    const [mediaType, setMediaType] = useState<number>(0);
-    const [fileSize, setFileSize] = useState<bigint>(BigInt(0));
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [paymentAmount, setPaymentAmount] = useState<BigNumberish | undefined>();
     const [paymentToken, setPaymentToken] = useState<AddressLike | undefined>();
     const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -43,30 +44,57 @@ export function MessageInput({
     }, [input]);
 
     const handleSend = async () => {
-        if ((!input.trim() && !ipfsHash) || isSending || disabled) return;
+        if ((!input.trim() && !selectedFile) || isSending || disabled) return;
 
-        const message = input.trim() || 'Media message';
+        const message = input.trim() || (selectedFile ? 'Media message' : '');
         const currentInput = input;
+        const currentFile = selectedFile;
         setInput('');
+        setSelectedFile(null);
         setIsSending(true);
 
         try {
+            let ipfsHash: string | undefined;
+            let mediaType: number | undefined;
+            let fileSize: bigint | undefined;
+
+            // Upload file if selected
+            if (currentFile) {
+                try {
+                    ipfsHash = await uploadToIPFS(currentFile, currentFile.name, async (hash) => {
+                        try {
+                            return await isIPFSHashUsed(hash);
+                        } catch {
+                            return false;
+                        }
+                    });
+                    mediaType = getMediaTypeFromFile(currentFile);
+                    fileSize = BigInt(currentFile.size);
+                } catch (uploadError: any) {
+                    console.error('File upload failed:', uploadError);
+                    setInput(currentInput);
+                    setSelectedFile(currentFile);
+                    setIsSending(false);
+                    throw new Error(`File upload failed: ${uploadError.message || 'Unknown error'}`);
+                }
+            }
+
             await onSend({
                 text: message,
-                ipfsHash: ipfsHash || undefined,
-                mediaType: ipfsHash ? mediaType : undefined,
-                fileSize: ipfsHash ? fileSize : undefined,
+                ipfsHash,
+                mediaType,
+                fileSize,
                 paymentAmount,
                 paymentToken,
             });
-            setIpfsHash(null);
-            setMediaType(0);
-            setFileSize(BigInt(0));
             setPaymentAmount(undefined);
             setPaymentToken(undefined);
         } catch (error) {
             console.error('Failed to send message:', error);
             setInput(currentInput);
+            if (currentFile) {
+                setSelectedFile(currentFile);
+            }
         } finally {
             setIsSending(false);
             textareaRef.current?.focus();
@@ -80,11 +108,23 @@ export function MessageInput({
         }
     };
 
-    const handleFileUpload = (hash: string, type: number, size: bigint) => {
-        setIpfsHash(hash);
-        setMediaType(type);
-        setFileSize(size);
+    const handleFileSelected = (file: File) => {
+        setSelectedFile(file);
         setShowFileUpload(false);
+    };
+
+    const getFileIcon = (file: File) => {
+        const type = file.type.toLowerCase();
+        if (type.startsWith('image/')) return <Image style={{ width: '1rem', height: '1rem' }} />;
+        if (type.startsWith('video/')) return <Video style={{ width: '1rem', height: '1rem' }} />;
+        if (type.startsWith('audio/')) return <Music style={{ width: '1rem', height: '1rem' }} />;
+        return <FileText style={{ width: '1rem', height: '1rem' }} />;
+    };
+
+    const formatFileSize = (bytes: number) => {
+        if (bytes < 1024) return `${bytes} B`;
+        if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(2)} KB`;
+        return `${(bytes / 1024 / 1024).toFixed(2)} MB`;
     };
 
     return (
@@ -99,8 +139,9 @@ export function MessageInput({
                 <div style={{ marginBottom: '1rem' }}>
                     {showFileUpload && (
                         <FileUpload
-                            onUploadComplete={handleFileUpload}
+                            onFileSelected={handleFileSelected}
                             onCancel={() => setShowFileUpload(false)}
+                            selectedFile={selectedFile}
                         />
                     )}
                     {showPayment && (
@@ -120,7 +161,7 @@ export function MessageInput({
                 </div>
             )}
 
-            {(ipfsHash || paymentAmount) && (
+            {(selectedFile || paymentAmount) && (
                 <div
                     style={{
                         marginBottom: '0.75rem',
@@ -130,7 +171,7 @@ export function MessageInput({
                         gap: '0.5rem',
                     }}
                 >
-                    {ipfsHash && (
+                    {selectedFile && (
                         <div
                             style={{
                                 display: 'flex',
@@ -138,18 +179,22 @@ export function MessageInput({
                                 gap: '0.5rem',
                                 padding: '0.5rem 0.75rem',
                                 borderRadius: '0.5rem',
-                                background: 'rgba(255, 255, 255, 0.05)',
-                                border: '1px solid rgba(255, 255, 255, 0.1)',
+                                background: 'rgba(99, 102, 241, 0.1)',
+                                border: '1px solid rgba(99, 102, 241, 0.2)',
                             }}
                         >
-                            <span style={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.7)', fontFamily: 'monospace' }}>
-                                File: {ipfsHash.slice(0, 12)}...
-                            </span>
+                            {getFileIcon(selectedFile)}
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.125rem' }}>
+                                <span style={{ fontSize: '0.75rem', color: '#ffffff', fontWeight: 500 }}>
+                                    {selectedFile.name}
+                                </span>
+                                <span style={{ fontSize: '0.6875rem', color: 'rgba(255, 255, 255, 0.6)', fontFamily: 'monospace' }}>
+                                    {formatFileSize(selectedFile.size)}
+                                </span>
+                            </div>
                             <button
                                 onClick={() => {
-                                    setIpfsHash(null);
-                                    setMediaType(0);
-                                    setFileSize(BigInt(0));
+                                    setSelectedFile(null);
                                 }}
                                 style={{
                                     background: 'transparent',
@@ -178,13 +223,21 @@ export function MessageInput({
                                 gap: '0.5rem',
                                 padding: '0.5rem 0.75rem',
                                 borderRadius: '0.5rem',
-                                background: 'rgba(255, 255, 255, 0.05)',
-                                border: '1px solid rgba(255, 255, 255, 0.1)',
+                                background: 'rgba(245, 158, 11, 0.1)',
+                                border: '1px solid rgba(245, 158, 11, 0.2)',
                             }}
                         >
-                            <span style={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.7)', fontFamily: 'monospace' }}>
-                                Payment: {paymentAmount.toString()} wei
-                            </span>
+                            <Coins style={{ width: '1rem', height: '1rem', color: '#fbbf24' }} />
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.125rem' }}>
+                                <span style={{ fontSize: '0.75rem', color: '#ffffff', fontWeight: 500 }}>
+                                    {formatEther(paymentAmount)} ETH
+                                </span>
+                                {paymentToken && paymentToken !== '0x0000000000000000000000000000000000000000' && (
+                                    <span style={{ fontSize: '0.6875rem', color: 'rgba(255, 255, 255, 0.6)', fontFamily: 'monospace' }}>
+                                        Token: {String(paymentToken).slice(0, 6)}...{String(paymentToken).slice(-4)}
+                                    </span>
+                                )}
+                            </div>
                             <button
                                 onClick={() => {
                                     setPaymentAmount(undefined);
@@ -307,22 +360,37 @@ export function MessageInput({
 
                 <button
                     onClick={handleSend}
-                    disabled={(!input.trim() && !ipfsHash) || isSending || disabled}
+                    disabled={(!input.trim() && !selectedFile) || isSending || disabled}
                     style={{
                         padding: '0.75rem',
                         borderRadius: '0.5rem',
                         background: '#ffffff',
                         border: 'none',
                         color: '#0f0f0f',
-                        cursor: (!input.trim() && !ipfsHash) || isSending || disabled ? 'not-allowed' : 'pointer',
-                        opacity: (!input.trim() && !ipfsHash) || isSending || disabled ? 0.6 : 1,
+                        cursor: (!input.trim() && !selectedFile) || isSending || disabled ? 'not-allowed' : 'pointer',
+                        opacity: (!input.trim() && !selectedFile) || isSending || disabled ? 0.6 : 1,
                         transition: 'opacity 0.2s',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
                     }}
                 >
                     {isSending ? (
-                        <Loader2 style={{ width: '1.25rem', height: '1.25rem', animation: 'spin 1s linear infinite' }} />
+                        <>
+                            <Loader2 style={{ width: '1.25rem', height: '1.25rem', animation: 'spin 1s linear infinite' }} />
+                            <span style={{ fontSize: '0.875rem', fontWeight: 500 }}>
+                                {selectedFile ? 'Uploading & Sending...' : 'Sending...'}
+                            </span>
+                        </>
                     ) : (
-                        <Send style={{ width: '1.25rem', height: '1.25rem' }} />
+                        <>
+                            <Send style={{ width: '1.25rem', height: '1.25rem' }} />
+                            {(selectedFile || paymentAmount) && (
+                                <span style={{ fontSize: '0.75rem', fontWeight: 500 }}>
+                                    {selectedFile && paymentAmount ? 'Send All' : selectedFile ? 'Send File' : 'Send Payment'}
+                                </span>
+                            )}
+                        </>
                     )}
                 </button>
             </div>

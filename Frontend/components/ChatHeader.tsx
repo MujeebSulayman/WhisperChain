@@ -1,15 +1,17 @@
 'use client';
 
-import { Menu } from 'lucide-react';
+import { Menu, MessageSquare } from 'lucide-react';
 import { BASE_CHAIN } from '@WhisperChain/lib/blockchain';
 
 type ChatHeaderProps = {
     threadTitle?: string;
     onMenuClick?: () => void;
     showMenu?: boolean;
+    onConversationsClick?: () => void;
+    showConversations?: boolean;
 };
 
-export function ChatHeader({ threadTitle, onMenuClick, showMenu = false }: ChatHeaderProps) {
+export function ChatHeader({ threadTitle, onMenuClick, showMenu = false, onConversationsClick, showConversations = true }: ChatHeaderProps) {
     return (
         <div
             style={{
@@ -75,6 +77,31 @@ export function ChatHeader({ threadTitle, onMenuClick, showMenu = false }: ChatH
                     </p>
                 </div>
             </div>
+            {onConversationsClick && (
+                <button
+                    onClick={onConversationsClick}
+                    style={{
+                        padding: '0.5rem',
+                        borderRadius: '0.5rem',
+                        background: showConversations ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
+                        border: '1px solid rgba(255, 255, 255, 0.08)',
+                        color: 'rgba(255, 255, 255, 0.7)',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s',
+                    }}
+                    onMouseEnter={(e) => {
+                        e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
+                        e.currentTarget.style.color = '#ffffff';
+                    }}
+                    onMouseLeave={(e) => {
+                        e.currentTarget.style.background = showConversations ? 'rgba(255, 255, 255, 0.1)' : 'transparent';
+                        e.currentTarget.style.color = 'rgba(255, 255, 255, 0.7)';
+                    }}
+                    title={showConversations ? 'Hide conversations' : 'Show conversations'}
+                >
+                    <MessageSquare style={{ width: '1.25rem', height: '1.25rem' }} />
+                </button>
+            )}
         </div>
     );
 }

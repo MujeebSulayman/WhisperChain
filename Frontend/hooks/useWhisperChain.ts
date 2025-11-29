@@ -100,7 +100,7 @@ export function useWhisperChain(userAddress?: string) {
 					ipfsHash: msg.ipfsHash,
 					mediaType: Number(msg.mediaType),
 					fileSize: msg.fileSize,
-					textContent: (msg as any).textContent || '',
+					textContent: msg.textContent || '',
 				}))
 			);
 		} catch (err: any) {

@@ -1,9 +1,8 @@
 'use client';
 
-import { CheckCheck, Clock, Image, Video, Music, FileText } from 'lucide-react';
-import { formatDistanceToNow } from 'date-fns';
+import { CheckCheck, Image, Video, Music, FileText, ExternalLink } from 'lucide-react';
+import { format } from 'date-fns';
 import { useState, useEffect } from 'react';
-import { MessageActions } from './MessageActions';
 import { getIPFSUrl, getMediaTypeName } from '@WhisperChain/lib/ipfs';
 
 type Message = {
@@ -18,46 +17,31 @@ type Message = {
     ipfsHash?: string;
     mediaType?: number;
     fileSize?: bigint;
+    sender?: string;
+    recipient?: string;
 };
 
 type MessageBubbleProps = {
     message: Message;
     index?: number;
-    onUpdate?: () => void;
+    showAvatar?: boolean;
+    isGrouped?: boolean;
 };
 
-export function MessageBubble({ message, index = 0, onUpdate }: MessageBubbleProps) {
+export function MessageBubble({ message, index = 0, showAvatar = true, isGrouped = false }: MessageBubbleProps) {
     const [isVisible, setIsVisible] = useState(false);
     const isSelf = message.isSelf;
-    const timeAgo =
-        typeof message.timestamp === 'number'
-            ? formatDistanceToNow(new Date(message.timestamp * 1000), { addSuffix: true })
-            : message.timestamp;
+
+    const timestamp = typeof message.timestamp === 'number' ? message.timestamp * 1000 : new Date(message.timestamp).getTime();
+    const exactTime = format(new Date(timestamp), 'HH:mm');
 
     useEffect(() => {
         const timer = setTimeout(() => setIsVisible(true), index * 30);
         return () => clearTimeout(timer);
     }, [index]);
 
-    const statusConfig = {
-        read: {
-            icon: CheckCheck,
-            color: '#10b981',
-            label: 'Read',
-        },
-        delivered: {
-            icon: CheckCheck,
-            color: '#6366f1',
-            label: 'Delivered',
-        },
-        pending: {
-            icon: Clock,
-            color: 'rgba(255, 255, 255, 0.4)',
-            label: 'Pending',
-        },
-    };
-
-    const { icon: StatusIcon, color, label } = statusConfig[message.status];
+    // Only show "read" status for sent messages, not "delivered" or "pending"
+    const showReadStatus = isSelf && message.status === 'read';
 
     const getMediaIcon = (type?: number) => {
         switch (type) {
@@ -82,148 +66,354 @@ export function MessageBubble({ message, index = 0, onUpdate }: MessageBubblePro
         return `${(num / 1024 / 1024).toFixed(2)} MB`;
     };
 
+    const getAvatarInitial = () => {
+        if (isSelf) return 'You'[0];
+        return message.author?.[0]?.toUpperCase() || 'U';
+    };
+
+    const getAvatarColor = () => {
+        if (isSelf) return '#6366f1';
+        const hash = message.sender?.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) || 0;
+        const colors = ['#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4'];
+        return colors[hash % colors.length];
+    };
+
     return (
         <div
             style={{
-                marginBottom: '1rem',
+                marginBottom: isGrouped ? '0.25rem' : '1.5rem',
                 display: 'flex',
-                flexDirection: 'column',
-                gap: '0.25rem',
-                alignItems: isSelf ? 'flex-end' : 'flex-start',
+                flexDirection: 'row',
+                gap: '0.75rem',
+                alignItems: 'flex-end',
+                justifyContent: isSelf ? 'flex-end' : 'flex-start',
                 opacity: isVisible ? 1 : 0,
                 transition: 'opacity 0.3s ease-out',
+                paddingLeft: isSelf ? '3rem' : '0',
+                paddingRight: isSelf ? '0' : '3rem',
             }}
             className="animate-slide-up"
         >
-            {!isSelf && (
-                <span
+            {/* Avatar - Only show for received messages and when not grouped */}
+            {!isSelf && showAvatar && !isGrouped && (
+                <div
                     style={{
+                        width: '2rem',
+                        height: '2rem',
+                        borderRadius: '50%',
+                        background: getAvatarColor(),
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: '#ffffff',
+                        fontWeight: 600,
                         fontSize: '0.75rem',
-                        color: 'rgba(255, 255, 255, 0.5)',
-                        padding: '0 0.5rem',
-                        marginBottom: '0.25rem',
+                        flexShrink: 0,
+                        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)',
                     }}
                 >
-                    {message.author}
-                </span>
+                    {getAvatarInitial()}
+                </div>
+            )}
+            {!isSelf && showAvatar && isGrouped && (
+                <div style={{ width: '2rem', flexShrink: 0 }} />
             )}
 
+            {/* Message Content */}
             <div
                 style={{
                     maxWidth: '70%',
-                    borderRadius: '0.75rem',
-                    padding: '0.75rem 1rem',
-                    background: isSelf ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.03)',
-                    border: `1px solid ${isSelf ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.05)'}`,
-                    color: '#e5e5e5',
+                    minWidth: '8rem',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '0.5rem',
                 }}
             >
-                <p
-                    style={{
-                        fontSize: '0.875rem',
-                        lineHeight: '1.6',
-                        whiteSpace: 'pre-wrap',
-                        wordBreak: 'break-word',
-                        color: '#ffffff',
-                    }}
-                >
-                    {message.body}
-                </p>
-
-                {message.ipfsHash && (
+                {/* Author Header */}
+                {!isSelf && !isGrouped && (
                     <div
                         style={{
-                            marginTop: '0.75rem',
-                            paddingTop: '0.75rem',
-                            borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            gap: '0.5rem',
+                            marginBottom: '0.25rem',
+                            paddingLeft: '0.5rem',
                         }}
                     >
-                        {message.mediaType !== undefined && message.mediaType > 0 && (
-                            <div
-                                style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '0.5rem',
-                                    fontSize: '0.75rem',
-                                    color: 'rgba(255, 255, 255, 0.7)',
-                                }}
-                            >
-                                {getMediaIcon(message.mediaType)}
-                                <span style={{ fontFamily: 'monospace' }}>
-                                    {getMediaTypeName(message.mediaType)}
-                                </span>
-                                {message.fileSize && (
-                                    <span style={{ color: 'rgba(255, 255, 255, 0.5)' }}>
-                                        • {formatFileSize(message.fileSize)}
-                                    </span>
-                                )}
-                            </div>
-                        )}
-                        <a
-                            href={getIPFSUrl(message.ipfsHash)}
-                            target="_blank"
-                            rel="noopener noreferrer"
+                        <span
                             style={{
-                                fontSize: '0.75rem',
-                                color: '#6366f1',
-                                textDecoration: 'none',
-                                fontFamily: 'monospace',
-                                transition: 'color 0.2s',
-                            }}
-                            onMouseEnter={(e) => {
-                                e.currentTarget.style.color = '#818cf8';
-                            }}
-                            onMouseLeave={(e) => {
-                                e.currentTarget.style.color = '#6366f1';
+                                fontSize: '0.8125rem',
+                                fontWeight: 500,
+                                color: 'rgba(255, 255, 255, 0.7)',
                             }}
                         >
-                            IPFS: {message.ipfsHash.slice(0, 12)}...{message.ipfsHash.slice(-8)}
-                        </a>
+                            {message.author}
+                        </span>
                     </div>
                 )}
-            </div>
 
-            <div
-                style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    padding: '0 0.5rem',
-                    flexWrap: 'wrap',
-                }}
-            >
-                <span
-                    style={{
-                        fontSize: '0.625rem',
-                        color: 'rgba(255, 255, 255, 0.4)',
-                        fontFamily: 'monospace',
-                    }}
-                >
-                    {timeAgo}
-                </span>
+                {/* Message Bubble */}
                 <div
                     style={{
+                        borderRadius: isSelf
+                            ? (isGrouped ? '1rem 0.25rem 1rem 1rem' : '1rem 0.25rem 1rem 1rem')
+                            : (isGrouped ? '0.25rem 1rem 1rem 1rem' : '0.25rem 1rem 1rem 1rem'),
+                        padding: message.ipfsHash && message.mediaType === 1 ? '0' : '0.75rem 1rem',
+                        background: isSelf
+                            ? 'rgba(99, 102, 241, 0.15)'
+                            : 'rgba(255, 255, 255, 0.06)',
+                        border: `1px solid ${isSelf ? 'rgba(99, 102, 241, 0.2)' : 'rgba(255, 255, 255, 0.08)'}`,
+                        position: 'relative',
                         display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.25rem',
-                        color: color,
+                        flexDirection: 'column',
+                        gap: message.body && message.ipfsHash && message.mediaType === 1 ? '0.5rem' : '0',
                     }}
                 >
-                    <StatusIcon style={{ width: '0.75rem', height: '0.75rem' }} />
-                    <span style={{ fontSize: '0.625rem', fontFamily: 'monospace' }}>{label}</span>
+                    {/* Message Text */}
+                    {message.body && (
+                        <p
+                            style={{
+                                fontSize: '0.9375rem',
+                                lineHeight: '1.5',
+                                whiteSpace: 'pre-wrap',
+                                wordBreak: 'break-word',
+                                color: '#ffffff',
+                                margin: 0,
+                                padding: message.ipfsHash && message.mediaType === 1 ? '0.75rem 0.875rem 0 0.875rem' : '0',
+                            }}
+                        >
+                            {message.body}
+                        </p>
+                    )}
+
+                    {/* Media Preview */}
+                    {message.ipfsHash && message.ipfsHash.length > 0 && message.mediaType !== undefined && message.mediaType > 0 && (
+                        <div
+                            style={{
+                                marginTop: message.body ? '0.875rem' : '0',
+                                paddingTop: message.body ? '0.875rem' : '0',
+                                borderTop: message.body ? `1px solid ${isSelf ? 'rgba(99, 102, 241, 0.2)' : 'rgba(255, 255, 255, 0.1)'}` : 'none',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: '0.625rem',
+                            }}
+                        >
+                            {/* Image Preview */}
+                            {message.mediaType === 1 && (
+                                <div
+                                    style={{
+                                        borderRadius: message.body ? '0.5rem' : isSelf ? '1.125rem 0.25rem 0 0' : '0.25rem 1.125rem 0 0',
+                                        overflow: 'hidden',
+                                        maxWidth: '100%',
+                                        maxHeight: '20rem',
+                                        background: 'rgba(0, 0, 0, 0.2)',
+                                        position: 'relative',
+                                        cursor: 'pointer',
+                                    }}
+                                    onClick={() => window.open(getIPFSUrl(message.ipfsHash!), '_blank')}
+                                >
+                                    <img
+                                        src={getIPFSUrl(message.ipfsHash!)}
+                                        alt="Shared image"
+                                        style={{
+                                            width: '100%',
+                                            height: 'auto',
+                                            maxHeight: '20rem',
+                                            objectFit: 'contain',
+                                            display: 'block',
+                                        }}
+                                        onError={(e) => {
+                                            e.currentTarget.style.display = 'none';
+                                            const parent = e.currentTarget.parentElement;
+                                            if (parent) {
+                                                parent.innerHTML = `
+                                                    <div style="padding: 2rem; text-align: center; color: rgba(255, 255, 255, 0.5);">
+                                                        <p>Image preview unavailable</p>
+                                                        <a href="${getIPFSUrl(message.ipfsHash!)}" target="_blank" style="color: #6366f1; text-decoration: none;">Open in new tab</a>
+                                                    </div>
+                                                `;
+                                            }
+                                        }}
+                                    />
+                                </div>
+                            )}
+
+                            {/* Document Preview */}
+                            {message.mediaType === 4 && (
+                                <a
+                                    href={getIPFSUrl(message.ipfsHash!)}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    style={{
+                                        textDecoration: 'none',
+                                        display: 'block',
+                                    }}
+                                >
+                                    <div
+                                        style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '0.75rem',
+                                            padding: '0.875rem',
+                                            borderRadius: '0.75rem',
+                                            background: isSelf ? 'rgba(99, 102, 241, 0.1)' : 'rgba(255, 255, 255, 0.05)',
+                                            border: `1px solid ${isSelf ? 'rgba(99, 102, 241, 0.2)' : 'rgba(255, 255, 255, 0.1)'}`,
+                                            transition: 'all 0.2s',
+                                            cursor: 'pointer',
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            e.currentTarget.style.background = isSelf ? 'rgba(99, 102, 241, 0.15)' : 'rgba(255, 255, 255, 0.08)';
+                                            e.currentTarget.style.borderColor = isSelf ? 'rgba(99, 102, 241, 0.3)' : 'rgba(255, 255, 255, 0.15)';
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.currentTarget.style.background = isSelf ? 'rgba(99, 102, 241, 0.1)' : 'rgba(255, 255, 255, 0.05)';
+                                            e.currentTarget.style.borderColor = isSelf ? 'rgba(99, 102, 241, 0.2)' : 'rgba(255, 255, 255, 0.1)';
+                                        }}
+                                    >
+                                        <div
+                                            style={{
+                                                width: '3rem',
+                                                height: '3rem',
+                                                borderRadius: '0.5rem',
+                                                background: isSelf ? 'rgba(99, 102, 241, 0.2)' : 'rgba(255, 255, 255, 0.1)',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                flexShrink: 0,
+                                            }}
+                                        >
+                                            <FileText style={{ width: '1.5rem', height: '1.5rem', color: isSelf ? '#a5b4fc' : 'rgba(255, 255, 255, 0.7)' }} />
+                                        </div>
+                                        <div style={{ flex: 1, minWidth: 0 }}>
+                                            <div
+                                                style={{
+                                                    fontSize: '0.875rem',
+                                                    fontWeight: 500,
+                                                    color: '#ffffff',
+                                                    marginBottom: '0.25rem',
+                                                    overflow: 'hidden',
+                                                    textOverflow: 'ellipsis',
+                                                    whiteSpace: 'nowrap',
+                                                }}
+                                            >
+                                                Document
+                                            </div>
+                                            <div
+                                                style={{
+                                                    fontSize: '0.75rem',
+                                                    color: 'rgba(255, 255, 255, 0.6)',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: '0.5rem',
+                                                }}
+                                            >
+                                                {message.fileSize && (
+                                                    <span>{formatFileSize(message.fileSize)}</span>
+                                                )}
+                                                <span>•</span>
+                                                <span style={{ fontFamily: 'monospace', fontSize: '0.6875rem' }}>
+                                                    {message.ipfsHash.slice(0, 8)}...{message.ipfsHash.slice(-6)}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <ExternalLink style={{ width: '1rem', height: '1rem', color: 'rgba(255, 255, 255, 0.5)', flexShrink: 0 }} />
+                                    </div>
+                                </a>
+                            )}
+
+                            {/* Video and Audio - Show as cards with play icon */}
+                            {(message.mediaType === 2 || message.mediaType === 3) && (
+                                <a
+                                    href={getIPFSUrl(message.ipfsHash!)}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    style={{
+                                        textDecoration: 'none',
+                                        display: 'block',
+                                    }}
+                                >
+                                    <div
+                                        style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '0.75rem',
+                                            padding: '0.875rem',
+                                            borderRadius: '0.75rem',
+                                            background: isSelf ? 'rgba(99, 102, 241, 0.1)' : 'rgba(255, 255, 255, 0.05)',
+                                            border: `1px solid ${isSelf ? 'rgba(99, 102, 241, 0.2)' : 'rgba(255, 255, 255, 0.1)'}`,
+                                            transition: 'all 0.2s',
+                                            cursor: 'pointer',
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            e.currentTarget.style.background = isSelf ? 'rgba(99, 102, 241, 0.15)' : 'rgba(255, 255, 255, 0.08)';
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.currentTarget.style.background = isSelf ? 'rgba(99, 102, 241, 0.1)' : 'rgba(255, 255, 255, 0.05)';
+                                        }}
+                                    >
+                                        <div
+                                            style={{
+                                                width: '3rem',
+                                                height: '3rem',
+                                                borderRadius: '0.5rem',
+                                                background: isSelf ? 'rgba(99, 102, 241, 0.2)' : 'rgba(255, 255, 255, 0.1)',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                flexShrink: 0,
+                                            }}
+                                        >
+                                            {getMediaIcon(message.mediaType)}
+                                        </div>
+                                        <div style={{ flex: 1, minWidth: 0 }}>
+                                            <div
+                                                style={{
+                                                    fontSize: '0.875rem',
+                                                    fontWeight: 500,
+                                                    color: '#ffffff',
+                                                    marginBottom: '0.25rem',
+                                                }}
+                                            >
+                                                {getMediaTypeName(message.mediaType)}
+                                            </div>
+                                            {message.fileSize && (
+                                                <div
+                                                    style={{
+                                                        fontSize: '0.75rem',
+                                                        color: 'rgba(255, 255, 255, 0.6)',
+                                                    }}
+                                                >
+                                                    {formatFileSize(message.fileSize)}
+                                                </div>
+                                            )}
+                                        </div>
+                                        <ExternalLink style={{ width: '1rem', height: '1rem', color: 'rgba(255, 255, 255, 0.5)', flexShrink: 0 }} />
+                                    </div>
+                                </a>
+                            )}
+                        </div>
+                    )}
+
+                    {/* Timestamp and Status Footer */}
+                    <div
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'flex-end',
+                            gap: '0.375rem',
+                            padding: message.ipfsHash && message.mediaType === 1
+                                ? (message.body ? '0.5rem 1rem 0.75rem' : '0.5rem 1rem 0.75rem')
+                                : '0.25rem 0 0 0',
+                            fontSize: '0.6875rem',
+                            color: 'rgba(255, 255, 255, 0.4)',
+                        }}
+                    >
+                        <span>
+                            {exactTime}
+                        </span>
+                        {showReadStatus && (
+                            <CheckCheck style={{ width: '0.75rem', height: '0.75rem', color: '#10b981', flexShrink: 0 }} />
+                        )}
+                    </div>
                 </div>
-                {message.messageId && onUpdate && (
-                    <MessageActions
-                        messageId={message.messageId}
-                        isDelivered={message.status === 'delivered' || message.status === 'read'}
-                        isRead={message.status === 'read'}
-                        isSelf={message.isSelf}
-                        onUpdate={onUpdate}
-                    />
-                )}
+
             </div>
         </div>
     );
