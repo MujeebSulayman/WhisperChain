@@ -58,6 +58,7 @@ export declare namespace WhisperChain {
     ipfsHash: string;
     mediaType: BigNumberish;
     fileSize: BigNumberish;
+    textContent: string;
   };
 
   export type MessageStructOutput = [
@@ -71,7 +72,8 @@ export declare namespace WhisperChain {
     paymentToken: string,
     ipfsHash: string,
     mediaType: bigint,
-    fileSize: bigint
+    fileSize: bigint,
+    textContent: string
   ] & {
     sender: string;
     recipient: string;
@@ -84,6 +86,7 @@ export declare namespace WhisperChain {
     ipfsHash: string;
     mediaType: bigint;
     fileSize: bigint;
+    textContent: string;
   };
 }
 
@@ -105,6 +108,7 @@ export interface WhisperChainInterface extends Interface {
       | "getMediaType"
       | "getMessage"
       | "getRemainingStorage"
+      | "getTextContent"
       | "getUserMessageCount"
       | "getUserMessages"
       | "getUserPublicKey"
@@ -216,6 +220,10 @@ export interface WhisperChainInterface extends Interface {
     values: [AddressLike]
   ): string;
   encodeFunctionData(
+    functionFragment: "getTextContent",
+    values: [BytesLike]
+  ): string;
+  encodeFunctionData(
     functionFragment: "getUserMessageCount",
     values: [AddressLike]
   ): string;
@@ -280,7 +288,8 @@ export interface WhisperChainInterface extends Interface {
       BigNumberish[],
       string[],
       BigNumberish[],
-      BigNumberish[]
+      BigNumberish[],
+      string[]
     ]
   ): string;
   encodeFunctionData(
@@ -292,7 +301,8 @@ export interface WhisperChainInterface extends Interface {
       BigNumberish,
       string,
       BigNumberish,
-      BigNumberish
+      BigNumberish,
+      string
     ]
   ): string;
   encodeFunctionData(
@@ -396,6 +406,10 @@ export interface WhisperChainInterface extends Interface {
   decodeFunctionResult(functionFragment: "getMessage", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "getRemainingStorage",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getTextContent",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -809,6 +823,8 @@ export interface WhisperChain extends BaseContract {
     "view"
   >;
 
+  getTextContent: TypedContractMethod<[messageId: BytesLike], [string], "view">;
+
   getUserMessageCount: TypedContractMethod<
     [user: AddressLike],
     [bigint],
@@ -859,7 +875,8 @@ export interface WhisperChain extends BaseContract {
         string,
         string,
         bigint,
-        bigint
+        bigint,
+        string
       ] & {
         sender: string;
         recipient: string;
@@ -872,6 +889,7 @@ export interface WhisperChain extends BaseContract {
         ipfsHash: string;
         mediaType: bigint;
         fileSize: bigint;
+        textContent: string;
       }
     ],
     "view"
@@ -901,7 +919,8 @@ export interface WhisperChain extends BaseContract {
       paymentAmounts: BigNumberish[],
       ipfsHashes: string[],
       mediaTypes: BigNumberish[],
-      fileSizes: BigNumberish[]
+      fileSizes: BigNumberish[],
+      textContents: string[]
     ],
     [void],
     "payable"
@@ -915,7 +934,8 @@ export interface WhisperChain extends BaseContract {
       paymentAmount: BigNumberish,
       ipfsHash: string,
       mediaType: BigNumberish,
-      fileSize: BigNumberish
+      fileSize: BigNumberish,
+      textContent: string
     ],
     [void],
     "payable"
@@ -1045,6 +1065,9 @@ export interface WhisperChain extends BaseContract {
     nameOrSignature: "getRemainingStorage"
   ): TypedContractMethod<[user: AddressLike], [bigint], "view">;
   getFunction(
+    nameOrSignature: "getTextContent"
+  ): TypedContractMethod<[messageId: BytesLike], [string], "view">;
+  getFunction(
     nameOrSignature: "getUserMessageCount"
   ): TypedContractMethod<[user: AddressLike], [bigint], "view">;
   getFunction(
@@ -1090,7 +1113,8 @@ export interface WhisperChain extends BaseContract {
         string,
         string,
         bigint,
-        bigint
+        bigint,
+        string
       ] & {
         sender: string;
         recipient: string;
@@ -1103,6 +1127,7 @@ export interface WhisperChain extends BaseContract {
         ipfsHash: string;
         mediaType: bigint;
         fileSize: bigint;
+        textContent: string;
       }
     ],
     "view"
@@ -1139,7 +1164,8 @@ export interface WhisperChain extends BaseContract {
       paymentAmounts: BigNumberish[],
       ipfsHashes: string[],
       mediaTypes: BigNumberish[],
-      fileSizes: BigNumberish[]
+      fileSizes: BigNumberish[],
+      textContents: string[]
     ],
     [void],
     "payable"
@@ -1154,7 +1180,8 @@ export interface WhisperChain extends BaseContract {
       paymentAmount: BigNumberish,
       ipfsHash: string,
       mediaType: BigNumberish,
-      fileSize: BigNumberish
+      fileSize: BigNumberish,
+      textContent: string
     ],
     [void],
     "payable"
