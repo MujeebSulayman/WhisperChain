@@ -16,8 +16,6 @@ import {
 	updatePublicKey,
 	updateLastSeen,
 	sendWhisper,
-	markDelivered,
-	markRead,
 	deleteWhisper,
 	createConversation,
 	waitForTransaction,

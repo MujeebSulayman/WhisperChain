@@ -101,7 +101,6 @@ export async function sendWhisper(args: {
 	);
 }
 
-
 export async function deleteWhisper(messageId: BytesLike) {
 	const contract = await getSignerContract();
 	return contract.deleteMessage(messageId);

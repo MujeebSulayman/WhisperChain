@@ -103,44 +103,6 @@ const _abi = [
         type: "bytes32",
       },
       {
-        indexed: false,
-        internalType: "uint256",
-        name: "timestamp",
-        type: "uint256",
-      },
-    ],
-    name: "MessageDelivered",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: "bytes32",
-        name: "messageId",
-        type: "bytes32",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "timestamp",
-        type: "uint256",
-      },
-    ],
-    name: "MessageRead",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: "bytes32",
-        name: "messageId",
-        type: "bytes32",
-      },
-      {
         indexed: true,
         internalType: "address",
         name: "sender",
@@ -770,32 +732,6 @@ const _abi = [
       },
     ],
     stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "bytes32",
-        name: "messageId",
-        type: "bytes32",
-      },
-    ],
-    name: "markAsDelivered",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "bytes32",
-        name: "messageId",
-        type: "bytes32",
-      },
-    ],
-    name: "markAsRead",
-    outputs: [],
-    stateMutability: "nonpayable",
     type: "function",
   },
   {

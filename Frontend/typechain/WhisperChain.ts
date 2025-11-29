@@ -116,8 +116,6 @@ export interface WhisperChainInterface extends Interface {
       | "isIPFSHashUsed"
       | "isMessageDeleted"
       | "isUserRegistered"
-      | "markAsDelivered"
-      | "markAsRead"
       | "messageDeleted"
       | "messages"
       | "owner"
@@ -148,8 +146,6 @@ export interface WhisperChainInterface extends Interface {
       | "ConversationCreated"
       | "MediaUploaded"
       | "MessageDeleted"
-      | "MessageDelivered"
-      | "MessageRead"
       | "MessageSent"
       | "OwnershipTransferred"
       | "Paused"
@@ -250,14 +246,6 @@ export interface WhisperChainInterface extends Interface {
   encodeFunctionData(
     functionFragment: "isUserRegistered",
     values: [AddressLike]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "markAsDelivered",
-    values: [BytesLike]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "markAsRead",
-    values: [BytesLike]
   ): string;
   encodeFunctionData(
     functionFragment: "messageDeleted",
@@ -441,11 +429,6 @@ export interface WhisperChainInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "markAsDelivered",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "markAsRead", data: BytesLike): Result;
-  decodeFunctionResult(
     functionFragment: "messageDeleted",
     data: BytesLike
   ): Result;
@@ -577,32 +560,6 @@ export namespace MessageDeletedEvent {
   export interface OutputObject {
     messageId: string;
     deleter: string;
-  }
-  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
-  export type Filter = TypedDeferredTopicFilter<Event>;
-  export type Log = TypedEventLog<Event>;
-  export type LogDescription = TypedLogDescription<Event>;
-}
-
-export namespace MessageDeliveredEvent {
-  export type InputTuple = [messageId: BytesLike, timestamp: BigNumberish];
-  export type OutputTuple = [messageId: string, timestamp: bigint];
-  export interface OutputObject {
-    messageId: string;
-    timestamp: bigint;
-  }
-  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
-  export type Filter = TypedDeferredTopicFilter<Event>;
-  export type Log = TypedEventLog<Event>;
-  export type LogDescription = TypedLogDescription<Event>;
-}
-
-export namespace MessageReadEvent {
-  export type InputTuple = [messageId: BytesLike, timestamp: BigNumberish];
-  export type OutputTuple = [messageId: string, timestamp: bigint];
-  export interface OutputObject {
-    messageId: string;
-    timestamp: bigint;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
@@ -851,14 +808,6 @@ export interface WhisperChain extends BaseContract {
 
   isUserRegistered: TypedContractMethod<[user: AddressLike], [boolean], "view">;
 
-  markAsDelivered: TypedContractMethod<
-    [messageId: BytesLike],
-    [void],
-    "nonpayable"
-  >;
-
-  markAsRead: TypedContractMethod<[messageId: BytesLike], [void], "nonpayable">;
-
   messageDeleted: TypedContractMethod<[arg0: BytesLike], [boolean], "view">;
 
   messages: TypedContractMethod<
@@ -1089,12 +1038,6 @@ export interface WhisperChain extends BaseContract {
     nameOrSignature: "isUserRegistered"
   ): TypedContractMethod<[user: AddressLike], [boolean], "view">;
   getFunction(
-    nameOrSignature: "markAsDelivered"
-  ): TypedContractMethod<[messageId: BytesLike], [void], "nonpayable">;
-  getFunction(
-    nameOrSignature: "markAsRead"
-  ): TypedContractMethod<[messageId: BytesLike], [void], "nonpayable">;
-  getFunction(
     nameOrSignature: "messageDeleted"
   ): TypedContractMethod<[arg0: BytesLike], [boolean], "view">;
   getFunction(
@@ -1271,20 +1214,6 @@ export interface WhisperChain extends BaseContract {
     MessageDeletedEvent.OutputObject
   >;
   getEvent(
-    key: "MessageDelivered"
-  ): TypedContractEvent<
-    MessageDeliveredEvent.InputTuple,
-    MessageDeliveredEvent.OutputTuple,
-    MessageDeliveredEvent.OutputObject
-  >;
-  getEvent(
-    key: "MessageRead"
-  ): TypedContractEvent<
-    MessageReadEvent.InputTuple,
-    MessageReadEvent.OutputTuple,
-    MessageReadEvent.OutputObject
-  >;
-  getEvent(
     key: "MessageSent"
   ): TypedContractEvent<
     MessageSentEvent.InputTuple,
@@ -1377,28 +1306,6 @@ export interface WhisperChain extends BaseContract {
       MessageDeletedEvent.InputTuple,
       MessageDeletedEvent.OutputTuple,
       MessageDeletedEvent.OutputObject
-    >;
-
-    "MessageDelivered(bytes32,uint256)": TypedContractEvent<
-      MessageDeliveredEvent.InputTuple,
-      MessageDeliveredEvent.OutputTuple,
-      MessageDeliveredEvent.OutputObject
-    >;
-    MessageDelivered: TypedContractEvent<
-      MessageDeliveredEvent.InputTuple,
-      MessageDeliveredEvent.OutputTuple,
-      MessageDeliveredEvent.OutputObject
-    >;
-
-    "MessageRead(bytes32,uint256)": TypedContractEvent<
-      MessageReadEvent.InputTuple,
-      MessageReadEvent.OutputTuple,
-      MessageReadEvent.OutputObject
-    >;
-    MessageRead: TypedContractEvent<
-      MessageReadEvent.InputTuple,
-      MessageReadEvent.OutputTuple,
-      MessageReadEvent.OutputObject
     >;
 
     "MessageSent(bytes32,address,address,uint256,uint256)": TypedContractEvent<
