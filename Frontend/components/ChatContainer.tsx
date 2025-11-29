@@ -12,6 +12,8 @@ import { UserRegistration } from './UserRegistration';
 import { CreateConversation } from './CreateConversation';
 import { ProfileSettings } from './ProfileSettings';
 import { BatchMessaging } from './BatchMessaging';
+import { PaymentNotification } from './PaymentNotification';
+import { PaymentHistory } from './PaymentHistory';
 import {
 	sendWhisper,
 	waitForTransaction,
@@ -39,6 +41,8 @@ type Message = {
 	ipfsHash?: string;
 	mediaType?: number;
 	fileSize?: bigint;
+	paymentAmount?: bigint;
+	paymentToken?: string;
 };
 
 type Thread = {
@@ -66,6 +70,14 @@ export function ChatContainer() {
 	const [conversationsSidebarOpen, setConversationsSidebarOpen] = useState(true);
 	const [userPublicKey, setUserPublicKey] = useState<string>('');
 	const [pendingTransactions, setPendingTransactions] = useState<Set<string>>(new Set());
+	const [paymentNotification, setPaymentNotification] = useState<{
+		amount: bigint;
+		token?: string;
+		isReceived: boolean;
+		from?: string;
+		to?: string;
+	} | null>(null);
+	const [showPaymentHistory, setShowPaymentHistory] = useState(false);
 
 	const { profile, isRegistered, refresh } = useWhisperChain(connectedAddress);
 
@@ -145,27 +157,33 @@ export function ChatContainer() {
 				handleMessageSent(messageId, sender, recipient);
 			});
 
-			// Listen for MessageDelivered events
-			const messageDeliveredEvent = contract.getEvent('MessageDelivered');
-			contract.on(messageDeliveredEvent, () => {
-				setTimeout(() => {
-					loadUserData();
-				}, 500);
-			});
-
-			// Listen for MessageRead events
-			const messageReadEvent = contract.getEvent('MessageRead');
-			contract.on(messageReadEvent, () => {
-				setTimeout(() => {
-					loadUserData();
-				}, 500);
+			// Listen for PaymentSettled events
+			const paymentSettledEvent = contract.getEvent('PaymentSettled');
+			contract.on(paymentSettledEvent, async (messageId, amount, event) => {
+				try {
+					// Get message details to show notification
+					const msg = await fetchMessage(messageId);
+					const isReceived = msg.recipient.toLowerCase() === connectedAddress.toLowerCase();
+					if (isReceived) {
+						setPaymentNotification({
+							amount: amount,
+							token: msg.paymentToken,
+							isReceived: true,
+							from: msg.sender,
+						});
+					}
+					setTimeout(() => {
+						loadUserData();
+					}, 500);
+				} catch (error) {
+					console.error('Failed to load payment details:', error);
+				}
 			});
 
 			// Cleanup function
 			return () => {
 				contract.removeAllListeners(messageSentEvent);
-				contract.removeAllListeners(messageDeliveredEvent);
-				contract.removeAllListeners(messageReadEvent);
+				contract.removeAllListeners(paymentSettledEvent);
 			};
 		} catch (error) {
 			console.error('Failed to setup event listeners:', error);
@@ -289,7 +307,9 @@ export function ChatContainer() {
 							conversationId: conversationId,
 							sender: msg.sender,
 							recipient: msg.recipient,
-						} as Message & { conversationId: string; sender: string; recipient: string };
+							paymentAmount: msg.paymentAmount,
+							paymentToken: msg.paymentToken,
+						} as Message & { conversationId: string; sender: string; recipient: string; paymentAmount?: bigint; paymentToken?: string };
 					} catch {
 						return null;
 					}
@@ -456,6 +476,16 @@ export function ChatContainer() {
 
 			const receipt = await waitForTransaction(Promise.resolve(tx));
 
+			// Show payment sent notification
+			if (args.paymentAmount && args.paymentAmount > BigInt(0)) {
+				setPaymentNotification({
+					amount: args.paymentAmount,
+					token: args.paymentToken,
+					isReceived: false,
+					to: recipient,
+				});
+			}
+
 			// Remove from pending transactions
 			setPendingTransactions((prev) => {
 				const next = new Set(prev);
@@ -539,6 +569,7 @@ export function ChatContainer() {
 				onNewChat={() => setShowCreateConversation(true)}
 				onBatchSend={() => setShowBatchMessaging(true)}
 				onSettings={() => setShowProfileSettings(true)}
+				onPaymentHistory={() => setShowPaymentHistory(true)}
 			/>
 
 			{/* Main Chat Area */}
@@ -565,6 +596,7 @@ export function ChatContainer() {
 									loadUserData();
 									refresh();
 								}}
+								connectedAddress={connectedAddress}
 							/>
 						</div>
 						<MessageInput
@@ -586,6 +618,23 @@ export function ChatContainer() {
 				onSelectThread={setActiveThreadId}
 				connectedAddress={connectedAddress}
 			/>
+
+			{/* Payment Notification */}
+			{paymentNotification && (
+				<PaymentNotification
+					paymentAmount={paymentNotification.amount}
+					paymentToken={paymentNotification.token}
+					isReceived={paymentNotification.isReceived}
+					from={paymentNotification.from}
+					to={paymentNotification.to}
+					onDismiss={() => setPaymentNotification(null)}
+				/>
+			)}
+
+			{/* Payment History */}
+			{showPaymentHistory && connectedAddress && (
+				<PaymentHistory userAddress={connectedAddress} onClose={() => setShowPaymentHistory(false)} />
+			)}
 
 			{/* Modals */}
 			{showCreateConversation && connectedAddress && (

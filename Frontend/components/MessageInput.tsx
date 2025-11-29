@@ -234,7 +234,7 @@ export function MessageInput({
                             <Coins style={{ width: '1rem', height: '1rem', color: '#fbbf24' }} />
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.125rem' }}>
                                 <span style={{ fontSize: '0.75rem', color: '#ffffff', fontWeight: 500 }}>
-                                    {formatEther(paymentAmount)} ETH
+                                    {formatEther(paymentAmount)} Base ETH
                                 </span>
                                 {paymentToken && paymentToken !== '0x0000000000000000000000000000000000000000' && (
                                     <span style={{ fontSize: '0.6875rem', color: 'rgba(255, 255, 255, 0.6)', fontFamily: 'monospace' }}>

@@ -1,9 +1,10 @@
 'use client';
 
-import { CheckCheck, Image, Video, Music, FileText, ExternalLink } from 'lucide-react';
+import { CheckCheck, Image, Video, Music, FileText, ExternalLink, Coins, CheckCircle2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { useState, useEffect } from 'react';
 import { getIPFSUrl, getMediaTypeName } from '@WhisperChain/lib/ipfs';
+import { formatEther, ZeroAddress } from 'ethers';
 
 type Message = {
     id: string;
@@ -19,6 +20,8 @@ type Message = {
     fileSize?: bigint;
     sender?: string;
     recipient?: string;
+    paymentAmount?: bigint;
+    paymentToken?: string;
 };
 
 type MessageBubbleProps = {
@@ -391,6 +394,78 @@ export function MessageBubble({ message, index = 0, showAvatar = true, isGrouped
                         </div>
                     )}
 
+                    {/* Payment Indicator */}
+                    {message.paymentAmount && message.paymentAmount > BigInt(0) && (
+                        <div
+                            style={{
+                                marginTop: message.body || (message.ipfsHash && message.mediaType !== undefined) ? '0.75rem' : '0',
+                                paddingTop: message.body || (message.ipfsHash && message.mediaType !== undefined) ? '0.75rem' : '0',
+                                borderTop: message.body || (message.ipfsHash && message.mediaType !== undefined)
+                                    ? `1px solid ${isSelf ? 'rgba(99, 102, 241, 0.2)' : 'rgba(255, 255, 255, 0.1)'}`
+                                    : 'none',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.5rem',
+                                padding: '0.625rem 0.875rem',
+                                borderRadius: '0.5rem',
+                                background: isSelf
+                                    ? 'rgba(245, 158, 11, 0.15)'
+                                    : message.status === 'delivered' || message.status === 'read'
+                                        ? 'rgba(16, 185, 129, 0.15)'
+                                        : 'rgba(245, 158, 11, 0.1)',
+                                border: `1px solid ${isSelf
+                                    ? 'rgba(245, 158, 11, 0.3)'
+                                    : message.status === 'delivered' || message.status === 'read'
+                                        ? 'rgba(16, 185, 129, 0.3)'
+                                        : 'rgba(245, 158, 11, 0.2)'
+                                    }`,
+                            }}
+                        >
+                            <Coins
+                                style={{
+                                    width: '1rem',
+                                    height: '1rem',
+                                    color: isSelf
+                                        ? '#fbbf24'
+                                        : message.status === 'delivered' || message.status === 'read'
+                                            ? '#10b981'
+                                            : '#fbbf24',
+                                    flexShrink: 0,
+                                }}
+                            />
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                                <div
+                                    style={{
+                                        fontSize: '0.8125rem',
+                                        fontWeight: 600,
+                                        color: '#ffffff',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '0.375rem',
+                                    }}
+                                >
+                                    {isSelf ? 'Sent' : message.status === 'delivered' || message.status === 'read' ? 'Received' : 'Pending'}
+                                    {formatEther(message.paymentAmount)} {message.paymentToken && message.paymentToken !== ZeroAddress ? 'Tokens' : 'Base ETH'}
+                                    {(message.status === 'delivered' || message.status === 'read') && !isSelf && (
+                                        <CheckCircle2 style={{ width: '0.875rem', height: '0.875rem', color: '#10b981', flexShrink: 0 }} />
+                                    )}
+                                </div>
+                                {message.paymentToken && message.paymentToken !== ZeroAddress && (
+                                    <div
+                                        style={{
+                                            fontSize: '0.6875rem',
+                                            color: 'rgba(255, 255, 255, 0.6)',
+                                            fontFamily: 'monospace',
+                                            marginTop: '0.125rem',
+                                        }}
+                                    >
+                                        {String(message.paymentToken).slice(0, 6)}...{String(message.paymentToken).slice(-4)}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
                     {/* Timestamp and Status Footer */}
                     <div
                         style={{
@@ -400,7 +475,9 @@ export function MessageBubble({ message, index = 0, showAvatar = true, isGrouped
                             gap: '0.375rem',
                             padding: message.ipfsHash && message.mediaType === 1
                                 ? (message.body ? '0.5rem 1rem 0.75rem' : '0.5rem 1rem 0.75rem')
-                                : '0.25rem 0 0 0',
+                                : message.paymentAmount && message.paymentAmount > BigInt(0)
+                                    ? '0.5rem 0.875rem 0.75rem'
+                                    : '0.25rem 0 0 0',
                             fontSize: '0.6875rem',
                             color: 'rgba(255, 255, 255, 0.4)',
                         }}

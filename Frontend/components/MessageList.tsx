@@ -17,6 +17,8 @@ type Message = {
     fileSize?: bigint;
     sender?: string;
     recipient?: string;
+    paymentAmount?: bigint;
+    paymentToken?: string;
 };
 
 type MessageListProps = {
@@ -24,6 +26,7 @@ type MessageListProps = {
     isLoading?: boolean;
     emptyMessage?: string;
     onMessageUpdate?: () => void;
+    connectedAddress?: string;
 };
 
 export function MessageList({
@@ -31,6 +34,7 @@ export function MessageList({
     isLoading,
     emptyMessage = 'No messages yet. Start the conversation!',
     onMessageUpdate,
+    connectedAddress,
 }: MessageListProps) {
     return (
         <div
@@ -137,13 +141,14 @@ export function MessageList({
                             (message.timestamp - prevMessage.timestamp) < 300; // 5 minutes
 
                         return (
-                            <MessageBubble
-                                key={message.id}
-                                message={message}
-                                index={index}
-                                showAvatar={!isGrouped}
-                                isGrouped={isGrouped}
-                            />
+                            <div key={message.id} data-message-id={message.messageId || message.id}>
+                                <MessageBubble
+                                    message={message}
+                                    index={index}
+                                    showAvatar={!isGrouped}
+                                    isGrouped={isGrouped}
+                                />
+                            </div>
                         );
                     })}
                 </div>

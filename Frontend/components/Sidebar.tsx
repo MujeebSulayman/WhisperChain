@@ -1,6 +1,6 @@
 'use client';
 
-import { MessageSquarePlus, Settings, Send, Menu, X, Hash, User } from 'lucide-react';
+import { MessageSquarePlus, Settings, Send, Menu, X, Hash, User, Coins } from 'lucide-react';
 import { WalletConnect } from './WalletConnect';
 import { UserStats } from './UserStats';
 import { StorageManagement } from './StorageManagement';
@@ -21,6 +21,7 @@ type SidebarProps = {
     onNewChat: () => void;
     onBatchSend: () => void;
     onSettings: () => void;
+    onPaymentHistory: () => void;
 };
 
 export function Sidebar({
@@ -33,6 +34,7 @@ export function Sidebar({
     onNewChat,
     onBatchSend,
     onSettings,
+    onPaymentHistory,
 }: SidebarProps) {
     return (
         <aside
@@ -366,6 +368,35 @@ export function Sidebar({
                                 <Send style={{ width: '1rem', height: '1rem' }} />
                                 Batch Send
                             </button>
+                            <button
+                                onClick={onPaymentHistory}
+                                style={{
+                                    width: '100%',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '0.5rem',
+                                    padding: '0.75rem 1rem',
+                                    borderRadius: '0.5rem',
+                                    background: 'transparent',
+                                    border: '1px solid rgba(245, 158, 11, 0.2)',
+                                    color: 'rgba(245, 158, 11, 0.8)',
+                                    cursor: 'pointer',
+                                    fontSize: '0.875rem',
+                                    transition: 'all 0.2s',
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.background = 'rgba(245, 158, 11, 0.1)';
+                                    e.currentTarget.style.color = '#fbbf24';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.background = 'transparent';
+                                    e.currentTarget.style.color = 'rgba(245, 158, 11, 0.8)';
+                                }}
+                            >
+                                <Coins style={{ width: '1rem', height: '1rem' }} />
+                                Payment History
+                            </button>
                         </>
                     ) : (
                         <>
@@ -422,6 +453,34 @@ export function Sidebar({
                                 title="Batch Send"
                             >
                                 <Send style={{ width: '1rem', height: '1rem' }} />
+                            </button>
+                            <button
+                                onClick={onPaymentHistory}
+                                style={{
+                                    width: '2.5rem',
+                                    height: '2.5rem',
+                                    padding: '0.5rem',
+                                    borderRadius: '0.5rem',
+                                    background: 'transparent',
+                                    border: '1px solid rgba(245, 158, 11, 0.2)',
+                                    color: 'rgba(245, 158, 11, 0.8)',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    transition: 'all 0.2s',
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.background = 'rgba(245, 158, 11, 0.1)';
+                                    e.currentTarget.style.color = '#fbbf24';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.background = 'transparent';
+                                    e.currentTarget.style.color = 'rgba(245, 158, 11, 0.8)';
+                                }}
+                                title="Payment History"
+                            >
+                                <Coins style={{ width: '1rem', height: '1rem' }} />
                             </button>
                         </>
                     )}
