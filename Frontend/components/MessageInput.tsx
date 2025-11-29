@@ -130,9 +130,13 @@ export function MessageInput({
     return (
         <div
             style={{
-                borderTop: '1px solid rgba(255, 255, 255, 0.08)',
-                background: '#1a1a1a',
-                padding: '1rem',
+                borderTop: '1px solid rgba(255, 255, 255, 0.06)',
+                background: 'rgba(15, 15, 15, 0.95)',
+                backdropFilter: 'blur(10px)',
+                padding: '1rem 1.25rem',
+                position: 'sticky',
+                bottom: 0,
+                zIndex: 10,
             }}
         >
             {(showFileUpload || showPayment) && (
@@ -266,74 +270,99 @@ export function MessageInput({
             )}
 
             <div style={{ display: 'flex', alignItems: 'flex-end', gap: '0.5rem' }}>
-                <div style={{ display: 'flex', gap: '0.25rem' }}>
-                    <button
-                        onClick={() => {
-                            setShowFileUpload(!showFileUpload);
-                            setShowPayment(false);
-                        }}
-                        disabled={disabled}
-                        style={{
-                            padding: '0.625rem',
-                            borderRadius: '0.5rem',
-                            background: showFileUpload ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
-                            border: `1px solid ${showFileUpload ? 'rgba(255, 255, 255, 0.2)' : 'rgba(255, 255, 255, 0.08)'}`,
-                            color: showFileUpload ? '#ffffff' : 'rgba(255, 255, 255, 0.6)',
-                            cursor: disabled ? 'not-allowed' : 'pointer',
-                            opacity: disabled ? 0.5 : 1,
-                            transition: 'all 0.2s',
-                        }}
-                        onMouseEnter={(e) => {
-                            if (!disabled && !showFileUpload) {
-                                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
-                            }
-                        }}
-                        onMouseLeave={(e) => {
-                            if (!disabled && !showFileUpload) {
-                                e.currentTarget.style.background = 'transparent';
-                            }
-                        }}
-                    >
-                        <Paperclip style={{ width: '1rem', height: '1rem' }} />
-                    </button>
-                    <button
-                        onClick={() => {
-                            setShowPayment(!showPayment);
-                            setShowFileUpload(false);
-                        }}
-                        disabled={disabled}
-                        style={{
-                            padding: '0.625rem',
-                            borderRadius: '0.5rem',
-                            background: showPayment ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
-                            border: `1px solid ${showPayment ? 'rgba(255, 255, 255, 0.2)' : 'rgba(255, 255, 255, 0.08)'}`,
-                            color: showPayment ? '#ffffff' : 'rgba(255, 255, 255, 0.6)',
-                            cursor: disabled ? 'not-allowed' : 'pointer',
-                            opacity: disabled ? 0.5 : 1,
-                            transition: 'all 0.2s',
-                        }}
-                        onMouseEnter={(e) => {
-                            if (!disabled && !showPayment) {
-                                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
-                            }
-                        }}
-                        onMouseLeave={(e) => {
-                            if (!disabled && !showPayment) {
-                                e.currentTarget.style.background = 'transparent';
-                            }
-                        }}
-                    >
-                        <Coins style={{ width: '1rem', height: '1rem' }} />
-                    </button>
-                </div>
+                <button
+                    onClick={() => {
+                        setShowFileUpload(!showFileUpload);
+                        setShowPayment(false);
+                    }}
+                    disabled={disabled}
+                    style={{
+                        padding: '0.75rem',
+                        borderRadius: '50%',
+                        background: showFileUpload ? 'rgba(99, 102, 241, 0.15)' : 'transparent',
+                        border: `1px solid ${showFileUpload ? 'rgba(99, 102, 241, 0.3)' : 'rgba(255, 255, 255, 0.1)'}`,
+                        color: showFileUpload ? '#a5b4fc' : 'rgba(255, 255, 255, 0.6)',
+                        cursor: disabled ? 'not-allowed' : 'pointer',
+                        opacity: disabled ? 0.5 : 1,
+                        transition: 'all 0.2s',
+                        width: '3rem',
+                        height: '3rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0,
+                    }}
+                    onMouseEnter={(e) => {
+                        if (!disabled && !showFileUpload) {
+                            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
+                            e.currentTarget.style.color = '#ffffff';
+                        }
+                    }}
+                    onMouseLeave={(e) => {
+                        if (!disabled && !showFileUpload) {
+                            e.currentTarget.style.background = 'transparent';
+                            e.currentTarget.style.color = 'rgba(255, 255, 255, 0.6)';
+                        }
+                    }}
+                    title="Attach file"
+                >
+                    <Paperclip style={{ width: '1.125rem', height: '1.125rem' }} />
+                </button>
+                <button
+                    onClick={() => {
+                        setShowPayment(!showPayment);
+                        setShowFileUpload(false);
+                    }}
+                    disabled={disabled}
+                    style={{
+                        padding: '0.75rem',
+                        borderRadius: '50%',
+                        background: showPayment ? 'rgba(245, 158, 11, 0.15)' : 'transparent',
+                        border: `1px solid ${showPayment ? 'rgba(245, 158, 11, 0.3)' : 'rgba(255, 255, 255, 0.1)'}`,
+                        color: showPayment ? '#fbbf24' : 'rgba(255, 255, 255, 0.6)',
+                        cursor: disabled ? 'not-allowed' : 'pointer',
+                        opacity: disabled ? 0.5 : 1,
+                        transition: 'all 0.2s',
+                        width: '3rem',
+                        height: '3rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0,
+                    }}
+                    onMouseEnter={(e) => {
+                        if (!disabled && !showPayment) {
+                            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
+                            e.currentTarget.style.color = '#fbbf24';
+                        }
+                    }}
+                    onMouseLeave={(e) => {
+                        if (!disabled && !showPayment) {
+                            e.currentTarget.style.background = 'transparent';
+                            e.currentTarget.style.color = 'rgba(255, 255, 255, 0.6)';
+                        }
+                    }}
+                    title="Add payment"
+                >
+                    <Coins style={{ width: '1.125rem', height: '1.125rem' }} />
+                </button>
 
                 <div
                     style={{
                         flex: 1,
-                        borderRadius: '0.5rem',
-                        background: 'rgba(255, 255, 255, 0.03)',
-                        border: '1px solid rgba(255, 255, 255, 0.08)',
-                        padding: '0.75rem',
+                        borderRadius: '1.5rem',
+                        background: 'rgba(255, 255, 255, 0.05)',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        padding: '0.75rem 1rem',
+                        transition: 'all 0.2s',
+                    }}
+                    onFocus={(e) => {
+                        e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)';
+                        e.currentTarget.style.borderColor = 'rgba(99, 102, 241, 0.3)';
+                    }}
+                    onBlur={(e) => {
+                        e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
+                        e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)';
                     }}
                 >
                     <textarea
@@ -348,12 +377,13 @@ export function MessageInput({
                             width: '100%',
                             resize: 'none',
                             background: 'transparent',
-                            fontSize: '0.875rem',
+                            fontSize: '0.9375rem',
                             color: '#ffffff',
                             border: 'none',
                             outline: 'none',
                             minHeight: '24px',
                             maxHeight: '120px',
+                            lineHeight: '1.5',
                         }}
                     />
                 </div>
@@ -363,34 +393,42 @@ export function MessageInput({
                     disabled={(!input.trim() && !selectedFile) || isSending || disabled}
                     style={{
                         padding: '0.75rem',
-                        borderRadius: '0.5rem',
-                        background: '#ffffff',
+                        borderRadius: '50%',
+                        background: (!input.trim() && !selectedFile) || isSending || disabled
+                            ? 'rgba(99, 102, 241, 0.2)'
+                            : 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
                         border: 'none',
-                        color: '#0f0f0f',
+                        color: '#ffffff',
                         cursor: (!input.trim() && !selectedFile) || isSending || disabled ? 'not-allowed' : 'pointer',
-                        opacity: (!input.trim() && !selectedFile) || isSending || disabled ? 0.6 : 1,
-                        transition: 'opacity 0.2s',
+                        opacity: (!input.trim() && !selectedFile) || isSending || disabled ? 0.5 : 1,
+                        transition: 'all 0.2s',
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '0.5rem',
+                        justifyContent: 'center',
+                        width: '3rem',
+                        height: '3rem',
+                        flexShrink: 0,
+                        boxShadow: (!input.trim() && !selectedFile) || isSending || disabled
+                            ? 'none'
+                            : '0 4px 12px rgba(99, 102, 241, 0.3)',
+                    }}
+                    onMouseEnter={(e) => {
+                        if (!((!input.trim() && !selectedFile) || isSending || disabled)) {
+                            e.currentTarget.style.transform = 'scale(1.05)';
+                            e.currentTarget.style.boxShadow = '0 6px 16px rgba(99, 102, 241, 0.4)';
+                        }
+                    }}
+                    onMouseLeave={(e) => {
+                        e.currentTarget.style.transform = 'scale(1)';
+                        e.currentTarget.style.boxShadow = (!input.trim() && !selectedFile) || isSending || disabled
+                            ? 'none'
+                            : '0 4px 12px rgba(99, 102, 241, 0.3)';
                     }}
                 >
                     {isSending ? (
-                        <>
-                            <Loader2 style={{ width: '1.25rem', height: '1.25rem', animation: 'spin 1s linear infinite' }} />
-                            <span style={{ fontSize: '0.875rem', fontWeight: 500 }}>
-                                {selectedFile ? 'Uploading & Sending...' : 'Sending...'}
-                            </span>
-                        </>
+                        <Loader2 style={{ width: '1.25rem', height: '1.25rem', animation: 'spin 1s linear infinite' }} />
                     ) : (
-                        <>
-                            <Send style={{ width: '1.25rem', height: '1.25rem' }} />
-                            {(selectedFile || paymentAmount) && (
-                                <span style={{ fontSize: '0.75rem', fontWeight: 500 }}>
-                                    {selectedFile && paymentAmount ? 'Send All' : selectedFile ? 'Send File' : 'Send Payment'}
-                                </span>
-                            )}
-                        </>
+                        <Send style={{ width: '1.25rem', height: '1.25rem' }} />
                     )}
                 </button>
             </div>

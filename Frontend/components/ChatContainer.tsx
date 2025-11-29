@@ -542,7 +542,7 @@ export function ChatContainer() {
 			/>
 
 			{/* Main Chat Area */}
-			<main style={{ flex: 1, display: 'flex', flexDirection: 'column', position: 'relative', background: '#0f0f0f', minWidth: 0 }}>
+			<main style={{ flex: 1, display: 'flex', flexDirection: 'column', position: 'relative', background: '#0a0a0a', minWidth: 0 }}>
 				{error && <ErrorToast message={error} onDismiss={() => setError(null)} />}
 
 				{activeThreadId && (

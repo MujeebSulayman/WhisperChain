@@ -81,16 +81,16 @@ export function MessageBubble({ message, index = 0, showAvatar = true, isGrouped
     return (
         <div
             style={{
-                marginBottom: isGrouped ? '0.25rem' : '1.5rem',
+                marginBottom: isGrouped ? '0.375rem' : '1rem',
                 display: 'flex',
                 flexDirection: 'row',
-                gap: '0.75rem',
+                gap: '0.625rem',
                 alignItems: 'flex-end',
                 justifyContent: isSelf ? 'flex-end' : 'flex-start',
                 opacity: isVisible ? 1 : 0,
-                transition: 'opacity 0.3s ease-out',
-                paddingLeft: isSelf ? '3rem' : '0',
-                paddingRight: isSelf ? '0' : '3rem',
+                transition: 'opacity 0.2s ease-out',
+                paddingLeft: isSelf ? '2rem' : '0',
+                paddingRight: isSelf ? '0' : '2rem',
             }}
             className="animate-slide-up"
         >
@@ -98,8 +98,8 @@ export function MessageBubble({ message, index = 0, showAvatar = true, isGrouped
             {!isSelf && showAvatar && !isGrouped && (
                 <div
                     style={{
-                        width: '2rem',
-                        height: '2rem',
+                        width: '2.25rem',
+                        height: '2.25rem',
                         borderRadius: '50%',
                         background: getAvatarColor(),
                         display: 'flex',
@@ -109,39 +109,38 @@ export function MessageBubble({ message, index = 0, showAvatar = true, isGrouped
                         fontWeight: 600,
                         fontSize: '0.75rem',
                         flexShrink: 0,
-                        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)',
                     }}
                 >
                     {getAvatarInitial()}
                 </div>
             )}
             {!isSelf && showAvatar && isGrouped && (
-                <div style={{ width: '2rem', flexShrink: 0 }} />
+                <div style={{ width: '2.25rem', flexShrink: 0 }} />
             )}
 
             {/* Message Content */}
             <div
                 style={{
-                    maxWidth: '70%',
-                    minWidth: '8rem',
+                    maxWidth: '75%',
+                    minWidth: '6rem',
                     display: 'flex',
                     flexDirection: 'column',
-                    gap: '0.5rem',
+                    gap: '0.375rem',
                 }}
             >
                 {/* Author Header */}
                 {!isSelf && !isGrouped && (
                     <div
                         style={{
-                            marginBottom: '0.25rem',
-                            paddingLeft: '0.5rem',
+                            marginBottom: '0.375rem',
+                            paddingLeft: '0.625rem',
                         }}
                     >
                         <span
                             style={{
                                 fontSize: '0.8125rem',
                                 fontWeight: 500,
-                                color: 'rgba(255, 255, 255, 0.7)',
+                                color: 'rgba(255, 255, 255, 0.8)',
                             }}
                         >
                             {message.author}
@@ -153,17 +152,18 @@ export function MessageBubble({ message, index = 0, showAvatar = true, isGrouped
                 <div
                     style={{
                         borderRadius: isSelf
-                            ? (isGrouped ? '1rem 0.25rem 1rem 1rem' : '1rem 0.25rem 1rem 1rem')
-                            : (isGrouped ? '0.25rem 1rem 1rem 1rem' : '0.25rem 1rem 1rem 1rem'),
+                            ? (isGrouped ? '1.125rem 0.375rem 1.125rem 1.125rem' : '1.125rem 0.375rem 1.125rem 1.125rem')
+                            : (isGrouped ? '0.375rem 1.125rem 1.125rem 1.125rem' : '0.375rem 1.125rem 1.125rem 1.125rem'),
                         padding: message.ipfsHash && message.mediaType === 1 ? '0' : '0.75rem 1rem',
                         background: isSelf
-                            ? 'rgba(99, 102, 241, 0.15)'
-                            : 'rgba(255, 255, 255, 0.06)',
-                        border: `1px solid ${isSelf ? 'rgba(99, 102, 241, 0.2)' : 'rgba(255, 255, 255, 0.08)'}`,
+                            ? 'linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(99, 102, 241, 0.12) 100%)'
+                            : 'rgba(255, 255, 255, 0.08)',
+                        border: `1px solid ${isSelf ? 'rgba(99, 102, 241, 0.25)' : 'rgba(255, 255, 255, 0.1)'}`,
                         position: 'relative',
                         display: 'flex',
                         flexDirection: 'column',
                         gap: message.body && message.ipfsHash && message.mediaType === 1 ? '0.5rem' : '0',
+                        backdropFilter: 'blur(10px)',
                     }}
                 >
                     {/* Message Text */}

@@ -37,7 +37,9 @@ export function MessageList({
             style={{
                 flex: 1,
                 overflowY: 'auto',
-                padding: '1.5rem',
+                overflowX: 'hidden',
+                padding: '1.25rem 1rem',
+                background: 'linear-gradient(to bottom, rgba(15, 15, 15, 0.5), rgba(15, 15, 15, 0.8))',
             }}
         >
             {isLoading && messages.length === 0 ? (
@@ -49,13 +51,27 @@ export function MessageList({
                         height: '100%',
                     }}
                 >
-                    <p
-                        style={{
-                            color: 'rgba(255, 255, 255, 0.5)',
-                        }}
-                    >
-                        Loading messages...
-                    </p>
+                    <div style={{ textAlign: 'center' }}>
+                        <div
+                            style={{
+                                width: '2rem',
+                                height: '2rem',
+                                border: '2px solid rgba(99, 102, 241, 0.3)',
+                                borderTopColor: '#6366f1',
+                                borderRadius: '50%',
+                                margin: '0 auto 1rem',
+                                animation: 'spin 1s linear infinite',
+                            }}
+                        />
+                        <p
+                            style={{
+                                color: 'rgba(255, 255, 255, 0.5)',
+                                fontSize: '0.875rem',
+                            }}
+                        >
+                            Loading messages...
+                        </p>
+                    </div>
                 </div>
             ) : messages.length === 0 ? (
                 <div
@@ -66,18 +82,42 @@ export function MessageList({
                         height: '100%',
                     }}
                 >
-                    <div style={{ textAlign: 'center' }}>
-                        <MessageSquare
+                    <div style={{ textAlign: 'center', maxWidth: '20rem' }}>
+                        <div
                             style={{
-                                width: '3rem',
-                                height: '3rem',
-                                margin: '0 auto 0.75rem',
-                                color: 'rgba(255, 255, 255, 0.2)',
+                                width: '4rem',
+                                height: '4rem',
+                                borderRadius: '50%',
+                                background: 'rgba(99, 102, 241, 0.1)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                margin: '0 auto 1.5rem',
                             }}
-                        />
+                        >
+                            <MessageSquare
+                                style={{
+                                    width: '2rem',
+                                    height: '2rem',
+                                    color: 'rgba(99, 102, 241, 0.5)',
+                                }}
+                            />
+                        </div>
+                        <h3
+                            style={{
+                                fontSize: '1.125rem',
+                                fontWeight: 600,
+                                color: '#ffffff',
+                                marginBottom: '0.5rem',
+                            }}
+                        >
+                            No messages yet
+                        </h3>
                         <p
                             style={{
                                 color: 'rgba(255, 255, 255, 0.5)',
+                                fontSize: '0.875rem',
+                                lineHeight: '1.5',
                             }}
                         >
                             {emptyMessage}
@@ -85,7 +125,7 @@ export function MessageList({
                     </div>
                 </div>
             ) : (
-                <div style={{ maxWidth: '48rem', margin: '0 auto' }}>
+                <div style={{ maxWidth: '52rem', margin: '0 auto', paddingBottom: '1rem' }}>
                     {messages.map((message, index) => {
                         // Determine if this message should be grouped with the previous one
                         const prevMessage = index > 0 ? messages[index - 1] : null;
