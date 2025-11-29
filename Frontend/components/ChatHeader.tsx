@@ -1,6 +1,6 @@
 'use client';
 
-import { Menu, Circle } from 'lucide-react';
+import { Menu, Circle, MessageSquare } from 'lucide-react';
 
 type ChatHeaderProps = {
     threadTitle?: string;
@@ -83,52 +83,87 @@ export function ChatHeader({ threadTitle, onMenuClick, showMenu = false, onConve
                         <Menu style={{ width: isMobile ? '1.5rem' : '1.25rem', height: isMobile ? '1.5rem' : '1.25rem' }} />
                     </button>
                 )}
-                <div
+                {threadTitle && (
+                    <>
+                        <div
+                            style={{
+                                width: isMobile ? '2.25rem' : '2.75rem',
+                                height: isMobile ? '2.25rem' : '2.75rem',
+                                borderRadius: '50%',
+                                background: getAvatarColor(threadTitle),
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                color: '#ffffff',
+                                fontWeight: 600,
+                                fontSize: isMobile ? '0.75rem' : '0.875rem',
+                                flexShrink: 0,
+                            }}
+                        >
+                            {getInitials(threadTitle)}
+                        </div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                            <h2
+                                style={{
+                                    fontWeight: 600,
+                                    fontSize: isMobile ? '0.875rem' : '1rem',
+                                    color: '#ffffff',
+                                    margin: 0,
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    whiteSpace: 'nowrap',
+                                }}
+                            >
+                                {threadTitle}
+                            </h2>
+                            {!isMobile && (
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.125rem' }}>
+                                    <Circle style={{ width: '0.5rem', height: '0.5rem', color: '#10b981', fill: '#10b981' }} />
+                                    <span
+                                        style={{
+                                            fontSize: '0.75rem',
+                                            color: 'rgba(255, 255, 255, 0.5)',
+                                        }}
+                                    >
+                                        Active
+                                    </span>
+                                </div>
+                            )}
+                        </div>
+                    </>
+                )}
+            </div>
+            {/* Conversations toggle button - only on mobile */}
+            {isMobile && onConversationsClick && (
+                <button
+                    onClick={onConversationsClick}
                     style={{
-                        width: isMobile ? '2.25rem' : '2.75rem',
-                        height: isMobile ? '2.25rem' : '2.75rem',
-                        borderRadius: '50%',
-                        background: getAvatarColor(threadTitle),
+                        padding: '0.75rem',
+                        borderRadius: '0.5rem',
+                        background: showConversations ? 'rgba(99, 102, 241, 0.15)' : 'transparent',
+                        border: `1px solid ${showConversations ? 'rgba(99, 102, 241, 0.3)' : 'rgba(255, 255, 255, 0.08)'}`,
+                        color: showConversations ? '#a5b4fc' : 'rgba(255, 255, 255, 0.6)',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s',
+                        flexShrink: 0,
+                        touchAction: 'manipulation',
+                        minWidth: '2.75rem',
+                        minHeight: '2.75rem',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        color: '#ffffff',
-                        fontWeight: 600,
-                        fontSize: isMobile ? '0.75rem' : '0.875rem',
-                        flexShrink: 0,
                     }}
+                    onTouchStart={(e) => {
+                        e.currentTarget.style.background = showConversations ? 'rgba(99, 102, 241, 0.2)' : 'rgba(255, 255, 255, 0.1)';
+                    }}
+                    onTouchEnd={(e) => {
+                        e.currentTarget.style.background = showConversations ? 'rgba(99, 102, 241, 0.15)' : 'transparent';
+                    }}
+                    title={showConversations ? 'Hide conversations' : 'Show conversations'}
                 >
-                    {getInitials(threadTitle)}
-                </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                    <h2
-                        style={{
-                            fontWeight: 600,
-                            fontSize: isMobile ? '0.875rem' : '1rem',
-                            color: '#ffffff',
-                            margin: 0,
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            whiteSpace: 'nowrap',
-                        }}
-                    >
-                        {threadTitle || 'New Conversation'}
-                    </h2>
-                    {!isMobile && (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.125rem' }}>
-                            <Circle style={{ width: '0.5rem', height: '0.5rem', color: '#10b981', fill: '#10b981' }} />
-                            <span
-                                style={{
-                                    fontSize: '0.75rem',
-                                    color: 'rgba(255, 255, 255, 0.5)',
-                                }}
-                            >
-                                Active
-                            </span>
-                        </div>
-                    )}
-                </div>
-            </div>
+                    <MessageSquare style={{ width: '1.25rem', height: '1.25rem' }} />
+                </button>
+            )}
         </div>
     );
 }
