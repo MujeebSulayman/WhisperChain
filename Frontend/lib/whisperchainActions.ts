@@ -101,16 +101,6 @@ export async function sendWhisper(args: {
 	);
 }
 
-export async function markDelivered(messageId: BytesLike) {
-	const contract = await getSignerContract();
-	return contract.markAsDelivered(messageId);
-}
-
-export async function markRead(messageId: BytesLike) {
-	const contract = await getSignerContract();
-	return contract.markAsRead(messageId);
-}
-
 export async function deleteWhisper(messageId: BytesLike) {
 	const contract = await getSignerContract();
 	return contract.deleteMessage(messageId);
@@ -254,6 +244,15 @@ export async function isMessageDeleted(messageId: BytesLike) {
 		return await contract.isMessageDeleted(messageId);
 	} catch (error: any) {
 		throw new Error(`Failed to check message status: ${error.message}`);
+	}
+}
+
+export async function isPaymentSettled(messageId: BytesLike) {
+	try {
+		const contract = getReadOnlyContract();
+		return await contract.paymentSettled(messageId);
+	} catch (error: any) {
+		throw new Error(`Failed to check payment status: ${error.message}`);
 	}
 }
 

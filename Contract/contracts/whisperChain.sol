@@ -71,8 +71,6 @@ contract WhisperChain is ReentrancyGuard, Ownable, Pausable {
         uint256 paymentAmount
     );
 
-    event MessageDelivered(bytes32 indexed messageId, uint256 timestamp);
-    event MessageRead(bytes32 indexed messageId, uint256 timestamp);
     event MessageDeleted(bytes32 indexed messageId, address indexed deleter);
     event PaymentSettled(bytes32 indexed messageId, uint256 amount);
     event UserRegistered(address indexed user, bytes32 publicKey);
@@ -195,22 +193,6 @@ contract WhisperChain is ReentrancyGuard, Ownable, Pausable {
             );
         }
 
-        if (paymentAmount > 0) {
-            if (paymentToken == address(0)) {
-                require(msg.value >= paymentAmount, "Insufficient ETH payment");
-            } else {
-                IERC20 token = IERC20(paymentToken);
-                require(
-                    token.transferFrom(
-                        msg.sender,
-                        address(this),
-                        paymentAmount
-                    ),
-                    "Token transfer failed"
-                );
-            }
-        }
-
         bytes32 messageId = keccak256(
             abi.encodePacked(
                 msg.sender,
@@ -220,6 +202,21 @@ contract WhisperChain is ReentrancyGuard, Ownable, Pausable {
                 block.number
             )
         );
+
+        if (paymentAmount > 0) {
+            if (paymentToken == address(0)) {
+                require(msg.value >= paymentAmount, "Insufficient ETH payment");
+                (bool success, ) = recipient.call{value: paymentAmount}("");
+                require(success, "ETH transfer failed");
+            } else {
+                IERC20 token = IERC20(paymentToken);
+                require(
+                    token.transferFrom(msg.sender, recipient, paymentAmount),
+                    "Token transfer failed"
+                );
+            }
+            emit PaymentSettled(messageId, paymentAmount);
+        }
 
         messages[messageId] = Message({
             sender: msg.sender,
@@ -257,34 +254,6 @@ contract WhisperChain is ReentrancyGuard, Ownable, Pausable {
             paymentAmount
         );
         emit MediaUploaded(messageId, ipfsHash, mediaType);
-    }
-
-    function markAsDelivered(
-        bytes32 messageId
-    ) external messageExists(messageId) {
-        Message storage message = messages[messageId];
-        require(message.recipient == msg.sender, "Not the recipient");
-        require(!message.delivered, "Already delivered");
-
-        message.delivered = true;
-
-        if (message.paymentAmount > 0) {
-            _settlePayment(messageId);
-        }
-
-        emit MessageDelivered(messageId, block.timestamp);
-    }
-
-    function markAsRead(
-        bytes32 messageId
-    ) external messageExists(messageId) notDeleted(messageId) {
-        Message storage message = messages[messageId];
-        require(message.recipient == msg.sender, "Not the recipient");
-        require(message.delivered, "Message not delivered");
-        require(!message.read, "Already read");
-
-        message.read = true;
-        emit MessageRead(messageId, block.timestamp);
     }
 
     function deleteMessage(
@@ -387,6 +356,30 @@ contract WhisperChain is ReentrancyGuard, Ownable, Pausable {
                 )
             );
 
+            if (paymentAmounts[i] > 0) {
+                if (paymentTokens[i] == address(0)) {
+                    require(
+                        msg.value >= paymentAmounts[i],
+                        "Insufficient ETH payment"
+                    );
+                    (bool success, ) = recipients[i].call{
+                        value: paymentAmounts[i]
+                    }("");
+                    require(success, "ETH transfer failed");
+                } else {
+                    IERC20 token = IERC20(paymentTokens[i]);
+                    require(
+                        token.transferFrom(
+                            msg.sender,
+                            recipients[i],
+                            paymentAmounts[i]
+                        ),
+                        "Token transfer failed"
+                    );
+                }
+                emit PaymentSettled(messageId, paymentAmounts[i]);
+            }
+
             messages[messageId] = Message({
                 sender: msg.sender,
                 recipient: recipients[i],
@@ -421,29 +414,6 @@ contract WhisperChain is ReentrancyGuard, Ownable, Pausable {
         userMessageCount[msg.sender] += recipients.length;
 
         emit BatchMessageSent(messageIds, msg.sender);
-    }
-
-    function _settlePayment(bytes32 messageId) internal {
-        Message storage message = messages[messageId];
-        require(!paymentSettled[messageId], "Payment already settled");
-
-        if (message.paymentAmount > 0) {
-            if (message.paymentToken == address(0)) {
-                (bool success, ) = message.recipient.call{
-                    value: message.paymentAmount
-                }("");
-                require(success, "ETH transfer failed");
-            } else {
-                IERC20 token = IERC20(message.paymentToken);
-                require(
-                    token.transfer(message.recipient, message.paymentAmount),
-                    "Token transfer failed"
-                );
-            }
-
-            paymentSettled[messageId] = true;
-            emit PaymentSettled(messageId, message.paymentAmount);
-        }
     }
 
     function withdrawBalance() external onlyRegisteredUser nonReentrant {

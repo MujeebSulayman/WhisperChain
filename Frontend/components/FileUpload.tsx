@@ -1,23 +1,29 @@
 'use client';
 
-import { useState, useRef } from 'react';
-import { Upload, X, Image, Video, Music, FileText, Loader2, AlertCircle } from 'lucide-react';
-import { uploadToIPFS, getMediaTypeFromFile } from '@WhisperChain/lib/ipfs';
-import { isIPFSHashUsed } from '@WhisperChain/lib/whisperchainActions';
+import { useState, useRef, useEffect } from 'react';
+import { Upload, X, Image, Video, Music, FileText, AlertCircle } from 'lucide-react';
+import { getMediaTypeFromFile } from '@WhisperChain/lib/ipfs';
 
 // Contract constant
 const MAX_FILE_SIZE = 50000000; // 50MB
 
 type FileUploadProps = {
-    onUploadComplete: (ipfsHash: string, mediaType: number, fileSize: bigint) => void;
+    onFileSelected?: (file: File) => void;
     onCancel?: () => void;
+    selectedFile?: File | null;
 };
 
-export function FileUpload({ onUploadComplete, onCancel }: FileUploadProps) {
-    const [file, setFile] = useState<File | null>(null);
-    const [isUploading, setIsUploading] = useState(false);
+export function FileUpload({ onFileSelected, onCancel, selectedFile: externalFile }: FileUploadProps) {
+    const [file, setFile] = useState<File | null>(externalFile || null);
     const [error, setError] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    // Sync with external file prop
+    useEffect(() => {
+        if (externalFile !== undefined) {
+            setFile(externalFile);
+        }
+    }, [externalFile]);
 
     const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
         const selectedFile = e.target.files?.[0];
@@ -30,32 +36,7 @@ export function FileUpload({ onUploadComplete, onCancel }: FileUploadProps) {
 
         setFile(selectedFile);
         setError(null);
-    };
-
-    const handleUpload = async () => {
-        if (!file) return;
-
-        setIsUploading(true);
-        setError(null);
-
-        try {
-            const ipfsHash = await uploadToIPFS(file, file.name, async (hash) => {
-                try {
-                    return await isIPFSHashUsed(hash);
-                } catch {
-                    return false;
-                }
-            });
-            const mediaType = getMediaTypeFromFile(file);
-            const fileSize = BigInt(file.size);
-
-            onUploadComplete(ipfsHash, mediaType, fileSize);
-            setFile(null);
-        } catch (err: any) {
-            setError(err.message || 'Upload failed');
-        } finally {
-            setIsUploading(false);
-        }
+        onFileSelected?.(selectedFile);
     };
 
     const getFileIcon = (file: File) => {
@@ -193,69 +174,9 @@ export function FileUpload({ onUploadComplete, onCancel }: FileUploadProps) {
                         </div>
                     )}
 
-                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                        <button
-                            onClick={handleUpload}
-                            disabled={isUploading}
-                            style={{
-                                flex: 1,
-                                borderRadius: '0.5rem',
-                                background: '#ffffff',
-                                border: 'none',
-                                padding: '0.75rem 1rem',
-                                fontSize: '0.875rem',
-                                fontWeight: 600,
-                                color: '#0f0f0f',
-                                cursor: isUploading ? 'not-allowed' : 'pointer',
-                                opacity: isUploading ? 0.6 : 1,
-                                transition: 'opacity 0.2s',
-                            }}
-                        >
-                            {isUploading ? (
-                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
-                                    <Loader2 style={{ width: '1rem', height: '1rem', animation: 'spin 1s linear infinite' }} />
-                                    <span>Uploading...</span>
-                                </div>
-                            ) : (
-                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
-                                    <Upload style={{ width: '1rem', height: '1rem' }} />
-                                    <span>Upload to IPFS</span>
-                                </div>
-                            )}
-                        </button>
-                        {onCancel && (
-                            <button
-                                onClick={onCancel}
-                                disabled={isUploading}
-                                style={{
-                                    borderRadius: '0.5rem',
-                                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                                    background: 'transparent',
-                                    padding: '0.75rem 1rem',
-                                    fontSize: '0.875rem',
-                                    fontWeight: 500,
-                                    color: 'rgba(255, 255, 255, 0.7)',
-                                    cursor: isUploading ? 'not-allowed' : 'pointer',
-                                    opacity: isUploading ? 0.5 : 1,
-                                    transition: 'all 0.2s',
-                                }}
-                                onMouseEnter={(e) => {
-                                    if (!isUploading) {
-                                        e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
-                                        e.currentTarget.style.color = '#ffffff';
-                                    }
-                                }}
-                                onMouseLeave={(e) => {
-                                    if (!isUploading) {
-                                        e.currentTarget.style.background = 'transparent';
-                                        e.currentTarget.style.color = 'rgba(255, 255, 255, 0.7)';
-                                    }
-                                }}
-                            >
-                                Cancel
-                            </button>
-                        )}
-                    </div>
+                    <p style={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.5)', textAlign: 'center', marginTop: '0.5rem' }}>
+                        File will be uploaded when you send the message
+                    </p>
                 </div>
             )}
         </div>
