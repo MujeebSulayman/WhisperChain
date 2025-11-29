@@ -642,16 +642,36 @@ export function ChatContainer() {
 			/>
 
 			{/* Main Chat Area */}
-			<main style={{ flex: 1, display: 'flex', flexDirection: 'column', position: 'relative', background: '#0a0a0a', minWidth: 0 }}>
+			<main style={{
+				flex: 1,
+				display: 'flex',
+				flexDirection: 'column',
+				position: 'relative',
+				background: '#0a0a0a',
+				minWidth: 0,
+				backdropFilter: isMobile && (sidebarOpen || conversationsSidebarOpen) ? 'blur(8px)' : 'none',
+				opacity: isMobile && (sidebarOpen || conversationsSidebarOpen) ? 0.7 : 1,
+				transition: 'opacity 0.3s ease-out, backdrop-filter 0.3s ease-out',
+			}}>
 				{error && <ErrorToast message={error} onDismiss={() => setError(null)} />}
 
 				{/* Always show header on mobile, or when there's an active thread */}
 				{(isMobile || activeThreadId) && (
 					<ChatHeader
 						threadTitle={activeThreadId ? threads.find((t) => t.id === activeThreadId)?.title : undefined}
-						onMenuClick={() => setSidebarOpen(true)}
+						onMenuClick={() => {
+							if (isMobile && conversationsSidebarOpen) {
+								setConversationsSidebarOpen(false);
+							}
+							setSidebarOpen(true);
+						}}
 						showMenu={isMobile}
-						onConversationsClick={() => setConversationsSidebarOpen(!conversationsSidebarOpen)}
+						onConversationsClick={() => {
+							if (isMobile && sidebarOpen) {
+								setSidebarOpen(false);
+							}
+							setConversationsSidebarOpen(!conversationsSidebarOpen);
+						}}
 						showConversations={conversationsSidebarOpen}
 						isMobile={isMobile}
 					/>
@@ -689,7 +709,12 @@ export function ChatContainer() {
 			{/* Right Sidebar - Conversations */}
 			<ConversationsSidebar
 				isOpen={conversationsSidebarOpen}
-				onToggle={() => setConversationsSidebarOpen(!conversationsSidebarOpen)}
+				onToggle={() => {
+					if (isMobile && sidebarOpen) {
+						setSidebarOpen(false);
+					}
+					setConversationsSidebarOpen(!conversationsSidebarOpen);
+				}}
 				threads={threads}
 				activeThreadId={activeThreadId}
 				onSelectThread={(threadId) => {
