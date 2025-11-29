@@ -2,6 +2,7 @@
 
 import { MessageSquare } from 'lucide-react';
 import { MessageBubble } from './MessageBubble';
+import { useIsMobile } from '../hooks/useMediaQuery';
 
 type Message = {
     id: string;
@@ -36,13 +37,14 @@ export function MessageList({
     onMessageUpdate,
     connectedAddress,
 }: MessageListProps) {
+    const isMobile = useIsMobile();
     return (
         <div
             style={{
                 flex: 1,
                 overflowY: 'auto',
                 overflowX: 'hidden',
-                padding: '1.25rem 1rem',
+                padding: isMobile ? '1rem 0.75rem' : '1.25rem 1rem',
                 background: 'linear-gradient(to bottom, rgba(15, 15, 15, 0.5), rgba(15, 15, 15, 0.8))',
             }}
         >
@@ -129,7 +131,7 @@ export function MessageList({
                     </div>
                 </div>
             ) : (
-                <div style={{ maxWidth: '52rem', margin: '0 auto', paddingBottom: '1rem' }}>
+                <div style={{ maxWidth: isMobile ? '100%' : '52rem', margin: '0 auto', paddingBottom: isMobile ? '0.75rem' : '1rem' }}>
                     {messages.map((message, index) => {
                         // Determine if this message should be grouped with the previous one
                         const prevMessage = index > 0 ? messages[index - 1] : null;

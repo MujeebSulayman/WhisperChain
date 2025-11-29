@@ -5,6 +5,7 @@ import { format } from 'date-fns';
 import { useState, useEffect } from 'react';
 import { getIPFSUrl, getMediaTypeName } from '@WhisperChain/lib/ipfs';
 import { formatEther, ZeroAddress } from 'ethers';
+import { useIsMobile } from '../hooks/useMediaQuery';
 
 type Message = {
     id: string;
@@ -32,6 +33,7 @@ type MessageBubbleProps = {
 };
 
 export function MessageBubble({ message, index = 0, showAvatar = true, isGrouped = false }: MessageBubbleProps) {
+    const isMobile = useIsMobile();
     const [isVisible, setIsVisible] = useState(false);
     const isSelf = message.isSelf;
 
@@ -84,16 +86,16 @@ export function MessageBubble({ message, index = 0, showAvatar = true, isGrouped
     return (
         <div
             style={{
-                marginBottom: isGrouped ? '0.375rem' : '1rem',
+                marginBottom: isGrouped ? (isMobile ? '0.25rem' : '0.375rem') : (isMobile ? '0.75rem' : '1rem'),
                 display: 'flex',
                 flexDirection: 'row',
-                gap: '0.625rem',
+                gap: isMobile ? '0.5rem' : '0.625rem',
                 alignItems: 'flex-end',
                 justifyContent: isSelf ? 'flex-end' : 'flex-start',
                 opacity: isVisible ? 1 : 0,
                 transition: 'opacity 0.2s ease-out',
-                paddingLeft: isSelf ? '2rem' : '0',
-                paddingRight: isSelf ? '0' : '2rem',
+                paddingLeft: isSelf ? (isMobile ? '1rem' : '2rem') : '0',
+                paddingRight: isSelf ? '0' : (isMobile ? '1rem' : '2rem'),
             }}
             className="animate-slide-up"
         >
@@ -101,8 +103,8 @@ export function MessageBubble({ message, index = 0, showAvatar = true, isGrouped
             {!isSelf && showAvatar && !isGrouped && (
                 <div
                     style={{
-                        width: '2.25rem',
-                        height: '2.25rem',
+                        width: isMobile ? '2rem' : '2.25rem',
+                        height: isMobile ? '2rem' : '2.25rem',
                         borderRadius: '50%',
                         background: getAvatarColor(),
                         display: 'flex',
@@ -110,7 +112,7 @@ export function MessageBubble({ message, index = 0, showAvatar = true, isGrouped
                         justifyContent: 'center',
                         color: '#ffffff',
                         fontWeight: 600,
-                        fontSize: '0.75rem',
+                        fontSize: isMobile ? '0.6875rem' : '0.75rem',
                         flexShrink: 0,
                     }}
                 >
@@ -118,14 +120,14 @@ export function MessageBubble({ message, index = 0, showAvatar = true, isGrouped
                 </div>
             )}
             {!isSelf && showAvatar && isGrouped && (
-                <div style={{ width: '2.25rem', flexShrink: 0 }} />
+                <div style={{ width: isMobile ? '2rem' : '2.25rem', flexShrink: 0 }} />
             )}
 
             {/* Message Content */}
             <div
                 style={{
-                    maxWidth: '75%',
-                    minWidth: '6rem',
+                    maxWidth: isMobile ? '85%' : '75%',
+                    minWidth: isMobile ? '4rem' : '6rem',
                     display: 'flex',
                     flexDirection: 'column',
                     gap: '0.375rem',

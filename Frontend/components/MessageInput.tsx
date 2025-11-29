@@ -7,6 +7,7 @@ import { PaymentOptions } from './PaymentOptions';
 import { uploadToIPFS, getMediaTypeFromFile } from '@WhisperChain/lib/ipfs';
 import { isIPFSHashUsed } from '@WhisperChain/lib/whisperchainActions';
 import { formatEther } from 'ethers';
+import { useIsMobile } from '../hooks/useMediaQuery';
 import type { AddressLike, BigNumberish } from 'ethers';
 
 type MessageInputProps = {
@@ -27,6 +28,7 @@ export function MessageInput({
     disabled = false,
     placeholder = 'Type a message...',
 }: MessageInputProps) {
+    const isMobile = useIsMobile();
     const [input, setInput] = useState('');
     const [isSending, setIsSending] = useState(false);
     const [showFileUpload, setShowFileUpload] = useState(false);
@@ -133,7 +135,7 @@ export function MessageInput({
                 borderTop: '1px solid rgba(255, 255, 255, 0.06)',
                 background: 'rgba(15, 15, 15, 0.95)',
                 backdropFilter: 'blur(10px)',
-                padding: '1rem 1.25rem',
+                padding: isMobile ? '0.75rem' : '1rem 1.25rem',
                 position: 'sticky',
                 bottom: 0,
                 zIndex: 10,
@@ -285,28 +287,39 @@ export function MessageInput({
                         cursor: disabled ? 'not-allowed' : 'pointer',
                         opacity: disabled ? 0.5 : 1,
                         transition: 'all 0.2s',
-                        width: '3rem',
-                        height: '3rem',
+                        width: isMobile ? '2.75rem' : '3rem',
+                        height: isMobile ? '2.75rem' : '3rem',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         flexShrink: 0,
+                        touchAction: 'manipulation',
                     }}
                     onMouseEnter={(e) => {
-                        if (!disabled && !showFileUpload) {
+                        if (!isMobile && !disabled && !showFileUpload) {
                             e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
                             e.currentTarget.style.color = '#ffffff';
                         }
                     }}
                     onMouseLeave={(e) => {
-                        if (!disabled && !showFileUpload) {
+                        if (!isMobile && !disabled && !showFileUpload) {
                             e.currentTarget.style.background = 'transparent';
                             e.currentTarget.style.color = 'rgba(255, 255, 255, 0.6)';
                         }
                     }}
+                    onTouchStart={(e) => {
+                        if (!disabled) {
+                            e.currentTarget.style.background = showFileUpload ? 'rgba(99, 102, 241, 0.2)' : 'rgba(255, 255, 255, 0.1)';
+                        }
+                    }}
+                    onTouchEnd={(e) => {
+                        if (!disabled) {
+                            e.currentTarget.style.background = showFileUpload ? 'rgba(99, 102, 241, 0.15)' : 'transparent';
+                        }
+                    }}
                     title="Attach file"
                 >
-                    <Paperclip style={{ width: '1.125rem', height: '1.125rem' }} />
+                    <Paperclip style={{ width: isMobile ? '1.25rem' : '1.125rem', height: isMobile ? '1.25rem' : '1.125rem' }} />
                 </button>
                 <button
                     onClick={() => {
@@ -323,37 +336,48 @@ export function MessageInput({
                         cursor: disabled ? 'not-allowed' : 'pointer',
                         opacity: disabled ? 0.5 : 1,
                         transition: 'all 0.2s',
-                        width: '3rem',
-                        height: '3rem',
+                        width: isMobile ? '2.75rem' : '3rem',
+                        height: isMobile ? '2.75rem' : '3rem',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         flexShrink: 0,
+                        touchAction: 'manipulation',
                     }}
                     onMouseEnter={(e) => {
-                        if (!disabled && !showPayment) {
+                        if (!isMobile && !disabled && !showPayment) {
                             e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
                             e.currentTarget.style.color = '#fbbf24';
                         }
                     }}
                     onMouseLeave={(e) => {
-                        if (!disabled && !showPayment) {
+                        if (!isMobile && !disabled && !showPayment) {
                             e.currentTarget.style.background = 'transparent';
                             e.currentTarget.style.color = 'rgba(255, 255, 255, 0.6)';
                         }
                     }}
+                    onTouchStart={(e) => {
+                        if (!disabled) {
+                            e.currentTarget.style.background = showPayment ? 'rgba(245, 158, 11, 0.2)' : 'rgba(255, 255, 255, 0.1)';
+                        }
+                    }}
+                    onTouchEnd={(e) => {
+                        if (!disabled) {
+                            e.currentTarget.style.background = showPayment ? 'rgba(245, 158, 11, 0.15)' : 'transparent';
+                        }
+                    }}
                     title="Add payment"
                 >
-                    <Coins style={{ width: '1.125rem', height: '1.125rem' }} />
+                    <Coins style={{ width: isMobile ? '1.25rem' : '1.125rem', height: isMobile ? '1.25rem' : '1.125rem' }} />
                 </button>
 
                 <div
                     style={{
                         flex: 1,
-                        borderRadius: '1.5rem',
+                        borderRadius: isMobile ? '1.25rem' : '1.5rem',
                         background: 'rgba(255, 255, 255, 0.05)',
                         border: '1px solid rgba(255, 255, 255, 0.1)',
-                        padding: '0.75rem 1rem',
+                        padding: isMobile ? '0.625rem 0.875rem' : '0.75rem 1rem',
                         transition: 'all 0.2s',
                     }}
                     onFocus={(e) => {
@@ -377,12 +401,12 @@ export function MessageInput({
                             width: '100%',
                             resize: 'none',
                             background: 'transparent',
-                            fontSize: '0.9375rem',
+                            fontSize: isMobile ? '0.875rem' : '0.9375rem',
                             color: '#ffffff',
                             border: 'none',
                             outline: 'none',
-                            minHeight: '24px',
-                            maxHeight: '120px',
+                            minHeight: isMobile ? '20px' : '24px',
+                            maxHeight: isMobile ? '100px' : '120px',
                             lineHeight: '1.5',
                         }}
                     />
@@ -405,30 +429,41 @@ export function MessageInput({
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        width: '3rem',
-                        height: '3rem',
+                        width: isMobile ? '2.75rem' : '3rem',
+                        height: isMobile ? '2.75rem' : '3rem',
                         flexShrink: 0,
                         boxShadow: (!input.trim() && !selectedFile) || isSending || disabled
                             ? 'none'
                             : '0 4px 12px rgba(99, 102, 241, 0.3)',
+                        touchAction: 'manipulation',
                     }}
                     onMouseEnter={(e) => {
-                        if (!((!input.trim() && !selectedFile) || isSending || disabled)) {
+                        if (!isMobile && !((!input.trim() && !selectedFile) || isSending || disabled)) {
                             e.currentTarget.style.transform = 'scale(1.05)';
                             e.currentTarget.style.boxShadow = '0 6px 16px rgba(99, 102, 241, 0.4)';
                         }
                     }}
                     onMouseLeave={(e) => {
+                        if (!isMobile) {
+                            e.currentTarget.style.transform = 'scale(1)';
+                            e.currentTarget.style.boxShadow = (!input.trim() && !selectedFile) || isSending || disabled
+                                ? 'none'
+                                : '0 4px 12px rgba(99, 102, 241, 0.3)';
+                        }
+                    }}
+                    onTouchStart={(e) => {
+                        if (!((!input.trim() && !selectedFile) || isSending || disabled)) {
+                            e.currentTarget.style.transform = 'scale(0.95)';
+                        }
+                    }}
+                    onTouchEnd={(e) => {
                         e.currentTarget.style.transform = 'scale(1)';
-                        e.currentTarget.style.boxShadow = (!input.trim() && !selectedFile) || isSending || disabled
-                            ? 'none'
-                            : '0 4px 12px rgba(99, 102, 241, 0.3)';
                     }}
                 >
                     {isSending ? (
-                        <Loader2 style={{ width: '1.25rem', height: '1.25rem', animation: 'spin 1s linear infinite' }} />
+                        <Loader2 style={{ width: isMobile ? '1.125rem' : '1.25rem', height: isMobile ? '1.125rem' : '1.25rem', animation: 'spin 1s linear infinite' }} />
                     ) : (
-                        <Send style={{ width: '1.25rem', height: '1.25rem' }} />
+                        <Send style={{ width: isMobile ? '1.125rem' : '1.25rem', height: isMobile ? '1.125rem' : '1.25rem' }} />
                     )}
                 </button>
             </div>

@@ -22,6 +22,7 @@ type SidebarProps = {
     onBatchSend: () => void;
     onSettings: () => void;
     onPaymentHistory: () => void;
+    isMobile?: boolean;
 };
 
 export function Sidebar({
@@ -35,21 +36,26 @@ export function Sidebar({
     onBatchSend,
     onSettings,
     onPaymentHistory,
+    isMobile = false,
 }: SidebarProps) {
     return (
         <aside
             style={{
-                width: isOpen ? '18rem' : '4rem',
-                minWidth: isOpen ? '18rem' : '4rem',
+                width: isMobile ? (isOpen ? '18rem' : '0') : (isOpen ? '18rem' : '4rem'),
+                minWidth: isMobile ? (isOpen ? '18rem' : '0') : (isOpen ? '18rem' : '4rem'),
                 transition: 'width 0.3s ease-out, min-width 0.3s ease-out',
                 background: '#1a1a1a',
                 borderRight: '1px solid rgba(255, 255, 255, 0.08)',
                 display: 'flex',
                 flexDirection: 'column',
                 overflow: 'hidden',
-                position: 'relative',
+                position: isMobile ? 'fixed' : 'relative',
+                left: 0,
+                top: 0,
+                zIndex: isMobile ? 50 : 'auto',
                 flexShrink: 0,
                 height: '100vh',
+                boxShadow: isMobile && isOpen ? '4px 0 24px rgba(0, 0, 0, 0.5)' : 'none',
             }}
         >
             {/* Header - Fixed */}
@@ -108,7 +114,7 @@ export function Sidebar({
                     <button
                         onClick={onToggle}
                         style={{
-                            padding: '0.375rem',
+                            padding: isMobile ? '0.625rem' : '0.375rem',
                             borderRadius: '0.5rem',
                             background: 'transparent',
                             border: '1px solid rgba(255, 255, 255, 0.08)',
@@ -118,14 +124,27 @@ export function Sidebar({
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
+                            touchAction: 'manipulation',
+                            minWidth: isMobile ? '2.75rem' : 'auto',
+                            minHeight: isMobile ? '2.75rem' : 'auto',
                         }}
                         onMouseEnter={(e) => {
-                            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
-                            e.currentTarget.style.color = '#ffffff';
+                            if (!isMobile) {
+                                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
+                                e.currentTarget.style.color = '#ffffff';
+                            }
                         }}
                         onMouseLeave={(e) => {
+                            if (!isMobile) {
+                                e.currentTarget.style.background = 'transparent';
+                                e.currentTarget.style.color = 'rgba(255, 255, 255, 0.7)';
+                            }
+                        }}
+                        onTouchStart={(e) => {
+                            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
+                        }}
+                        onTouchEnd={(e) => {
                             e.currentTarget.style.background = 'transparent';
-                            e.currentTarget.style.color = 'rgba(255, 255, 255, 0.7)';
                         }}
                     >
                         {isOpen ? <X style={{ width: '1rem', height: '1rem' }} /> : <Menu style={{ width: '1rem', height: '1rem' }} />}
@@ -216,7 +235,7 @@ export function Sidebar({
                                         display: 'flex',
                                         alignItems: 'center',
                                         gap: '0.5rem',
-                                        padding: '0.5rem 0.75rem',
+                                        padding: isMobile ? '0.75rem' : '0.5rem 0.75rem',
                                         borderRadius: '0.5rem',
                                         background: 'transparent',
                                         border: '1px solid rgba(255, 255, 255, 0.08)',
@@ -224,14 +243,25 @@ export function Sidebar({
                                         cursor: 'pointer',
                                         fontSize: '0.875rem',
                                         transition: 'all 0.2s',
+                                        touchAction: 'manipulation',
                                     }}
                                     onMouseEnter={(e) => {
-                                        e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
-                                        e.currentTarget.style.color = '#ffffff';
+                                        if (!isMobile) {
+                                            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
+                                            e.currentTarget.style.color = '#ffffff';
+                                        }
                                     }}
                                     onMouseLeave={(e) => {
+                                        if (!isMobile) {
+                                            e.currentTarget.style.background = 'transparent';
+                                            e.currentTarget.style.color = 'rgba(255, 255, 255, 0.7)';
+                                        }
+                                    }}
+                                    onTouchStart={(e) => {
+                                        e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
+                                    }}
+                                    onTouchEnd={(e) => {
                                         e.currentTarget.style.background = 'transparent';
-                                        e.currentTarget.style.color = 'rgba(255, 255, 255, 0.7)';
                                     }}
                                 >
                                     <Settings style={{ width: '1rem', height: '1rem' }} />
