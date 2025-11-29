@@ -620,9 +620,10 @@ export function ChatContainer() {
 			<main style={{ flex: 1, display: 'flex', flexDirection: 'column', position: 'relative', background: '#0a0a0a', minWidth: 0 }}>
 				{error && <ErrorToast message={error} onDismiss={() => setError(null)} />}
 
-				{activeThreadId && (
+				{/* Always show header on mobile, or when there's an active thread */}
+				{(isMobile || activeThreadId) && (
 					<ChatHeader
-						threadTitle={threads.find((t) => t.id === activeThreadId)?.title}
+						threadTitle={activeThreadId ? threads.find((t) => t.id === activeThreadId)?.title : undefined}
 						onMenuClick={() => setSidebarOpen(true)}
 						showMenu={isMobile && !sidebarOpen}
 						onConversationsClick={() => setConversationsSidebarOpen(!conversationsSidebarOpen)}
