@@ -50,8 +50,9 @@ export function PaymentHistory({ userAddress, onClose }: PaymentHistoryProps) {
                             if (msg.paymentAmount && msg.paymentAmount > BigInt(0)) {
                                 const isReceived = msg.recipient.toLowerCase() === userAddress.toLowerCase();
                                 const settled = await isPaymentSettled(id);
+                                const messageIdStr = typeof id === 'string' ? id : String(id);
                                 return {
-                                    messageId: typeof id === 'string' ? id : id.toString(),
+                                    messageId: messageIdStr,
                                     amount: msg.paymentAmount,
                                     token: msg.paymentToken,
                                     timestamp: Number(msg.timestamp),
@@ -291,10 +292,10 @@ export function PaymentHistory({ userAddress, onClose }: PaymentHistoryProps) {
                                                     : 'rgba(99, 102, 241, 0.1)'
                                                 : 'rgba(245, 158, 11, 0.1)',
                                             border: `1px solid ${payment.isReceived
-                                                    ? payment.settled
-                                                        ? 'rgba(16, 185, 129, 0.2)'
-                                                        : 'rgba(99, 102, 241, 0.2)'
-                                                    : 'rgba(245, 158, 11, 0.2)'
+                                                ? payment.settled
+                                                    ? 'rgba(16, 185, 129, 0.2)'
+                                                    : 'rgba(99, 102, 241, 0.2)'
+                                                : 'rgba(245, 158, 11, 0.2)'
                                                 }`,
                                             display: 'flex',
                                             alignItems: 'center',
