@@ -1,8 +1,8 @@
 'use client';
 
-import { Wallet, Loader2, CheckCircle2, AlertCircle, RefreshCw, LogOut } from 'lucide-react';
+import { Wallet, Loader2, CheckCircle2, AlertCircle, RefreshCw, LogOut, ExternalLink } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { connectWhisperChain, BASE_CHAIN } from '@WhisperChain/lib/blockchain';
+import { connectWhisperChain, BASE_CHAIN, isMobileDevice, openMetaMaskMobile } from '@WhisperChain/lib/blockchain';
 
 type WalletConnectProps = {
 	onConnect: () => void | Promise<void>;
@@ -20,6 +20,18 @@ export function WalletConnect({ onConnect, onDisconnect, connectedAddress }: Wal
 		setError(null);
 
 		try {
+			// Check if we're on mobile without wallet
+			if (isMobileDevice()) {
+				const ethereum = (window as typeof window & { ethereum?: any }).ethereum;
+				if (!ethereum) {
+					// Try to open MetaMask
+					openMetaMaskMobile();
+					setError('Opening MetaMask... Please open this page in MetaMask browser or install MetaMask.');
+					setIsConnecting(false);
+					return;
+				}
+			}
+
 			await onConnect();
 		} catch (err: any) {
 			setError(err.message || 'Failed to connect wallet');
@@ -254,16 +266,60 @@ export function WalletConnect({ onConnect, onDisconnect, connectedAddress }: Wal
 					style={{
 						marginTop: '0.5rem',
 						display: 'flex',
-						alignItems: 'center',
+						flexDirection: 'column',
 						gap: '0.5rem',
-						padding: '0.5rem',
+						padding: '0.75rem',
 						borderRadius: '0.5rem',
 						background: 'rgba(239, 68, 68, 0.1)',
 						border: '1px solid rgba(239, 68, 68, 0.2)',
 					}}
 				>
-					<AlertCircle style={{ width: '1rem', height: '1rem', color: '#f87171', flexShrink: 0 }} />
-					<p style={{ fontSize: '0.75rem', color: '#fca5a5' }}>{error}</p>
+					<div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+						<AlertCircle style={{ width: '1rem', height: '1rem', color: '#f87171', flexShrink: 0 }} />
+						<p style={{ fontSize: '0.75rem', color: '#fca5a5', flex: 1 }}>{error}</p>
+					</div>
+					{isMobileDevice() && !(window as typeof window & { ethereum?: any }).ethereum && (
+						<div style={{ marginTop: '0.5rem', paddingTop: '0.5rem', borderTop: '1px solid rgba(239, 68, 68, 0.2)' }}>
+							<p style={{ fontSize: '0.6875rem', color: 'rgba(255, 255, 255, 0.6)', marginBottom: '0.5rem' }}>
+								To connect on mobile:
+							</p>
+							<ol style={{ fontSize: '0.6875rem', color: 'rgba(255, 255, 255, 0.7)', paddingLeft: '1.25rem', margin: 0, lineHeight: '1.6' }}>
+								<li>Open this page in MetaMask browser</li>
+								<li>Or tap the button below to open in MetaMask app</li>
+							</ol>
+							<button
+								onClick={() => {
+									openMetaMaskMobile();
+								}}
+								style={{
+									marginTop: '0.75rem',
+									width: '100%',
+									display: 'flex',
+									alignItems: 'center',
+									justifyContent: 'center',
+									gap: '0.5rem',
+									padding: '0.625rem 0.75rem',
+									borderRadius: '0.5rem',
+									background: 'rgba(255, 255, 255, 0.1)',
+									border: '1px solid rgba(255, 255, 255, 0.2)',
+									color: '#ffffff',
+									fontSize: '0.75rem',
+									fontWeight: 500,
+									cursor: 'pointer',
+									transition: 'all 0.2s',
+								}}
+								onMouseEnter={(e) => {
+									e.currentTarget.style.background = 'rgba(255, 255, 255, 0.15)';
+								}}
+								onMouseLeave={(e) => {
+									e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
+								}}
+							>
+								<ExternalLink style={{ width: '0.875rem', height: '0.875rem' }} />
+								<span>Open in MetaMask</span>
+							</button>
+						</div>
+					)}
 				</div>
 			)}
 		</div>
