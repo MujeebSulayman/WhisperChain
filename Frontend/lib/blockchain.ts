@@ -43,6 +43,42 @@ type ConnectResult = {
 	contract: WhisperChainContract;
 };
 
+export function isMobileDevice(): boolean {
+	if (typeof window === 'undefined') return false;
+	return (
+		/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+			navigator.userAgent
+		) || window.innerWidth <= 768
+	);
+}
+
+export function openMetaMaskMobile(): void {
+	if (typeof window === 'undefined') return;
+
+	const currentUrl = window.location.href;
+	// Use MetaMask universal link
+	const metamaskUrl = `https://metamask.app.link/dapp/${encodeURIComponent(
+		currentUrl
+	)}`;
+
+	// Try to open MetaMask app
+	window.location.href = metamaskUrl;
+
+	// Fallback: Show instructions after a delay
+	setTimeout(() => {
+		const userAgent = navigator.userAgent.toLowerCase();
+		if (userAgent.includes('iphone') || userAgent.includes('ipad')) {
+			alert(
+				'Please open this page in MetaMask browser or install MetaMask from the App Store.'
+			);
+		} else if (userAgent.includes('android')) {
+			alert(
+				'Please open this page in MetaMask browser or install MetaMask from Google Play Store.'
+			);
+		}
+	}, 1000);
+}
+
 export async function connectWhisperChain(): Promise<ConnectResult> {
 	if (typeof window === 'undefined') {
 		throw new Error('Wallet connections must run in the browser');
@@ -55,7 +91,16 @@ export async function connectWhisperChain(): Promise<ConnectResult> {
 	).ethereum;
 
 	if (!ethereum) {
-		throw new Error('No EIP-1193 wallet detected');
+		// On mobile, try to open MetaMask
+		if (isMobileDevice()) {
+			openMetaMaskMobile();
+			throw new Error(
+				'Please open this page in MetaMask browser or install MetaMask to continue.'
+			);
+		}
+		throw new Error(
+			'No EIP-1193 wallet detected. Please install MetaMask or another Web3 wallet.'
+		);
 	}
 
 	// Create provider - Base Sepolia doesn't support ENS, so we'll handle errors gracefully
