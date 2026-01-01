@@ -89,7 +89,7 @@ export async function connectWhisperChain(): Promise<ConnectResult> {
 	).ethereum;
 
 	if (!ethereum) {
-		// On mobile, try to open MetaMask
+		
 		if (isMobileDevice()) {
 			openMetaMaskMobile();
 			throw new Error(
@@ -101,10 +101,9 @@ export async function connectWhisperChain(): Promise<ConnectResult> {
 		);
 	}
 
-	// Create provider - Base Sepolia doesn't support ENS, so we'll handle errors gracefully
+	
 	const provider = new BrowserProvider(ethereum);
 
-	// Check and switch network if needed
 	try {
 		const network = await provider.getNetwork();
 		if (Number(network.chainId) !== BASE_CHAIN.id) {
