@@ -133,7 +133,7 @@ export function MessageList({
             ) : (
                 <div style={{ maxWidth: isMobile ? '100%' : '52rem', margin: '0 auto', paddingBottom: isMobile ? '0.75rem' : '1rem' }}>
                     {messages.map((message, index) => {
-                        // Determine if this message should be grouped with the previous one
+                       
                         const prevMessage = index > 0 ? messages[index - 1] : null;
                         const isGrouped = prevMessage !== null &&
                             prevMessage.isSelf === message.isSelf &&

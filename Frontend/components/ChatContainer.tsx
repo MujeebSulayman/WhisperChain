@@ -506,7 +506,6 @@ export function ChatContainer() {
 
 			const receipt = await waitForTransaction(Promise.resolve(tx));
 
-			// Show payment sent notification
 			if (args.paymentAmount && args.paymentAmount > BigInt(0)) {
 				setPaymentNotification({
 					amount: args.paymentAmount,
