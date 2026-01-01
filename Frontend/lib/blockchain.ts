@@ -61,10 +61,8 @@ export function openMetaMaskMobile(): void {
 		currentUrl
 	)}`;
 
-	// Try to open MetaMask app
 	window.location.href = metamaskUrl;
 
-	// Fallback: Show instructions after a delay
 	setTimeout(() => {
 		const userAgent = navigator.userAgent.toLowerCase();
 		if (userAgent.includes('iphone') || userAgent.includes('ipad')) {
