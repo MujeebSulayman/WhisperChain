@@ -515,20 +515,16 @@ export function ChatContainer() {
 				});
 			}
 
-			// Remove from pending transactions
 			setPendingTransactions((prev) => {
 				const next = new Set(prev);
 				next.delete(txHash);
 				return next;
 			});
 
-			// Reload messages to get the new message from blockchain
-			// Event listener will also trigger, but this ensures immediate update
 			await loadUserData();
 			refresh();
 		} catch (error: any) {
 			setError(error.message || 'Failed to send message');
-			// Remove from pending transactions
 			setPendingTransactions((prev) => {
 				const next = new Set(prev);
 				next.delete(txHash);
