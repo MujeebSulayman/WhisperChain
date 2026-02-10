@@ -8,6 +8,15 @@ import {
 	getReadOnlyContract,
 	type WhisperChain,
 } from './blockchain';
+import {
+	buildForwardRequest,
+	encodeRegisterUserCalldata,
+	encodeSendMessageCalldata,
+	type ForwardRequest,
+	signForwardRequest,
+	submitViaForwarder,
+	submitViaPaymaster,
+} from './gasless';
 
 async function getSignerContract() {
 	const { contract } = await connectWhisperChain();
@@ -45,6 +54,25 @@ export async function registerUser(args: {
 }) {
 	const contract = await getSignerContract();
 	return contract.registerUser(args.publicKey, args.username);
+}
+
+/** Gasless: returns signed ForwardRequest; relayer calls submitViaPaymaster or submitViaForwarder. */
+export async function registerUserGasless(args: {
+	publicKey: BytesLike;
+	username: string;
+}): Promise<{ request: ForwardRequest; signature: string }> {
+	const { signer } = await connectWhisperChain();
+	const from = await signer.getAddress();
+	const pkHex =
+		typeof args.publicKey === 'string'
+			? args.publicKey
+			: (args.publicKey as Uint8Array).length
+				? '0x' + Buffer.from(args.publicKey as Uint8Array).toString('hex').padStart(64, '0').slice(-64)
+				: String(args.publicKey);
+	const data = encodeRegisterUserCalldata(pkHex, args.username);
+	const request = await buildForwardRequest({ from, data });
+	const signature = await signForwardRequest(signer, request);
+	return { request, signature };
 }
 
 export async function updatePublicKey(newKey: BytesLike) {
@@ -100,6 +128,62 @@ export async function sendWhisper(args: {
 		textContent
 	);
 }
+
+/** Gasless: returns signed ForwardRequest for sendMessage; relayer submits. */
+export async function sendWhisperGasless(args: {
+	recipient: AddressLike;
+	messageHash: BytesLike;
+	ipfsHash: string;
+	mediaType?: BigNumberish;
+	fileSize: BigNumberish;
+	paymentToken?: AddressLike;
+	paymentAmount?: BigNumberish;
+	value?: BigNumberish;
+	textContent?: string;
+}): Promise<{ request: ForwardRequest; signature: string }> {
+	const { signer } = await connectWhisperChain();
+	const from = await signer.getAddress();
+	const paymentToken = args.paymentToken ?? ZeroAddress;
+	const paymentAmount = args.paymentAmount ?? BigInt(0);
+	const mediaType = toMediaType(args.mediaType);
+	const textContent = args.textContent ?? '';
+	let recipientAddr: string;
+	if (typeof args.recipient === 'string') {
+		recipientAddr = args.recipient;
+	} else {
+		try {
+			recipientAddr = await (args.recipient as { getAddress(): Promise<string> }).getAddress();
+		} catch {
+			recipientAddr = String(args.recipient);
+		}
+	}
+	const msgHashHex =
+		typeof args.messageHash === 'string'
+			? args.messageHash
+			: (args.messageHash as Uint8Array).length
+				? '0x' + Buffer.from(args.messageHash as Uint8Array).toString('hex').padStart(64, '0').slice(-64)
+				: String(args.messageHash);
+	const data = encodeSendMessageCalldata({
+		recipient: recipientAddr,
+		messageHash: msgHashHex,
+		paymentToken: typeof paymentToken === 'string' ? paymentToken : ZeroAddress,
+		paymentAmount,
+		ipfsHash: args.ipfsHash,
+		mediaType,
+		fileSize: BigInt(Number(args.fileSize)),
+		textContent,
+	});
+	const value = args.value !== undefined ? BigInt(Number(args.value)) : (paymentToken === ZeroAddress && paymentAmount ? paymentAmount : BigInt(0));
+	const request = await buildForwardRequest({ from, value, data });
+	const signature = await signForwardRequest(signer, request);
+	return { request, signature };
+}
+
+/** Relayer: submit signed request via paymaster (relayer gets reimbursed). */
+export { submitViaPaymaster };
+
+/** Relayer: submit signed request via forwarder (relayer pays gas). */
+export { submitViaForwarder };
 
 export async function deleteWhisper(messageId: BytesLike) {
 	const contract = await getSignerContract();

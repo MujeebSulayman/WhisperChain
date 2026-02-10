@@ -5,8 +5,15 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
+import "@openzeppelin/contracts/metatx/ERC2771Context.sol";
+import "@openzeppelin/contracts/utils/Context.sol";
 
-contract WhisperChain is ReentrancyGuard, Ownable, Pausable {
+contract WhisperChain is
+    ReentrancyGuard,
+    Ownable,
+    Pausable,
+    ERC2771Context
+{
     struct Message {
         address sender;
         address recipient;
@@ -91,7 +98,7 @@ contract WhisperChain is ReentrancyGuard, Ownable, Pausable {
     );
 
     modifier onlyRegisteredUser() {
-        require(userProfiles[msg.sender].isActive, "User not registered");
+        require(userProfiles[_msgSender()].isActive, "User not registered");
         _;
     }
 
@@ -110,7 +117,7 @@ contract WhisperChain is ReentrancyGuard, Ownable, Pausable {
 
     modifier storageLimitCheck(uint256 fileSize) {
         require(
-            userStorageUsed[msg.sender] + fileSize <= MAX_STORAGE_PER_USER,
+            userStorageUsed[_msgSender()] + fileSize <= MAX_STORAGE_PER_USER,
             "Storage limit exceeded"
         );
         _;
@@ -121,36 +128,63 @@ contract WhisperChain is ReentrancyGuard, Ownable, Pausable {
         _;
     }
 
-    constructor() {
+    function _contextSuffixLength()
+        internal
+        view
+        override(Context, ERC2771Context)
+        returns (uint256)
+    {
+        return ERC2771Context._contextSuffixLength();
+    }
+
+    function _msgSender()
+        internal
+        view
+        override(Context, ERC2771Context)
+        returns (address)
+    {
+        return ERC2771Context._msgSender();
+    }
+
+    function _msgData()
+        internal
+        view
+        override(Context, ERC2771Context)
+        returns (bytes calldata)
+    {
+        return ERC2771Context._msgData();
+    }
+
+    constructor(address trustedForwarder) ERC2771Context(trustedForwarder) {
         _registerUser(bytes32(0), "");
     }
 
     function registerUser(bytes32 publicKey, string memory username) external {
-        require(!userProfiles[msg.sender].isActive, "User already registered");
+        require(!userProfiles[_msgSender()].isActive, "User already registered");
         require(publicKey != bytes32(0), "Invalid public key");
 
         _registerUser(publicKey, username);
     }
 
     function _registerUser(bytes32 publicKey, string memory username) internal {
-        userProfiles[msg.sender] = UserProfile({
+        userProfiles[_msgSender()] = UserProfile({
             publicKey: publicKey,
             isActive: true,
             lastSeen: block.timestamp,
             username: username
         });
 
-        emit UserRegistered(msg.sender, publicKey);
+        emit UserRegistered(_msgSender(), publicKey);
     }
 
     function updatePublicKey(bytes32 newPublicKey) external onlyRegisteredUser {
         require(newPublicKey != bytes32(0), "Invalid public key");
-        userProfiles[msg.sender].publicKey = newPublicKey;
-        userProfiles[msg.sender].lastSeen = block.timestamp;
+        userProfiles[_msgSender()].publicKey = newPublicKey;
+        userProfiles[_msgSender()].lastSeen = block.timestamp;
     }
 
     function updateLastSeen() external onlyRegisteredUser {
-        userProfiles[msg.sender].lastSeen = block.timestamp;
+        userProfiles[_msgSender()].lastSeen = block.timestamp;
     }
 
     function sendMessage(
@@ -164,11 +198,11 @@ contract WhisperChain is ReentrancyGuard, Ownable, Pausable {
         string memory textContent
     ) external payable onlyRegisteredUser nonReentrant whenNotPaused {
         require(recipient != address(0), "Invalid recipient");
-        require(recipient != msg.sender, "Cannot send to self");
+        require(recipient != _msgSender(), "Cannot send to self");
         require(userProfiles[recipient].isActive, "Recipient not registered");
         require(messageHash != bytes32(0), "Invalid message hash");
         require(
-            userMessageCount[msg.sender] < MAX_MESSAGES_PER_USER,
+            userMessageCount[_msgSender()] < MAX_MESSAGES_PER_USER,
             "User message limit exceeded"
         );
 
@@ -188,14 +222,14 @@ contract WhisperChain is ReentrancyGuard, Ownable, Pausable {
             require(!usedIPFSHashes[ipfsHash], "IPFS hash already used");
             require(fileSize <= MAX_FILE_SIZE, "File too large");
             require(
-                userStorageUsed[msg.sender] + fileSize <= MAX_STORAGE_PER_USER,
+                userStorageUsed[_msgSender()] + fileSize <= MAX_STORAGE_PER_USER,
                 "Storage limit exceeded"
             );
         }
 
         bytes32 messageId = keccak256(
             abi.encodePacked(
-                msg.sender,
+                _msgSender(),
                 recipient,
                 messageHash,
                 block.timestamp,
@@ -211,7 +245,7 @@ contract WhisperChain is ReentrancyGuard, Ownable, Pausable {
             } else {
                 IERC20 token = IERC20(paymentToken);
                 require(
-                    token.transferFrom(msg.sender, recipient, paymentAmount),
+                    token.transferFrom(_msgSender(), recipient, paymentAmount),
                     "Token transfer failed"
                 );
             }
@@ -219,7 +253,7 @@ contract WhisperChain is ReentrancyGuard, Ownable, Pausable {
         }
 
         messages[messageId] = Message({
-            sender: msg.sender,
+            sender: _msgSender(),
             recipient: recipient,
             messageHash: messageHash,
             timestamp: block.timestamp,
@@ -233,22 +267,22 @@ contract WhisperChain is ReentrancyGuard, Ownable, Pausable {
             textContent: textContent
         });
 
-        userMessages[msg.sender].push(messageId);
+        userMessages[_msgSender()].push(messageId);
         userMessages[recipient].push(messageId);
 
-        userMessageCount[msg.sender]++;
+        userMessageCount[_msgSender()]++;
 
         if (bytes(ipfsHash).length > 0 && !usedIPFSHashes[ipfsHash]) {
             usedIPFSHashes[ipfsHash] = true;
         }
 
         if (mediaType != MediaType.TEXT) {
-            userStorageUsed[msg.sender] += fileSize;
+            userStorageUsed[_msgSender()] += fileSize;
         }
 
         emit MessageSent(
             messageId,
-            msg.sender,
+            _msgSender(),
             recipient,
             block.timestamp,
             paymentAmount
@@ -261,12 +295,12 @@ contract WhisperChain is ReentrancyGuard, Ownable, Pausable {
     ) external messageExists(messageId) notDeleted(messageId) {
         Message storage message = messages[messageId];
         require(
-            message.sender == msg.sender || message.recipient == msg.sender,
+            message.sender == _msgSender() || message.recipient == _msgSender(),
             "Not authorized to delete"
         );
 
         messageDeleted[messageId] = true;
-        emit MessageDeleted(messageId, msg.sender);
+        emit MessageDeleted(messageId, _msgSender());
     }
 
     function sendBatchMessages(
@@ -310,7 +344,7 @@ contract WhisperChain is ReentrancyGuard, Ownable, Pausable {
 
         for (uint256 i = 0; i < recipients.length; i++) {
             require(recipients[i] != address(0), "Invalid recipient");
-            require(recipients[i] != msg.sender, "Cannot send to self");
+            require(recipients[i] != _msgSender(), "Cannot send to self");
             require(
                 userProfiles[recipients[i]].isActive,
                 "Recipient not registered"
@@ -339,7 +373,7 @@ contract WhisperChain is ReentrancyGuard, Ownable, Pausable {
                 );
                 require(fileSizes[i] <= MAX_FILE_SIZE, "File too large");
                 require(
-                    userStorageUsed[msg.sender] + fileSizes[i] <=
+                    userStorageUsed[_msgSender()] + fileSizes[i] <=
                         MAX_STORAGE_PER_USER,
                     "Storage limit exceeded"
                 );
@@ -347,7 +381,7 @@ contract WhisperChain is ReentrancyGuard, Ownable, Pausable {
 
             bytes32 messageId = keccak256(
                 abi.encodePacked(
-                    msg.sender,
+                    _msgSender(),
                     recipients[i],
                     messageHashes[i],
                     block.timestamp,
@@ -370,7 +404,7 @@ contract WhisperChain is ReentrancyGuard, Ownable, Pausable {
                     IERC20 token = IERC20(paymentTokens[i]);
                     require(
                         token.transferFrom(
-                            msg.sender,
+                            _msgSender(),
                             recipients[i],
                             paymentAmounts[i]
                         ),
@@ -381,7 +415,7 @@ contract WhisperChain is ReentrancyGuard, Ownable, Pausable {
             }
 
             messages[messageId] = Message({
-                sender: msg.sender,
+                sender: _msgSender(),
                 recipient: recipients[i],
                 messageHash: messageHashes[i],
                 timestamp: block.timestamp,
@@ -395,7 +429,7 @@ contract WhisperChain is ReentrancyGuard, Ownable, Pausable {
                 textContent: textContents[i]
             });
 
-            userMessages[msg.sender].push(messageId);
+            userMessages[_msgSender()].push(messageId);
             userMessages[recipients[i]].push(messageId);
             messageIds[i] = messageId;
 
@@ -407,21 +441,21 @@ contract WhisperChain is ReentrancyGuard, Ownable, Pausable {
             }
 
             if (mediaTypes[i] != MediaType.TEXT) {
-                userStorageUsed[msg.sender] += fileSizes[i];
+                userStorageUsed[_msgSender()] += fileSizes[i];
             }
         }
 
-        userMessageCount[msg.sender] += recipients.length;
+        userMessageCount[_msgSender()] += recipients.length;
 
-        emit BatchMessageSent(messageIds, msg.sender);
+        emit BatchMessageSent(messageIds, _msgSender());
     }
 
     function withdrawBalance() external onlyRegisteredUser nonReentrant {
-        uint256 balance = userBalances[msg.sender];
+        uint256 balance = userBalances[_msgSender()];
         require(balance > 0, "No balance to withdraw");
 
-        userBalances[msg.sender] = 0;
-        (bool success, ) = msg.sender.call{value: balance}("");
+        userBalances[_msgSender()] = 0;
+        (bool success, ) = _msgSender().call{value: balance}("");
         require(success, "Withdrawal failed");
     }
 
@@ -535,7 +569,7 @@ contract WhisperChain is ReentrancyGuard, Ownable, Pausable {
     }
 
     function clearStorage() external onlyRegisteredUser {
-        userStorageUsed[msg.sender] = 0;
+        userStorageUsed[_msgSender()] = 0;
     }
 
     function pause() external onlyOwner {

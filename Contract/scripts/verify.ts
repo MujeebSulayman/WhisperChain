@@ -6,10 +6,15 @@ async function main() {
 	console.log('Verifying WhisperChain contract...');
 	console.log(`Address: ${contractAddress}`);
 
+	// After gasless deploy: pass [forwarderAddress] for WhisperChain
+	const constructorArgs = process.env.FORWARDER_ADDRESS
+		? [process.env.FORWARDER_ADDRESS]
+		: [];
+
 	try {
 		await run('verify:verify', {
 			address: contractAddress,
-			constructorArguments: [],
+			constructorArguments: constructorArgs,
 		});
 
 		console.log('Contract verified successfully!');

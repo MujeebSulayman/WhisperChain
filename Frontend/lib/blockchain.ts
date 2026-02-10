@@ -3,6 +3,7 @@
 import type { JsonRpcSigner } from 'ethers';
 import {
 	BrowserProvider,
+	Contract,
 	JsonRpcProvider,
 	type ContractRunner,
 	type Eip1193Provider,
@@ -24,12 +25,35 @@ const DEPLOYED_ADDRESS_FALLBACK = '0x89343A3d8BFb9dea288b5aEF9773892F34c60665';
 export const WHISPERCHAIN_ADDRESS =
 	process.env.NEXT_PUBLIC_WHISPERCHAIN_ADDRESS ?? DEPLOYED_ADDRESS_FALLBACK;
 
+export const FORWARDER_ADDRESS =
+	process.env.NEXT_PUBLIC_FORWARDER_ADDRESS ?? '';
+
+export const PAYMASTER_ADDRESS =
+	process.env.NEXT_PUBLIC_PAYMASTER_ADDRESS ?? '';
+
 export const WHISPERCHAIN_ABI = WhisperChain__factory.abi;
+
+export const FORWARDER_ABI = [
+	'function getNonce(address from) view returns (uint256)',
+	'function execute((address from, address to, uint256 value, uint256 gas, uint256 nonce, bytes data) req, bytes signature) payable returns (bool, bytes)',
+] as const;
+
+export const PAYMASTER_ABI = [
+	'function relay((address from, address to, uint256 value, uint256 gas, uint256 nonce, bytes data) req, bytes signature, address relayer, uint256 reimbursement) payable',
+] as const;
 
 export type WhisperChainContract = WhisperChain;
 
 export function getWhisperChainContract(runner: ContractRunner) {
 	return WhisperChain__factory.connect(WHISPERCHAIN_ADDRESS, runner);
+}
+
+export function getForwarderContract(runner: ContractRunner) {
+	return new Contract(FORWARDER_ADDRESS, FORWARDER_ABI, runner);
+}
+
+export function getPaymasterContract(runner: ContractRunner) {
+	return new Contract(PAYMASTER_ADDRESS, PAYMASTER_ABI, runner);
 }
 
 export function getReadOnlyContract(rpcUrl = BASE_CHAIN.rpcUrl) {
