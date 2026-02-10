@@ -9,10 +9,10 @@ export type MediaType = 'TEXT' | 'IMAGE' | 'VIDEO' | 'AUDIO' | 'DOCUMENT';
 
 export function getMediaTypeFromFile(file: File): number {
 	const type = file.type.toLowerCase();
-	if (type.startsWith('image/')) return 1; // IMAGE
-	if (type.startsWith('video/')) return 2; // VIDEO
-	if (type.startsWith('audio/')) return 3; // AUDIO
-	return 4; // DOCUMENT
+	if (type.startsWith('image/')) return 1;
+	if (type.startsWith('video/')) return 2;
+	if (type.startsWith('audio/')) return 3;
+	return 4;
 }
 
 export function getMediaTypeName(type: number): MediaType {
@@ -46,7 +46,6 @@ export async function uploadToIPFS(
 	try {
 		const hash = await uploadToPinata(file, filename);
 
-		// Check if hash is already used (optional)
 		if (checkUsed) {
 			const isUsed = await checkUsed(hash);
 			if (isUsed) {
@@ -91,7 +90,6 @@ export function getIPFSUrl(hash: string): string {
 	if (hash.startsWith('ipfs://')) {
 		hash = hash.replace('ipfs://', '');
 	}
-	// Ensure hash doesn't start with / and gateway ends with /
 	const cleanHash = hash.startsWith('/') ? hash.slice(1) : hash;
 	const cleanGateway = IPFS_GATEWAY.endsWith('/')
 		? IPFS_GATEWAY

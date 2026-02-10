@@ -5,10 +5,6 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/metatx/MinimalForwarder.sol";
 
-/**
- * Paymaster that sponsors gas for WhisperChain (and other) meta-txs.
- * Holds ETH; relayers submit signed ForwardRequests and get reimbursed from this contract.
- */
 contract WhisperChainPaymaster is Ownable, ReentrancyGuard {
     MinimalForwarder public immutable forwarder;
 

@@ -56,7 +56,6 @@ export async function registerUser(args: {
 	return contract.registerUser(args.publicKey, args.username);
 }
 
-/** Gasless: returns signed ForwardRequest; relayer calls submitViaPaymaster or submitViaForwarder. */
 export async function registerUserGasless(args: {
 	publicKey: BytesLike;
 	username: string;
@@ -129,7 +128,6 @@ export async function sendWhisper(args: {
 	);
 }
 
-/** Gasless: returns signed ForwardRequest for sendMessage; relayer submits. */
 export async function sendWhisperGasless(args: {
 	recipient: AddressLike;
 	messageHash: BytesLike;
@@ -163,26 +161,24 @@ export async function sendWhisperGasless(args: {
 			: (args.messageHash as Uint8Array).length
 				? '0x' + Buffer.from(args.messageHash as Uint8Array).toString('hex').padStart(64, '0').slice(-64)
 				: String(args.messageHash);
+	const paymentAmountBigInt = BigInt(Number(paymentAmount));
 	const data = encodeSendMessageCalldata({
 		recipient: recipientAddr,
 		messageHash: msgHashHex,
 		paymentToken: typeof paymentToken === 'string' ? paymentToken : ZeroAddress,
-		paymentAmount,
+		paymentAmount: paymentAmountBigInt,
 		ipfsHash: args.ipfsHash,
-		mediaType,
+		mediaType: Number(mediaType),
 		fileSize: BigInt(Number(args.fileSize)),
 		textContent,
 	});
-	const value = args.value !== undefined ? BigInt(Number(args.value)) : (paymentToken === ZeroAddress && paymentAmount ? paymentAmount : BigInt(0));
+	const value = args.value !== undefined ? BigInt(Number(args.value)) : (paymentToken === ZeroAddress && paymentAmount ? paymentAmountBigInt : BigInt(0));
 	const request = await buildForwardRequest({ from, value, data });
 	const signature = await signForwardRequest(signer, request);
 	return { request, signature };
 }
 
-/** Relayer: submit signed request via paymaster (relayer gets reimbursed). */
 export { submitViaPaymaster };
-
-/** Relayer: submit signed request via forwarder (relayer pays gas). */
 export { submitViaForwarder };
 
 export async function deleteWhisper(messageId: BytesLike) {

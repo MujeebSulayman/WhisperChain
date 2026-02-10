@@ -80,15 +80,12 @@ export function openMetaMaskMobile(): void {
 	if (typeof window === 'undefined') return;
 
 	const currentUrl = window.location.href;
-	// Use MetaMask universal link
 	const metamaskUrl = `https://metamask.app.link/dapp/${encodeURIComponent(
 		currentUrl
 	)}`;
 
-	// Try to open MetaMask app
 	window.location.href = metamaskUrl;
 
-	// Fallback: Show instructions after a delay
 	setTimeout(() => {
 		const userAgent = navigator.userAgent.toLowerCase();
 		if (userAgent.includes('iphone') || userAgent.includes('ipad')) {
@@ -115,7 +112,6 @@ export async function connectWhisperChain(): Promise<ConnectResult> {
 	).ethereum;
 
 	if (!ethereum) {
-		// On mobile, try to open MetaMask
 		if (isMobileDevice()) {
 			openMetaMaskMobile();
 			throw new Error(
@@ -127,10 +123,8 @@ export async function connectWhisperChain(): Promise<ConnectResult> {
 		);
 	}
 
-	// Create provider - Base Sepolia doesn't support ENS, so we'll handle errors gracefully
 	const provider = new BrowserProvider(ethereum);
 
-	// Check and switch network if needed
 	try {
 		const network = await provider.getNetwork();
 		if (Number(network.chainId) !== BASE_CHAIN.id) {
@@ -140,7 +134,6 @@ export async function connectWhisperChain(): Promise<ConnectResult> {
 					params: [{ chainId: `0x${BASE_CHAIN.id.toString(16)}` }],
 				});
 			} catch (switchError: any) {
-				// If the chain doesn't exist, add it
 				if (switchError.code === 4902) {
 					await ethereum.request({
 						method: 'wallet_addEthereumChain',

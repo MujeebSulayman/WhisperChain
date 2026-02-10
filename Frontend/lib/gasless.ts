@@ -92,7 +92,7 @@ export async function signForwardRequest(
 	};
 	return signer.signTypedData(
 		payload.domain,
-		{ ForwardRequest: FORWARD_REQUEST_TYPES.ForwardRequest },
+		{ ForwardRequest: [...FORWARD_REQUEST_TYPES.ForwardRequest] },
 		payload.message
 	);
 }
@@ -101,7 +101,6 @@ function requestToTuple(req: ForwardRequest): [string, string, bigint, bigint, b
 	return [req.from, req.to, req.value, req.gas, req.nonce, req.data];
 }
 
-/** Submit via paymaster (gasless for user; relayer gets reimbursed). */
 export async function submitViaPaymaster(
 	request: ForwardRequest,
 	signature: string,
@@ -122,7 +121,6 @@ export async function submitViaPaymaster(
 	return { hash: receipt?.hash ?? tx.hash };
 }
 
-/** Submit via forwarder only (relayer pays gas; no reimbursement). */
 export async function submitViaForwarder(
 	request: ForwardRequest,
 	signature: string,
@@ -137,7 +135,6 @@ export async function submitViaForwarder(
 	return { hash: receipt?.hash ?? tx.hash };
 }
 
-/** Encode WhisperChain.sendMessage calldata for use in a ForwardRequest. */
 export function encodeSendMessageCalldata(params: {
 	recipient: string;
 	messageHash: string;
@@ -163,7 +160,6 @@ export function encodeSendMessageCalldata(params: {
 	]);
 }
 
-/** Encode WhisperChain.registerUser calldata. */
 export function encodeRegisterUserCalldata(publicKey: string, username: string): string {
 	const iface = new Interface([
 		'function registerUser(bytes32 publicKey, string username)',
@@ -171,13 +167,11 @@ export function encodeRegisterUserCalldata(publicKey: string, username: string):
 	return iface.encodeFunctionData('registerUser', [publicKey, username]);
 }
 
-/** Encode WhisperChain.updateLastSeen calldata. */
 export function encodeUpdateLastSeenCalldata(): string {
 	const iface = new Interface(['function updateLastSeen()']);
 	return iface.encodeFunctionData('updateLastSeen', []);
 }
 
-/** Encode WhisperChain.createConversation calldata. */
 export function encodeCreateConversationCalldata(
 	participants: string[],
 	conversationKeyHash: string
