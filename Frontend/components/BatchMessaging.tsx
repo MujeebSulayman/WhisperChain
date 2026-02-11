@@ -9,6 +9,7 @@ import {
 	waitForTransaction,
 } from '@WhisperChain/lib/whisperchainActions';
 import { isGaslessConfigured } from '@WhisperChain/lib/gasless';
+import { getErrorMessage } from '@WhisperChain/lib/errors';
 // Text messages are not stored on IPFS, only media files are
 import { ethers } from 'ethers';
 import type { AddressLike } from 'ethers';
@@ -109,7 +110,7 @@ export function BatchMessaging({ onComplete, onCancel }: BatchMessagingProps) {
             }
             onComplete();
         } catch (err: any) {
-            setError(err.message || 'Failed to send batch messages');
+            setError(getErrorMessage(err, 'Failed to send batch messages'));
         } finally {
             setIsSending(false);
         }

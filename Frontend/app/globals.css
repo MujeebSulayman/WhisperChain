@@ -99,3 +99,27 @@ body {
 	background: rgba(255, 255, 255, 0.2);
 	color: #ffffff;
 }
+
+@keyframes pulse-soft {
+	0%, 100% { opacity: 1; }
+	50% { opacity: 0.6; }
+}
+
+.animate-pulse-soft {
+	animation: pulse-soft 2s ease-in-out infinite;
+}
+
+.message-input-bar {
+	border: 1px solid rgba(255, 255, 255, 0.08);
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.03);
+	transition: border-color 0.2s, box-shadow 0.2s;
+}
+.message-input-bar:focus-within {
+	border-color: rgba(99, 102, 241, 0.25);
+	box-shadow: 0 2px 12px rgba(99, 102, 241, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+.chat-message-list {
+	background: linear-gradient(to bottom, rgba(12, 12, 14, 0.4) 0%, transparent 8rem),
+		linear-gradient(to top, rgba(12, 12, 14, 0.2) 0%, transparent 4rem);
+}

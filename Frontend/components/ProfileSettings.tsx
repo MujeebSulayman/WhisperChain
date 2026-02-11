@@ -11,6 +11,7 @@ import {
 	waitForTransaction,
 } from '@WhisperChain/lib/whisperchainActions';
 import { isGaslessConfigured } from '@WhisperChain/lib/gasless';
+import { getErrorMessage } from '@WhisperChain/lib/errors';
 import { ethers } from 'ethers';
 
 type ProfileSettingsProps = {
@@ -48,7 +49,7 @@ export function ProfileSettings({ onUpdate, onClose }: ProfileSettingsProps) {
                 onClose();
             }, 1500);
         } catch (err: any) {
-            setError(err.message || 'Failed to update public key');
+            setError(getErrorMessage(err, 'Failed to update public key'));
         } finally {
             setIsUpdating(false);
         }
@@ -72,7 +73,7 @@ export function ProfileSettings({ onUpdate, onClose }: ProfileSettingsProps) {
                 onClose();
             }, 1500);
         } catch (err: any) {
-            setError(err.message || 'Failed to update last seen');
+            setError(getErrorMessage(err, 'Failed to update last seen'));
         } finally {
             setIsUpdating(false);
         }

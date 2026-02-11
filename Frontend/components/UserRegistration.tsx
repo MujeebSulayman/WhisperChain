@@ -7,6 +7,7 @@ import {
 	submitSignedForwardRequest,
 } from '@WhisperChain/lib/whisperchainActions';
 import { isGaslessConfigured } from '@WhisperChain/lib/gasless';
+import { getErrorMessage } from '@WhisperChain/lib/errors';
 import { ethers } from 'ethers';
 
 type UserRegistrationProps = {
@@ -49,7 +50,7 @@ export function UserRegistration({ onRegistered, address }: UserRegistrationProp
                 onRegistered();
             }, 1500);
         } catch (err: any) {
-            setError(err.message || 'Registration failed');
+            setError(getErrorMessage(err, 'Registration failed'));
         } finally {
             setIsRegistering(false);
         }

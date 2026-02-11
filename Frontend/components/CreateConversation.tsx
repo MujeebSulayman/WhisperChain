@@ -9,6 +9,7 @@ import {
 	waitForTransaction,
 } from '@WhisperChain/lib/whisperchainActions';
 import { isGaslessConfigured } from '@WhisperChain/lib/gasless';
+import { getErrorMessage } from '@WhisperChain/lib/errors';
 import { ethers } from 'ethers';
 import type { AddressLike } from 'ethers';
 
@@ -86,7 +87,7 @@ export function CreateConversation({
                 onCreated(receipt.hash);
             }
         } catch (err: any) {
-            setError(err.message || 'Failed to create conversation');
+            setError(getErrorMessage(err, 'Failed to create conversation'));
         } finally {
             setIsCreating(false);
         }

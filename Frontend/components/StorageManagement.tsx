@@ -11,6 +11,7 @@ import {
 	waitForTransaction,
 } from '@WhisperChain/lib/whisperchainActions';
 import { isGaslessConfigured } from '@WhisperChain/lib/gasless';
+import { getErrorMessage } from '@WhisperChain/lib/errors';
 import type { AddressLike } from 'ethers';
 
 // Contract constants
@@ -44,7 +45,7 @@ export function StorageManagement({ userAddress, onUpdate }: StorageManagementPr
             }
             onUpdate();
         } catch (err: any) {
-            setError(err.message || 'Failed to clear storage');
+            setError(getErrorMessage(err, 'Failed to clear storage'));
         } finally {
             setIsClearing(false);
         }
@@ -64,7 +65,7 @@ export function StorageManagement({ userAddress, onUpdate }: StorageManagementPr
             }
             onUpdate();
         } catch (err: any) {
-            setError(err.message || 'Failed to withdraw balance');
+            setError(getErrorMessage(err, 'Failed to withdraw balance'));
         } finally {
             setIsWithdrawing(false);
         }

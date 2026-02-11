@@ -158,18 +158,34 @@ export function MessageBubble({ message, index = 0, showAvatar = true, isGrouped
                 <div
                     style={{
                         borderRadius: isSelf
-                            ? (isGrouped ? '1.125rem 0.375rem 1.125rem 1.125rem' : '1.125rem 0.375rem 1.125rem 1.125rem')
-                            : (isGrouped ? '0.375rem 1.125rem 1.125rem 1.125rem' : '0.375rem 1.125rem 1.125rem 1.125rem'),
-                        padding: message.ipfsHash && message.mediaType === 1 ? '0' : '0.75rem 1rem',
+                            ? (isGrouped ? '1.25rem 0.5rem 1.25rem 1.25rem' : '1.25rem 0.5rem 1.25rem 1.25rem')
+                            : (isGrouped ? '0.5rem 1.25rem 1.25rem 1.25rem' : '0.5rem 1.25rem 1.25rem 1.25rem'),
+                        padding: message.ipfsHash && message.mediaType === 1 ? '0' : '0.8125rem 1.125rem',
                         background: isSelf
-                            ? 'linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(99, 102, 241, 0.12) 100%)'
-                            : 'rgba(255, 255, 255, 0.08)',
-                        border: `1px solid ${isSelf ? 'rgba(99, 102, 241, 0.25)' : 'rgba(255, 255, 255, 0.1)'}`,
+                            ? 'linear-gradient(145deg, rgba(99, 102, 241, 0.22) 0%, rgba(79, 70, 229, 0.12) 100%)'
+                            : 'linear-gradient(145deg, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0.04) 100%)',
+                        border: `1px solid ${isSelf ? 'rgba(99, 102, 241, 0.2)' : 'rgba(255, 255, 255, 0.08)'}`,
+                        boxShadow: isSelf
+                            ? '0 2px 12px rgba(99, 102, 241, 0.08), 0 1px 2px rgba(0, 0, 0, 0.1)'
+                            : '0 1px 4px rgba(0, 0, 0, 0.06)',
                         position: 'relative',
                         display: 'flex',
                         flexDirection: 'column',
                         gap: message.body && message.ipfsHash && message.mediaType === 1 ? '0.5rem' : '0',
-                        backdropFilter: 'blur(10px)',
+                        backdropFilter: 'blur(12px)',
+                        transition: 'border-color 0.2s, box-shadow 0.2s, background 0.2s',
+                    }}
+                    onMouseEnter={(e) => {
+                        if (!isSelf) {
+                            e.currentTarget.style.background = 'linear-gradient(145deg, rgba(255, 255, 255, 0.09) 0%, rgba(255, 255, 255, 0.05) 100%)';
+                            e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.12)';
+                        }
+                    }}
+                    onMouseLeave={(e) => {
+                        if (!isSelf) {
+                            e.currentTarget.style.background = 'linear-gradient(145deg, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0.04) 100%)';
+                            e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.08)';
+                        }
                     }}
                 >
                     {/* Message Text */}

@@ -3,6 +3,7 @@
 import { Wallet, Loader2, CheckCircle2, AlertCircle, RefreshCw, LogOut, ExternalLink } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { connectWhisperChain, BASE_CHAIN, isMobileDevice, openMetaMaskMobile } from '@WhisperChain/lib/blockchain';
+import { getErrorMessage, isUserRejectedError } from '@WhisperChain/lib/errors';
 
 type WalletConnectProps = {
 	onConnect: () => void | Promise<void>;
@@ -34,7 +35,7 @@ export function WalletConnect({ onConnect, onDisconnect, connectedAddress }: Wal
 
 			await onConnect();
 		} catch (err: any) {
-			setError(err.message || 'Failed to connect wallet');
+			setError(getErrorMessage(err, 'Failed to connect wallet'));
 		} finally {
 			setIsConnecting(false);
 		}
@@ -62,9 +63,8 @@ export function WalletConnect({ onConnect, onDisconnect, connectedAddress }: Wal
 				await onConnect();
 			}
 		} catch (err: any) {
-			if (err.code !== 4001) {
-				// 4001 is user rejection, don't show error for that
-				setError(err.message || 'Failed to switch account');
+			if (!isUserRejectedError(err)) {
+				setError(getErrorMessage(err, 'Failed to switch account'));
 			}
 		} finally {
 			setIsSwitching(false);

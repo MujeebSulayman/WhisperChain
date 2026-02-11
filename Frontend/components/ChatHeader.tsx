@@ -31,10 +31,10 @@ export function ChatHeader({ threadTitle, onMenuClick, showMenu = false, onConve
     return (
         <div
             style={{
-                height: isMobile ? '3.5rem' : '4.5rem',
-                borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
-                background: 'rgba(15, 15, 15, 0.8)',
-                backdropFilter: 'blur(10px)',
+                height: isMobile ? '3.5rem' : '4rem',
+                borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+                background: 'linear-gradient(180deg, rgba(18, 18, 22, 0.95) 0%, rgba(12, 12, 14, 0.9) 100%)',
+                backdropFilter: 'blur(12px)',
                 padding: isMobile ? '0 0.75rem' : '0 1.25rem',
                 display: 'flex',
                 alignItems: 'center',
@@ -42,6 +42,7 @@ export function ChatHeader({ threadTitle, onMenuClick, showMenu = false, onConve
                 position: 'sticky',
                 top: 0,
                 zIndex: 10,
+                boxShadow: '0 1px 0 rgba(255, 255, 255, 0.03)',
             }}
         >
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.875rem', flex: 1, minWidth: 0 }}>
@@ -118,13 +119,8 @@ export function ChatHeader({ threadTitle, onMenuClick, showMenu = false, onConve
                             </h2>
                             {!isMobile && (
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.125rem' }}>
-                                    <Circle style={{ width: '0.5rem', height: '0.5rem', color: '#10b981', fill: '#10b981' }} />
-                                    <span
-                                        style={{
-                                            fontSize: '0.75rem',
-                                            color: 'rgba(255, 255, 255, 0.5)',
-                                        }}
-                                    >
+                                    <Circle className="animate-pulse-soft" style={{ width: '0.5rem', height: '0.5rem', color: '#10b981', fill: '#10b981' }} />
+                                    <span style={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.45)' }}>
                                         Active
                                     </span>
                                 </div>

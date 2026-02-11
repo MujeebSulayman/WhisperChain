@@ -258,10 +258,10 @@ export async function submitSignedForwardRequest(
 			}),
 		});
 		if (!res.ok) {
-			const err = (await res.json()).catch(() => ({})) as { error?: string };
+			const err = (await res.json().catch(() => ({}))) as { error?: string };
 			throw new Error(err.error || 'Relayer failed');
 		}
-		const data = (await res.json()) as { hash?: string };
+		const data = (await res.json().catch(() => ({}))) as { hash?: string };
 		return { hash: data.hash ?? '' };
 	}
 	const { signer } = await connectWhisperChain();

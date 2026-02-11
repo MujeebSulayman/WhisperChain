@@ -9,6 +9,7 @@ import {
 	waitForTransaction,
 } from '@WhisperChain/lib/whisperchainActions';
 import { isGaslessConfigured } from '@WhisperChain/lib/gasless';
+import { getErrorMessage } from '@WhisperChain/lib/errors';
 import type { BytesLike } from 'ethers';
 
 type MessageActionsProps = {
@@ -17,6 +18,7 @@ type MessageActionsProps = {
     isRead: boolean;
     isSelf: boolean;
     onUpdate: () => void;
+    onError?: (message: string) => void;
 };
 
 export function MessageActions({
@@ -25,6 +27,7 @@ export function MessageActions({
     isRead,
     isSelf,
     onUpdate,
+    onError,
 }: MessageActionsProps) {
     const [isLoading, setIsLoading] = useState<string | null>(null);
 
@@ -42,7 +45,9 @@ export function MessageActions({
             }
             onUpdate();
         } catch (error) {
-            console.error('Failed to delete message:', error);
+            const msg = getErrorMessage(error, 'Failed to delete message');
+            if (onError) onError(msg);
+            else console.error('Failed to delete message:', msg);
         } finally {
             setIsLoading(null);
         }

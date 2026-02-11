@@ -132,10 +132,10 @@ export function MessageInput({
     return (
         <div
             style={{
-                borderTop: '1px solid rgba(255, 255, 255, 0.06)',
-                background: 'rgba(15, 15, 15, 0.95)',
-                backdropFilter: 'blur(10px)',
-                padding: isMobile ? '0.75rem' : '1rem 1.25rem',
+                borderTop: '1px solid rgba(255, 255, 255, 0.05)',
+                background: 'linear-gradient(180deg, rgba(12, 12, 14, 0.6) 0%, rgba(10, 10, 12, 0.95) 100%)',
+                backdropFilter: 'blur(16px)',
+                padding: isMobile ? '0.875rem 0.75rem' : '1rem 1.5rem 1.25rem',
                 position: 'sticky',
                 bottom: 0,
                 zIndex: 10,
@@ -170,7 +170,7 @@ export function MessageInput({
             {(selectedFile || paymentAmount) && (
                 <div
                     style={{
-                        marginBottom: '0.75rem',
+                        marginBottom: '0.875rem',
                         display: 'flex',
                         flexWrap: 'wrap',
                         alignItems: 'center',
@@ -183,10 +183,11 @@ export function MessageInput({
                                 display: 'flex',
                                 alignItems: 'center',
                                 gap: '0.5rem',
-                                padding: '0.5rem 0.75rem',
-                                borderRadius: '0.5rem',
-                                background: 'rgba(99, 102, 241, 0.1)',
-                                border: '1px solid rgba(99, 102, 241, 0.2)',
+                                padding: '0.5rem 0.875rem',
+                                borderRadius: '9999px',
+                                background: 'rgba(99, 102, 241, 0.08)',
+                                border: '1px solid rgba(99, 102, 241, 0.15)',
+                                boxShadow: '0 1px 3px rgba(0, 0, 0, 0.15)',
                             }}
                         >
                             {getFileIcon(selectedFile)}
@@ -227,10 +228,11 @@ export function MessageInput({
                                 display: 'flex',
                                 alignItems: 'center',
                                 gap: '0.5rem',
-                                padding: '0.5rem 0.75rem',
-                                borderRadius: '0.5rem',
-                                background: 'rgba(245, 158, 11, 0.1)',
-                                border: '1px solid rgba(245, 158, 11, 0.2)',
+                                padding: '0.5rem 0.875rem',
+                                borderRadius: '9999px',
+                                background: 'rgba(245, 158, 11, 0.08)',
+                                border: '1px solid rgba(245, 158, 11, 0.15)',
+                                boxShadow: '0 1px 3px rgba(0, 0, 0, 0.15)',
                             }}
                         >
                             <Coins style={{ width: '1rem', height: '1rem', color: '#fbbf24' }} />
@@ -271,7 +273,17 @@ export function MessageInput({
                 </div>
             )}
 
-            <div style={{ display: 'flex', alignItems: 'flex-end', gap: '0.5rem' }}>
+            <div
+                className="message-input-bar"
+                style={{
+                    display: 'flex',
+                    alignItems: 'flex-end',
+                    gap: '0.625rem',
+                    borderRadius: '9999px',
+                    background: 'rgba(255, 255, 255, 0.04)',
+                    padding: isMobile ? '0.375rem 0.5rem 0.375rem 0.875rem' : '0.5rem 0.625rem 0.5rem 1rem',
+                }}
+            >
                 <button
                     onClick={() => {
                         setShowFileUpload(!showFileUpload);
@@ -279,16 +291,16 @@ export function MessageInput({
                     }}
                     disabled={disabled}
                     style={{
-                        padding: '0.75rem',
+                        padding: '0.5rem',
                         borderRadius: '50%',
-                        background: showFileUpload ? 'rgba(99, 102, 241, 0.15)' : 'transparent',
-                        border: `1px solid ${showFileUpload ? 'rgba(99, 102, 241, 0.3)' : 'rgba(255, 255, 255, 0.1)'}`,
-                        color: showFileUpload ? '#a5b4fc' : 'rgba(255, 255, 255, 0.6)',
+                        background: showFileUpload ? 'rgba(99, 102, 241, 0.12)' : 'transparent',
+                        border: 'none',
+                        color: showFileUpload ? '#a5b4fc' : 'rgba(255, 255, 255, 0.55)',
                         cursor: disabled ? 'not-allowed' : 'pointer',
                         opacity: disabled ? 0.5 : 1,
                         transition: 'all 0.2s',
-                        width: isMobile ? '2.75rem' : '3rem',
-                        height: isMobile ? '2.75rem' : '3rem',
+                        width: isMobile ? '2.5rem' : '2.75rem',
+                        height: isMobile ? '2.5rem' : '2.75rem',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -328,16 +340,16 @@ export function MessageInput({
                     }}
                     disabled={disabled}
                     style={{
-                        padding: '0.75rem',
+                        padding: '0.5rem',
                         borderRadius: '50%',
-                        background: showPayment ? 'rgba(245, 158, 11, 0.15)' : 'transparent',
-                        border: `1px solid ${showPayment ? 'rgba(245, 158, 11, 0.3)' : 'rgba(255, 255, 255, 0.1)'}`,
-                        color: showPayment ? '#fbbf24' : 'rgba(255, 255, 255, 0.6)',
+                        background: showPayment ? 'rgba(245, 158, 11, 0.12)' : 'transparent',
+                        border: 'none',
+                        color: showPayment ? '#fbbf24' : 'rgba(255, 255, 255, 0.55)',
                         cursor: disabled ? 'not-allowed' : 'pointer',
                         opacity: disabled ? 0.5 : 1,
                         transition: 'all 0.2s',
-                        width: isMobile ? '2.75rem' : '3rem',
-                        height: isMobile ? '2.75rem' : '3rem',
+                        width: isMobile ? '2.5rem' : '2.75rem',
+                        height: isMobile ? '2.5rem' : '2.75rem',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -371,24 +383,7 @@ export function MessageInput({
                     <Coins style={{ width: isMobile ? '1.25rem' : '1.125rem', height: isMobile ? '1.25rem' : '1.125rem' }} />
                 </button>
 
-                <div
-                    style={{
-                        flex: 1,
-                        borderRadius: isMobile ? '1.25rem' : '1.5rem',
-                        background: 'rgba(255, 255, 255, 0.05)',
-                        border: '1px solid rgba(255, 255, 255, 0.1)',
-                        padding: isMobile ? '0.625rem 0.875rem' : '0.75rem 1rem',
-                        transition: 'all 0.2s',
-                    }}
-                    onFocus={(e) => {
-                        e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)';
-                        e.currentTarget.style.borderColor = 'rgba(99, 102, 241, 0.3)';
-                    }}
-                    onBlur={(e) => {
-                        e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
-                        e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)';
-                    }}
-                >
+                <div style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center' }}>
                     <textarea
                         ref={textareaRef}
                         value={input}
@@ -408,6 +403,8 @@ export function MessageInput({
                             minHeight: isMobile ? '20px' : '24px',
                             maxHeight: isMobile ? '100px' : '120px',
                             lineHeight: '1.5',
+                            padding: '0.125rem 0',
+                            margin: 0,
                         }}
                     />
                 </div>
@@ -416,11 +413,11 @@ export function MessageInput({
                     onClick={handleSend}
                     disabled={(!input.trim() && !selectedFile) || isSending || disabled}
                     style={{
-                        padding: '0.75rem',
+                        padding: '0.5rem',
                         borderRadius: '50%',
                         background: (!input.trim() && !selectedFile) || isSending || disabled
-                            ? 'rgba(99, 102, 241, 0.2)'
-                            : 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+                            ? 'rgba(99, 102, 241, 0.15)'
+                            : 'linear-gradient(135deg, #6366f1 0%, #7c3aed 100%)',
                         border: 'none',
                         color: '#ffffff',
                         cursor: (!input.trim() && !selectedFile) || isSending || disabled ? 'not-allowed' : 'pointer',
@@ -429,12 +426,12 @@ export function MessageInput({
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        width: isMobile ? '2.75rem' : '3rem',
-                        height: isMobile ? '2.75rem' : '3rem',
+                        width: isMobile ? '2.5rem' : '2.75rem',
+                        height: isMobile ? '2.5rem' : '2.75rem',
                         flexShrink: 0,
                         boxShadow: (!input.trim() && !selectedFile) || isSending || disabled
                             ? 'none'
-                            : '0 4px 12px rgba(99, 102, 241, 0.3)',
+                            : '0 2px 10px rgba(99, 102, 241, 0.35), 0 1px 2px rgba(0, 0, 0, 0.2)',
                         touchAction: 'manipulation',
                     }}
                     onMouseEnter={(e) => {

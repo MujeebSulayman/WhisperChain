@@ -27,6 +27,7 @@ import {
 	getUserPublicKey,
 } from '@WhisperChain/lib/whisperchainActions';
 import { isGaslessConfigured } from '@WhisperChain/lib/gasless';
+import { getErrorMessage, REQUEST_CANCELLED_MESSAGE } from '@WhisperChain/lib/errors';
 import { useWhisperChain } from '../hooks/useWhisperChain';
 import { useWallet } from '../hooks/useWallet';
 import { useIsMobile } from '../hooks/useMediaQuery';
@@ -433,7 +434,7 @@ export function ChatContainer() {
 				setActiveThreadId(threadData[0].id);
 			}
 		} catch (err: any) {
-			setError(err.message || 'Failed to load data');
+			setError(getErrorMessage(err, 'Failed to load data'));
 		} finally {
 			setIsLoading(false);
 		}
@@ -541,7 +542,7 @@ export function ChatContainer() {
 			await loadUserData();
 			refresh();
 		} catch (error: any) {
-			setError(error.message || 'Failed to send message');
+			setError(getErrorMessage(error, 'Failed to send message'));
 			setPendingTransactions((prev) => {
 				const next = new Set(prev);
 				next.delete(txHash);
@@ -659,13 +660,20 @@ export function ChatContainer() {
 				display: 'flex',
 				flexDirection: 'column',
 				position: 'relative',
-				background: '#0a0a0a',
+				background: 'radial-gradient(ellipse 120% 80% at 50% 0%, rgba(30, 27, 45, 0.4) 0%, transparent 50%), linear-gradient(180deg, #0c0c0e 0%, #0a0a0c 100%)',
 				minWidth: 0,
 				backdropFilter: isMobile && (sidebarOpen || conversationsSidebarOpen) ? 'blur(8px)' : 'none',
 				opacity: isMobile && (sidebarOpen || conversationsSidebarOpen) ? 0.7 : 1,
 				transition: 'opacity 0.3s ease-out, backdrop-filter 0.3s ease-out',
 			}}>
-				{error && <ErrorToast message={error} onDismiss={() => setError(null)} />}
+				{error && (
+					<ErrorToast
+						message={error}
+						onDismiss={() => setError(null)}
+						variant={error === REQUEST_CANCELLED_MESSAGE ? 'cancel' : 'error'}
+						autoHideDelay={error === REQUEST_CANCELLED_MESSAGE ? 2500 : 5000}
+					/>
+				)}
 
 				{/* Always show header on mobile, or when there's an active thread */}
 				{(isMobile || activeThreadId) && (
@@ -691,7 +699,7 @@ export function ChatContainer() {
 
 				{activeThreadId ? (
 					<>
-						<div style={{ flex: 1, overflowY: 'auto', position: 'relative' }}>
+						<div style={{ flex: 1, overflowY: 'auto', position: 'relative', minHeight: 0 }}>
 							<MessageList
 								messages={messages[activeThreadId] ?? []}
 								isLoading={isLoading}
