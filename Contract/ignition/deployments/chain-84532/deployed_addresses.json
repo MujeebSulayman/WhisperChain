@@ -1,3 +1,5 @@
 {
-  "WhisperChainModule#WhisperChain": "0x5e84301E9d8Ce8a79Ab0f2144c432CD3C1131245"
+  "WhisperChainModule#Forwarder": "0x8e586796a694A8Ac7aE355e959fD2aA7605518a1",
+  "WhisperChainModule#WhisperChain": "0x65c050Ce0b516e633d350BE645537b41C3Ac97E5",
+  "WhisperChainModule#WhisperChainPaymaster": "0x5e4173440C48dd44EFF8F07523A9c5d33E6d9eED"
 }
