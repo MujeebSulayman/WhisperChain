@@ -1,6 +1,6 @@
 'use client';
 
-import type { JsonRpcSigner } from 'ethers';
+import type { InterfaceAbi, JsonRpcSigner } from 'ethers';
 import {
 	BrowserProvider,
 	Contract,
@@ -10,6 +10,8 @@ import {
 } from 'ethers';
 import { WhisperChain__factory } from '@WhisperChain/typechain/factories/WhisperChain__factory';
 import type { WhisperChain } from '@WhisperChain/typechain/WhisperChain';
+import forwarderAbi from '@/blockchain/Forwarder.json';
+import paymasterAbi from '@/blockchain/WhisperChainPaymaster.json';
 
 export type { WhisperChain } from '@WhisperChain/typechain/WhisperChain';
 
@@ -20,27 +22,24 @@ export const BASE_CHAIN = {
 	explorer: 'https://sepolia.basescan.org',
 } as const;
 
-const DEPLOYED_ADDRESS_FALLBACK = '0x89343A3d8BFb9dea288b5aEF9773892F34c60665';
+const DEPLOYED = {
+	whisperChain: '0x65c050Ce0b516e633d350BE645537b41C3Ac97E5',
+	forwarder: '0x8e586796a694A8Ac7aE355e959fD2aA7605518a1',
+	paymaster: '0x5e4173440C48dd44EFF8F07523A9c5d33E6d9eED',
+} as const;
 
 export const WHISPERCHAIN_ADDRESS =
-	process.env.NEXT_PUBLIC_WHISPERCHAIN_ADDRESS ?? DEPLOYED_ADDRESS_FALLBACK;
+	process.env.NEXT_PUBLIC_WHISPERCHAIN_ADDRESS ?? DEPLOYED.whisperChain;
 
 export const FORWARDER_ADDRESS =
-	process.env.NEXT_PUBLIC_FORWARDER_ADDRESS ?? '';
+	process.env.NEXT_PUBLIC_FORWARDER_ADDRESS ?? DEPLOYED.forwarder;
 
 export const PAYMASTER_ADDRESS =
-	process.env.NEXT_PUBLIC_PAYMASTER_ADDRESS ?? '';
+	process.env.NEXT_PUBLIC_PAYMASTER_ADDRESS ?? DEPLOYED.paymaster;
 
 export const WHISPERCHAIN_ABI = WhisperChain__factory.abi;
-
-export const FORWARDER_ABI = [
-	'function getNonce(address from) view returns (uint256)',
-	'function execute((address from, address to, uint256 value, uint256 gas, uint256 nonce, bytes data) req, bytes signature) payable returns (bool, bytes)',
-] as const;
-
-export const PAYMASTER_ABI = [
-	'function relay((address from, address to, uint256 value, uint256 gas, uint256 nonce, bytes data) req, bytes signature, address relayer, uint256 reimbursement) payable',
-] as const;
+export const FORWARDER_ABI = forwarderAbi as InterfaceAbi;
+export const PAYMASTER_ABI = paymasterAbi as InterfaceAbi;
 
 export type WhisperChainContract = WhisperChain;
 

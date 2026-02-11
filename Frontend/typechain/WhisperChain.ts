@@ -115,6 +115,7 @@ export interface WhisperChainInterface extends Interface {
       | "getUserStorageUsed"
       | "isIPFSHashUsed"
       | "isMessageDeleted"
+      | "isTrustedForwarder"
       | "isUserRegistered"
       | "messageDeleted"
       | "messages"
@@ -242,6 +243,10 @@ export interface WhisperChainInterface extends Interface {
   encodeFunctionData(
     functionFragment: "isMessageDeleted",
     values: [BytesLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "isTrustedForwarder",
+    values: [AddressLike]
   ): string;
   encodeFunctionData(
     functionFragment: "isUserRegistered",
@@ -422,6 +427,10 @@ export interface WhisperChainInterface extends Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "isMessageDeleted",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "isTrustedForwarder",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -806,6 +815,12 @@ export interface WhisperChain extends BaseContract {
     "view"
   >;
 
+  isTrustedForwarder: TypedContractMethod<
+    [forwarder: AddressLike],
+    [boolean],
+    "view"
+  >;
+
   isUserRegistered: TypedContractMethod<[user: AddressLike], [boolean], "view">;
 
   messageDeleted: TypedContractMethod<[arg0: BytesLike], [boolean], "view">;
@@ -1034,6 +1049,9 @@ export interface WhisperChain extends BaseContract {
   getFunction(
     nameOrSignature: "isMessageDeleted"
   ): TypedContractMethod<[messageId: BytesLike], [boolean], "view">;
+  getFunction(
+    nameOrSignature: "isTrustedForwarder"
+  ): TypedContractMethod<[forwarder: AddressLike], [boolean], "view">;
   getFunction(
     nameOrSignature: "isUserRegistered"
   ): TypedContractMethod<[user: AddressLike], [boolean], "view">;
