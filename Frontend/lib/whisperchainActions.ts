@@ -10,8 +10,15 @@ import {
 } from './blockchain';
 import {
 	buildForwardRequest,
+	encodeClearStorageCalldata,
+	encodeCreateConversationCalldata,
+	encodeDeleteMessageCalldata,
 	encodeRegisterUserCalldata,
 	encodeSendMessageCalldata,
+	encodeSendBatchMessagesCalldata,
+	encodeUpdateLastSeenCalldata,
+	encodeUpdatePublicKeyCalldata,
+	encodeWithdrawBalanceCalldata,
 	type ForwardRequest,
 	signForwardRequest,
 	submitViaForwarder,
@@ -178,12 +185,110 @@ export async function sendWhisperGasless(args: {
 	return { request, signature };
 }
 
+export async function sendBatchMessagesGasless(args: {
+	recipients: AddressLike[];
+	messageHashes: BytesLike[];
+	ipfsHashes: string[];
+	mediaTypes?: BigNumberish[];
+	fileSizes: BigNumberish[];
+	paymentTokens?: AddressLike[];
+	paymentAmounts?: BigNumberish[];
+	value?: BigNumberish;
+	textContents?: string[];
+}): Promise<{ request: ForwardRequest; signature: string }> {
+	const { signer } = await connectWhisperChain();
+	const from = await signer.getAddress();
+	const paymentTokens =
+		args.paymentTokens ?? args.recipients.map(() => ZeroAddress);
+	const paymentAmounts =
+		args.paymentAmounts ?? args.recipients.map(() => BigInt(0));
+	const mediaTypes = args.mediaTypes ?? args.recipients.map(() => 0);
+	const textContents = args.textContents ?? args.recipients.map(() => '');
+	const recipientsStr = args.recipients.map((r) =>
+		typeof r === 'string' ? r : String(r)
+	);
+	const msgHashesStr = args.messageHashes.map((m) =>
+		typeof m === 'string' ? m : '0x' + Buffer.from(m as Uint8Array).toString('hex').padStart(64, '0').slice(-64)
+	);
+	const paymentAmountsBigInt = paymentAmounts.map((a) => BigInt(Number(a)));
+	const fileSizesBigInt = args.fileSizes.map((f) => BigInt(Number(f)));
+	const data = encodeSendBatchMessagesCalldata({
+		recipients: recipientsStr,
+		messageHashes: msgHashesStr,
+		paymentTokens: paymentTokens.map((t) => (typeof t === 'string' ? t : ZeroAddress)),
+		paymentAmounts: paymentAmountsBigInt,
+		ipfsHashes: args.ipfsHashes,
+		mediaTypes: mediaTypes.map((m) => Number(m)),
+		fileSizes: fileSizesBigInt,
+		textContents,
+	});
+	const value = args.value !== undefined ? BigInt(Number(args.value)) : BigInt(0);
+	const request = await buildForwardRequest({ from, value, data });
+	const signature = await signForwardRequest(signer, request);
+	return { request, signature };
+}
+
 export { submitViaPaymaster };
 export { submitViaForwarder };
+
+export async function submitSignedForwardRequest(
+	request: ForwardRequest,
+	signature: string
+): Promise<{ hash: string }> {
+	const relayerUrl =
+		typeof process !== 'undefined' && process.env?.NEXT_PUBLIC_RELAYER_API_URL
+			? process.env.NEXT_PUBLIC_RELAYER_API_URL
+			: typeof window !== 'undefined'
+				? '/api/relay'
+				: '';
+	if (relayerUrl) {
+		const res = await fetch(relayerUrl, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				request: {
+					from: request.from,
+					to: request.to,
+					value: request.value.toString(),
+					gas: request.gas.toString(),
+					nonce: request.nonce.toString(),
+					data: request.data,
+				},
+				signature,
+			}),
+		});
+		if (!res.ok) {
+			const err = (await res.json()).catch(() => ({})) as { error?: string };
+			throw new Error(err.error || 'Relayer failed');
+		}
+		const data = (await res.json()) as { hash?: string };
+		return { hash: data.hash ?? '' };
+	}
+	const { signer } = await connectWhisperChain();
+	return submitViaForwarder(request, signature, signer);
+}
 
 export async function deleteWhisper(messageId: BytesLike) {
 	const contract = await getSignerContract();
 	return contract.deleteMessage(messageId);
+}
+
+export async function deleteWhisperGasless(messageId: BytesLike): Promise<{
+	request: ForwardRequest;
+	signature: string;
+}> {
+	const { signer } = await connectWhisperChain();
+	const from = await signer.getAddress();
+	const msgIdHex =
+		typeof messageId === 'string'
+			? messageId
+			: (messageId as Uint8Array).length
+				? '0x' + Buffer.from(messageId as Uint8Array).toString('hex').padStart(64, '0').slice(-64)
+				: String(messageId);
+	const data = encodeDeleteMessageCalldata(msgIdHex);
+	const request = await buildForwardRequest({ from, data });
+	const signature = await signForwardRequest(signer, request);
+	return { request, signature };
 }
 
 export async function createConversation(args: {
@@ -195,6 +300,27 @@ export async function createConversation(args: {
 		args.participants,
 		args.conversationKeyHash
 	);
+}
+
+export async function createConversationGasless(args: {
+	participants: AddressLike[];
+	conversationKeyHash: BytesLike;
+}): Promise<{ request: ForwardRequest; signature: string }> {
+	const { signer } = await connectWhisperChain();
+	const from = await signer.getAddress();
+	const participants = args.participants.map((p) =>
+		typeof p === 'string' ? p : String(p)
+	);
+	const keyHash =
+		typeof args.conversationKeyHash === 'string'
+			? args.conversationKeyHash
+			: (args.conversationKeyHash as Uint8Array).length
+				? '0x' + Buffer.from(args.conversationKeyHash as Uint8Array).toString('hex').padStart(64, '0').slice(-64)
+				: String(args.conversationKeyHash);
+	const data = encodeCreateConversationCalldata(participants, keyHash);
+	const request = await buildForwardRequest({ from, data });
+	const signature = await signForwardRequest(signer, request);
+	return { request, signature };
 }
 
 export async function fetchUserProfile(user: AddressLike) {
@@ -263,14 +389,68 @@ export async function updateLastSeen() {
 	return contract.updateLastSeen();
 }
 
+export async function updateLastSeenGasless(): Promise<{
+	request: ForwardRequest;
+	signature: string;
+}> {
+	const { signer } = await connectWhisperChain();
+	const from = await signer.getAddress();
+	const data = encodeUpdateLastSeenCalldata();
+	const request = await buildForwardRequest({ from, data });
+	const signature = await signForwardRequest(signer, request);
+	return { request, signature };
+}
+
+export async function updatePublicKeyGasless(newKey: BytesLike): Promise<{
+	request: ForwardRequest;
+	signature: string;
+}> {
+	const { signer } = await connectWhisperChain();
+	const from = await signer.getAddress();
+	const keyHex =
+		typeof newKey === 'string'
+			? newKey
+			: (newKey as Uint8Array).length
+				? '0x' + Buffer.from(newKey as Uint8Array).toString('hex').padStart(64, '0').slice(-64)
+				: String(newKey);
+	const data = encodeUpdatePublicKeyCalldata(keyHex);
+	const request = await buildForwardRequest({ from, data });
+	const signature = await signForwardRequest(signer, request);
+	return { request, signature };
+}
+
 export async function withdrawBalance() {
 	const contract = await getSignerContract();
 	return contract.withdrawBalance();
 }
 
+export async function withdrawBalanceGasless(): Promise<{
+	request: ForwardRequest;
+	signature: string;
+}> {
+	const { signer } = await connectWhisperChain();
+	const from = await signer.getAddress();
+	const data = encodeWithdrawBalanceCalldata();
+	const request = await buildForwardRequest({ from, data });
+	const signature = await signForwardRequest(signer, request);
+	return { request, signature };
+}
+
 export async function clearStorage() {
 	const contract = await getSignerContract();
 	return contract.clearStorage();
+}
+
+export async function clearStorageGasless(): Promise<{
+	request: ForwardRequest;
+	signature: string;
+}> {
+	const { signer } = await connectWhisperChain();
+	const from = await signer.getAddress();
+	const data = encodeClearStorageCalldata();
+	const request = await buildForwardRequest({ from, data });
+	const signature = await signForwardRequest(signer, request);
+	return { request, signature };
 }
 
 export async function isUserRegistered(user: AddressLike) {

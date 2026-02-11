@@ -2,7 +2,13 @@
 
 import { useState } from 'react';
 import { Users, Plus, X, Loader2 } from 'lucide-react';
-import { createConversation, waitForTransaction } from '@WhisperChain/lib/whisperchainActions';
+import {
+	createConversation,
+	createConversationGasless,
+	submitSignedForwardRequest,
+	waitForTransaction,
+} from '@WhisperChain/lib/whisperchainActions';
+import { isGaslessConfigured } from '@WhisperChain/lib/gasless';
 import { ethers } from 'ethers';
 import type { AddressLike } from 'ethers';
 
@@ -64,13 +70,21 @@ export function CreateConversation({
             const keyHash = ethers.keccak256(ethers.toUtf8Bytes(keyToUse));
             const allParticipants = [currentUser, ...participants] as AddressLike[];
 
-            const tx = await createConversation({
-                participants: allParticipants,
-                conversationKeyHash: keyHash,
-            });
-
-            const receipt = await waitForTransaction(Promise.resolve(tx));
-            onCreated(receipt.hash);
+            if (isGaslessConfigured()) {
+                const { request, signature } = await createConversationGasless({
+                    participants: allParticipants,
+                    conversationKeyHash: keyHash,
+                });
+                const { hash } = await submitSignedForwardRequest(request, signature);
+                onCreated(hash);
+            } else {
+                const tx = await createConversation({
+                    participants: allParticipants,
+                    conversationKeyHash: keyHash,
+                });
+                const receipt = await waitForTransaction(Promise.resolve(tx));
+                onCreated(receipt.hash);
+            }
         } catch (err: any) {
             setError(err.message || 'Failed to create conversation');
         } finally {

@@ -2,7 +2,15 @@
 
 import { useState } from 'react';
 import { HardDrive, Trash2, Loader2, AlertTriangle, Wallet } from 'lucide-react';
-import { clearStorage, withdrawBalance, waitForTransaction } from '@WhisperChain/lib/whisperchainActions';
+import {
+	clearStorage,
+	clearStorageGasless,
+	withdrawBalance,
+	withdrawBalanceGasless,
+	submitSignedForwardRequest,
+	waitForTransaction,
+} from '@WhisperChain/lib/whisperchainActions';
+import { isGaslessConfigured } from '@WhisperChain/lib/gasless';
 import type { AddressLike } from 'ethers';
 
 // Contract constants
@@ -27,8 +35,13 @@ export function StorageManagement({ userAddress, onUpdate }: StorageManagementPr
         setError(null);
 
         try {
-            const tx = await clearStorage();
-            await waitForTransaction(Promise.resolve(tx));
+            if (isGaslessConfigured()) {
+                const { request, signature } = await clearStorageGasless();
+                await submitSignedForwardRequest(request, signature);
+            } else {
+                const tx = await clearStorage();
+                await waitForTransaction(Promise.resolve(tx));
+            }
             onUpdate();
         } catch (err: any) {
             setError(err.message || 'Failed to clear storage');
@@ -42,8 +55,13 @@ export function StorageManagement({ userAddress, onUpdate }: StorageManagementPr
         setError(null);
 
         try {
-            const tx = await withdrawBalance();
-            await waitForTransaction(Promise.resolve(tx));
+            if (isGaslessConfigured()) {
+                const { request, signature } = await withdrawBalanceGasless();
+                await submitSignedForwardRequest(request, signature);
+            } else {
+                const tx = await withdrawBalance();
+                await waitForTransaction(Promise.resolve(tx));
+            }
             onUpdate();
         } catch (err: any) {
             setError(err.message || 'Failed to withdraw balance');

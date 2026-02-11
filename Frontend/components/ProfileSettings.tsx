@@ -2,7 +2,15 @@
 
 import { useState } from 'react';
 import { User, Key, Loader2, CheckCircle2, X, Clock } from 'lucide-react';
-import { updatePublicKey, updateLastSeen, waitForTransaction } from '@WhisperChain/lib/whisperchainActions';
+import {
+	updatePublicKey,
+	updatePublicKeyGasless,
+	updateLastSeen,
+	updateLastSeenGasless,
+	submitSignedForwardRequest,
+	waitForTransaction,
+} from '@WhisperChain/lib/whisperchainActions';
+import { isGaslessConfigured } from '@WhisperChain/lib/gasless';
 import { ethers } from 'ethers';
 
 type ProfileSettingsProps = {
@@ -27,8 +35,13 @@ export function ProfileSettings({ onUpdate, onClose }: ProfileSettingsProps) {
 
         try {
             const publicKeyBytes = ethers.hexlify(ethers.toUtf8Bytes(newPublicKey));
-            const tx = await updatePublicKey(publicKeyBytes);
-            await waitForTransaction(Promise.resolve(tx));
+            if (isGaslessConfigured()) {
+                const { request, signature } = await updatePublicKeyGasless(publicKeyBytes);
+                await submitSignedForwardRequest(request, signature);
+            } else {
+                const tx = await updatePublicKey(publicKeyBytes);
+                await waitForTransaction(Promise.resolve(tx));
+            }
             setSuccess(true);
             setTimeout(() => {
                 onUpdate();
@@ -46,8 +59,13 @@ export function ProfileSettings({ onUpdate, onClose }: ProfileSettingsProps) {
         setError(null);
 
         try {
-            const tx = await updateLastSeen();
-            await waitForTransaction(Promise.resolve(tx));
+            if (isGaslessConfigured()) {
+                const { request, signature } = await updateLastSeenGasless();
+                await submitSignedForwardRequest(request, signature);
+            } else {
+                const tx = await updateLastSeen();
+                await waitForTransaction(Promise.resolve(tx));
+            }
             setSuccess(true);
             setTimeout(() => {
                 onUpdate();

@@ -184,3 +184,52 @@ export function encodeCreateConversationCalldata(
 		conversationKeyHash,
 	]);
 }
+
+export function encodeDeleteMessageCalldata(messageId: string): string {
+	const iface = new Interface([
+		'function deleteMessage(bytes32 messageId)',
+	]);
+	return iface.encodeFunctionData('deleteMessage', [messageId]);
+}
+
+export function encodeUpdatePublicKeyCalldata(newPublicKey: string): string {
+	const iface = new Interface([
+		'function updatePublicKey(bytes32 newPublicKey)',
+	]);
+	return iface.encodeFunctionData('updatePublicKey', [newPublicKey]);
+}
+
+export function encodeWithdrawBalanceCalldata(): string {
+	const iface = new Interface(['function withdrawBalance()']);
+	return iface.encodeFunctionData('withdrawBalance', []);
+}
+
+export function encodeClearStorageCalldata(): string {
+	const iface = new Interface(['function clearStorage()']);
+	return iface.encodeFunctionData('clearStorage', []);
+}
+
+export function encodeSendBatchMessagesCalldata(params: {
+	recipients: string[];
+	messageHashes: string[];
+	paymentTokens: string[];
+	paymentAmounts: bigint[];
+	ipfsHashes: string[];
+	mediaTypes: number[];
+	fileSizes: bigint[];
+	textContents: string[];
+}): string {
+	const iface = new Interface([
+		'function sendBatchMessages(address[] recipients, bytes32[] messageHashes, address[] paymentTokens, uint256[] paymentAmounts, string[] ipfsHashes, uint8[] mediaTypes, uint256[] fileSizes, string[] textContents)',
+	]);
+	return iface.encodeFunctionData('sendBatchMessages', [
+		params.recipients,
+		params.messageHashes,
+		params.paymentTokens,
+		params.paymentAmounts,
+		params.ipfsHashes,
+		params.mediaTypes,
+		params.fileSizes,
+		params.textContents,
+	]);
+}

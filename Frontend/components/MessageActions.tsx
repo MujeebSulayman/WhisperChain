@@ -2,7 +2,13 @@
 
 import { useState } from 'react';
 import { Trash2, Loader2 } from 'lucide-react';
-import { deleteWhisper, waitForTransaction } from '@WhisperChain/lib/whisperchainActions';
+import {
+	deleteWhisper,
+	deleteWhisperGasless,
+	submitSignedForwardRequest,
+	waitForTransaction,
+} from '@WhisperChain/lib/whisperchainActions';
+import { isGaslessConfigured } from '@WhisperChain/lib/gasless';
 import type { BytesLike } from 'ethers';
 
 type MessageActionsProps = {
@@ -27,8 +33,13 @@ export function MessageActions({
 
         setIsLoading('delete');
         try {
-            const tx = await deleteWhisper(messageId);
-            await waitForTransaction(Promise.resolve(tx));
+            if (isGaslessConfigured()) {
+                const { request, signature } = await deleteWhisperGasless(messageId);
+                await submitSignedForwardRequest(request, signature);
+            } else {
+                const tx = await deleteWhisper(messageId);
+                await waitForTransaction(Promise.resolve(tx));
+            }
             onUpdate();
         } catch (error) {
             console.error('Failed to delete message:', error);

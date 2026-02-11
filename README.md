@@ -10,7 +10,7 @@ WhisperChain lets you talk to others using your wallet as your identity. Message
 
 - **Messaging:** Send encrypted text and share files?images, video, audio, documents?stored in a decentralized way.
 - **Conversations:** One-to-one chats or group conversations with multiple participants.
-- **Payments:** Attach ETH or ERC?20 tokens to a message; the recipient gets the payment when the message is sent.
+- **Payments:** Attach ETH or ERC 20 tokens to a message; the recipient gets the payment when the message is sent.
 - **Batch sending:** Send up to 10 messages in one transaction to save gas.
 - **Profiles:** Register with a public key and username, update your key, and manage your presence.
 - **Storage and limits:** Each user has a storage quota for media; the contract enforces message and file-size limits.

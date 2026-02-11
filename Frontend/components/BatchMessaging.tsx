@@ -2,7 +2,13 @@
 
 import { useState } from 'react';
 import { Send, Plus, X, Loader2, AlertCircle } from 'lucide-react';
-import { sendBatchMessages, waitForTransaction } from '@WhisperChain/lib/whisperchainActions';
+import {
+	sendBatchMessages,
+	sendBatchMessagesGasless,
+	submitSignedForwardRequest,
+	waitForTransaction,
+} from '@WhisperChain/lib/whisperchainActions';
+import { isGaslessConfigured } from '@WhisperChain/lib/gasless';
 // Text messages are not stored on IPFS, only media files are
 import { ethers } from 'ethers';
 import type { AddressLike } from 'ethers';
@@ -86,16 +92,21 @@ export function BatchMessaging({ onComplete, onCancel }: BatchMessagingProps) {
             // Use empty IPFS hashes for text messages (contract allows it now)
             const ipfsHashes = messages.map(() => '');
 
-            const tx = await sendBatchMessages({
-                recipients: recipients.map(r => r.trim()) as AddressLike[],
-                messageHashes: messageHashes,
-                ipfsHashes: ipfsHashes,
-                mediaTypes: messages.map(() => 0), // TEXT
-                fileSizes: messages.map(() => BigInt(0)), // No file size for text messages
-                textContents: messages, // Pass text content directly
-            });
-
-            await waitForTransaction(Promise.resolve(tx));
+            const payload = {
+                recipients: recipients.map((r) => r.trim()) as AddressLike[],
+                messageHashes,
+                ipfsHashes,
+                mediaTypes: messages.map(() => 0),
+                fileSizes: messages.map(() => BigInt(0)),
+                textContents: messages,
+            };
+            if (isGaslessConfigured()) {
+                const { request, signature } = await sendBatchMessagesGasless(payload);
+                await submitSignedForwardRequest(request, signature);
+            } else {
+                const tx = await sendBatchMessages(payload);
+                await waitForTransaction(Promise.resolve(tx));
+            }
             onComplete();
         } catch (err: any) {
             setError(err.message || 'Failed to send batch messages');

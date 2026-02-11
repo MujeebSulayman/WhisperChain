@@ -2,7 +2,11 @@
 
 import { useState } from 'react';
 import { UserPlus, Loader2, CheckCircle2 } from 'lucide-react';
-import { registerUser, waitForTransaction } from '@WhisperChain/lib/whisperchainActions';
+import {
+	registerUserGasless,
+	submitSignedForwardRequest,
+} from '@WhisperChain/lib/whisperchainActions';
+import { isGaslessConfigured } from '@WhisperChain/lib/gasless';
 import { ethers } from 'ethers';
 
 type UserRegistrationProps = {
@@ -26,17 +30,20 @@ export function UserRegistration({ onRegistered, address }: UserRegistrationProp
         setError(null);
 
         try {
-            // Auto-generate a unique public key based on address and timestamp
-            // This ensures it's unique and non-zero (contract requirement)
             const uniqueKey = `${address}-${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;
             const publicKeyBytes = ethers.keccak256(ethers.toUtf8Bytes(uniqueKey));
 
-            const tx = await registerUser({
-                publicKey: publicKeyBytes,
-                username: username.trim(),
-            });
-
-            await waitForTransaction(Promise.resolve(tx));
+            if (isGaslessConfigured()) {
+                const { request, signature } = await registerUserGasless({
+                    publicKey: publicKeyBytes,
+                    username: username.trim(),
+                });
+                await submitSignedForwardRequest(request, signature);
+            } else {
+                const { registerUser, waitForTransaction } = await import('@WhisperChain/lib/whisperchainActions');
+                const tx = await registerUser({ publicKey: publicKeyBytes, username: username.trim() });
+                await waitForTransaction(Promise.resolve(tx));
+            }
             setSuccess(true);
             setTimeout(() => {
                 onRegistered();

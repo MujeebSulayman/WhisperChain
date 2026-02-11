@@ -16,6 +16,8 @@ import { PaymentNotification } from './PaymentNotification';
 import { PaymentHistory } from './PaymentHistory';
 import {
 	sendWhisper,
+	sendWhisperGasless,
+	submitSignedForwardRequest,
 	waitForTransaction,
 	fetchUserMessages,
 	fetchMessage,
@@ -24,6 +26,7 @@ import {
 	getUserConversations,
 	getUserPublicKey,
 } from '@WhisperChain/lib/whisperchainActions';
+import { isGaslessConfigured } from '@WhisperChain/lib/gasless';
 import { useWhisperChain } from '../hooks/useWhisperChain';
 import { useWallet } from '../hooks/useWallet';
 import { useIsMobile } from '../hooks/useMediaQuery';
@@ -492,19 +495,33 @@ export function ChatContainer() {
 
 			const recipient = otherParticipants[0];
 
-			const tx = await sendWhisper({
-				recipient: recipient,
-				messageHash: messageHash,
-				ipfsHash: ipfsHash,
-				mediaType: mediaType,
-				fileSize: fileSize,
-				paymentToken: args.paymentToken,
-				paymentAmount: args.paymentAmount,
-				value: args.paymentToken === '0x0000000000000000000000000000000000000000' ? args.paymentAmount : undefined,
-				textContent: textContent,
-			});
-
-			const receipt = await waitForTransaction(Promise.resolve(tx));
+			if (isGaslessConfigured()) {
+				const { request, signature } = await sendWhisperGasless({
+					recipient,
+					messageHash,
+					ipfsHash,
+					mediaType,
+					fileSize,
+					paymentToken: args.paymentToken,
+					paymentAmount: args.paymentAmount,
+					value: args.paymentToken === '0x0000000000000000000000000000000000000000' ? args.paymentAmount : undefined,
+					textContent,
+				});
+				await submitSignedForwardRequest(request, signature);
+			} else {
+				const tx = await sendWhisper({
+					recipient,
+					messageHash,
+					ipfsHash,
+					mediaType,
+					fileSize,
+					paymentToken: args.paymentToken,
+					paymentAmount: args.paymentAmount,
+					value: args.paymentToken === '0x0000000000000000000000000000000000000000' ? args.paymentAmount : undefined,
+					textContent,
+				});
+				await waitForTransaction(Promise.resolve(tx));
+			}
 
 			if (args.paymentAmount && args.paymentAmount > BigInt(0)) {
 				setPaymentNotification({
