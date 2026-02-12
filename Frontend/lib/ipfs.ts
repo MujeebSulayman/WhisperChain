@@ -5,31 +5,28 @@ const IPFS_GATEWAY =
 const PINATA_API_KEY = process.env.NEXT_PUBLIC_PINATA_API_KEY;
 const PINATA_SECRET_KEY = process.env.NEXT_PUBLIC_PINATA_SECRET_KEY;
 
-export type MediaType = 'TEXT' | 'IMAGE' | 'VIDEO' | 'AUDIO' | 'DOCUMENT';
+// Contract enum: 0=TEXT, 1=IMAGE, 2=VIDEO, 3=AUDIO, 4=DOCUMENT
+export const MEDIA_TYPE = {
+	TEXT: 0,
+	IMAGE: 1,
+	VIDEO: 2,
+	AUDIO: 3,
+	DOCUMENT: 4,
+} as const;
+
+export type MediaTypeName = 'TEXT' | 'IMAGE' | 'VIDEO' | 'AUDIO' | 'DOCUMENT';
 
 export function getMediaTypeFromFile(file: File): number {
-	const type = file.type.toLowerCase();
-	if (type.startsWith('image/')) return 1;
-	if (type.startsWith('video/')) return 2;
-	if (type.startsWith('audio/')) return 3;
-	return 4;
+	const t = file.type.toLowerCase();
+	if (t.startsWith('image/')) return MEDIA_TYPE.IMAGE;
+	if (t.startsWith('video/')) return MEDIA_TYPE.VIDEO;
+	if (t.startsWith('audio/')) return MEDIA_TYPE.AUDIO;
+	return MEDIA_TYPE.DOCUMENT;
 }
 
-export function getMediaTypeName(type: number): MediaType {
-	switch (type) {
-		case 0:
-			return 'TEXT';
-		case 1:
-			return 'IMAGE';
-		case 2:
-			return 'VIDEO';
-		case 3:
-			return 'AUDIO';
-		case 4:
-			return 'DOCUMENT';
-		default:
-			return 'TEXT';
-	}
+export function getMediaTypeName(type: number): MediaTypeName {
+	const names: MediaTypeName[] = ['TEXT', 'IMAGE', 'VIDEO', 'AUDIO', 'DOCUMENT'];
+	return names[type] ?? 'TEXT';
 }
 
 export async function uploadToIPFS(

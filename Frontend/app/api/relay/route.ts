@@ -49,7 +49,18 @@ export async function POST(req: Request) {
 	}
 
 	const value = BigInt(request.value ?? '0');
-	const gas = BigInt(request.gas ?? '300000');
+	let gas: bigint;
+	if (request.gas && request.gas !== '0') {
+		gas = BigInt(request.gas);
+	} else {
+		const provider = new JsonRpcProvider(RPC_URL);
+		const estimated = await provider.estimateGas({
+			to: request.to,
+			data: request.data,
+			value,
+		});
+		gas = estimated + BigInt(80_000);
+	}
 	const nonce = BigInt(request.nonce ?? '0');
 	const reqTuple = [
 		request.from,

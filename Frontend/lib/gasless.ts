@@ -53,6 +53,8 @@ export async function getForwardRequestNonce(userAddress: string): Promise<bigin
 	return forwarder.getNonce(userAddress);
 }
 
+const GAS_ESTIMATE_BUFFER = BigInt(80_000);
+
 export async function buildForwardRequest(params: {
 	from: string;
 	to?: string;
@@ -60,12 +62,24 @@ export async function buildForwardRequest(params: {
 	gasLimit?: bigint;
 	data: string;
 }): Promise<ForwardRequest> {
+	const provider = new JsonRpcProvider(BASE_CHAIN.rpcUrl);
+	const target = params.to ?? WHISPERCHAIN_ADDRESS;
+	const value = params.value ?? BigInt(0);
+	let gas = params.gasLimit;
+	if (gas === undefined || gas === BigInt(0)) {
+		const estimated = await provider.estimateGas({
+			to: target,
+			data: params.data,
+			value,
+		});
+		gas = estimated + GAS_ESTIMATE_BUFFER;
+	}
 	const nonce = await getForwardRequestNonce(params.from);
 	return {
 		from: params.from,
-		to: params.to ?? WHISPERCHAIN_ADDRESS,
-		value: params.value ?? BigInt(0),
-		gas: params.gasLimit ?? BigInt(300_000),
+		to: target,
+		value,
+		gas,
 		nonce,
 		data: params.data,
 	};

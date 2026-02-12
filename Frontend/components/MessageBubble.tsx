@@ -46,8 +46,9 @@ export function MessageBubble({ message, index = 0, showAvatar = true, isGrouped
         return () => clearTimeout(timer);
     }, [index]);
 
-    // Only show "read" status for sent messages, not "delivered" or "pending"
     const showReadStatus = isSelf && message.status === 'read';
+    const hasMedia = Boolean(message.ipfsHash && (message.mediaType ?? 0) > 0);
+    const isImage = message.mediaType === 1;
 
     const getMediaIcon = (type?: number) => {
         switch (type) {
@@ -160,7 +161,7 @@ export function MessageBubble({ message, index = 0, showAvatar = true, isGrouped
                         borderRadius: isSelf
                             ? (isGrouped ? '1.25rem 0.5rem 1.25rem 1.25rem' : '1.25rem 0.5rem 1.25rem 1.25rem')
                             : (isGrouped ? '0.5rem 1.25rem 1.25rem 1.25rem' : '0.5rem 1.25rem 1.25rem 1.25rem'),
-                        padding: message.ipfsHash && message.mediaType === 1 ? '0' : '0.8125rem 1.125rem',
+                        padding: isImage && message.ipfsHash ? '0' : '0.8125rem 1.125rem',
                         background: isSelf
                             ? 'linear-gradient(145deg, rgba(99, 102, 241, 0.22) 0%, rgba(79, 70, 229, 0.12) 100%)'
                             : 'linear-gradient(145deg, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0.04) 100%)',
@@ -171,7 +172,7 @@ export function MessageBubble({ message, index = 0, showAvatar = true, isGrouped
                         position: 'relative',
                         display: 'flex',
                         flexDirection: 'column',
-                        gap: message.body && message.ipfsHash && message.mediaType === 1 ? '0.5rem' : '0',
+                        gap: message.body && isImage && message.ipfsHash ? '0.5rem' : '0',
                         backdropFilter: 'blur(12px)',
                         transition: 'border-color 0.2s, box-shadow 0.2s, background 0.2s',
                     }}
@@ -188,7 +189,6 @@ export function MessageBubble({ message, index = 0, showAvatar = true, isGrouped
                         }
                     }}
                 >
-                    {/* Message Text */}
                     {message.body && (
                         <p
                             style={{
@@ -198,15 +198,15 @@ export function MessageBubble({ message, index = 0, showAvatar = true, isGrouped
                                 wordBreak: 'break-word',
                                 color: '#ffffff',
                                 margin: 0,
-                                padding: message.ipfsHash && message.mediaType === 1 ? '0.75rem 0.875rem 0 0.875rem' : '0',
+                                padding: isImage && message.ipfsHash ? '0.75rem 0.875rem 0 0.875rem' : '0',
                             }}
                         >
                             {message.body}
                         </p>
                     )}
 
-                    {/* Media Preview */}
-                    {message.ipfsHash && message.ipfsHash.length > 0 && message.mediaType !== undefined && message.mediaType > 0 && (
+                    {/* Media: show when we have ipfsHash and mediaType 1–4 */}
+                    {message.ipfsHash && (message.mediaType ?? 0) > 0 && (
                         <div
                             style={{
                                 marginTop: message.body ? '0.875rem' : '0',
@@ -417,9 +417,9 @@ export function MessageBubble({ message, index = 0, showAvatar = true, isGrouped
                     {message.paymentAmount !== undefined && message.paymentAmount !== null && message.paymentAmount > BigInt(0) && (
                         <div
                             style={{
-                                marginTop: (message.body || (message.ipfsHash && message.mediaType !== undefined && message.mediaType > 0)) ? '0.875rem' : '0',
-                                paddingTop: (message.body || (message.ipfsHash && message.mediaType !== undefined && message.mediaType > 0)) ? '0.875rem' : '0',
-                                borderTop: (message.body || (message.ipfsHash && message.mediaType !== undefined && message.mediaType > 0))
+                                marginTop: (message.body || hasMedia) ? '0.875rem' : '0',
+                                paddingTop: (message.body || hasMedia) ? '0.875rem' : '0',
+                                borderTop: (message.body || hasMedia)
                                     ? `1px solid ${isSelf ? 'rgba(255, 255, 255, 0.2)' : 'rgba(255, 255, 255, 0.1)'}`
                                     : 'none',
                                 padding: '0.75rem 1rem',
@@ -466,8 +466,8 @@ export function MessageBubble({ message, index = 0, showAvatar = true, isGrouped
                             alignItems: 'center',
                             justifyContent: 'flex-end',
                             gap: '0.375rem',
-                            padding: message.ipfsHash && message.mediaType === 1
-                                ? (message.body ? '0.5rem 1rem 0.75rem' : '0.5rem 1rem 0.75rem')
+                            padding: isImage && message.ipfsHash
+                                ? '0.5rem 1rem 0.75rem'
                                 : message.paymentAmount && message.paymentAmount > BigInt(0)
                                     ? '0.5rem 0.875rem 0.75rem'
                                     : '0.25rem 0 0 0',
