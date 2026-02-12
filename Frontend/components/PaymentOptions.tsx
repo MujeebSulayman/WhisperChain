@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Coins, X, Loader2, CheckCircle2 } from 'lucide-react';
 import type { AddressLike, BigNumberish } from 'ethers';
-import { parseEther, Contract, ZeroAddress } from 'ethers';
+import { parseEther, parseUnits, Contract, ZeroAddress } from 'ethers';
 import { connectWhisperChain, WHISPERCHAIN_ADDRESS } from '@WhisperChain/lib/blockchain';
 
 type PaymentOptionsProps = {
@@ -16,6 +16,12 @@ const ERC20_ABI = [
     'function allowance(address owner, address spender) external view returns (uint256)',
     'function decimals() external view returns (uint8)',
 ];
+
+async function getTokenAmountRaw(tokenAddress: string, amountHuman: string, signer: import('ethers').Signer): Promise<bigint> {
+    const tokenContract = new Contract(tokenAddress, ERC20_ABI, signer);
+    const decimals = await tokenContract.decimals();
+    return parseUnits(amountHuman, Number(decimals));
+}
 
 export function PaymentOptions({ onPaymentSet, onCancel }: PaymentOptionsProps) {
     const [amount, setAmount] = useState('');
@@ -35,10 +41,10 @@ export function PaymentOptions({ onPaymentSet, onCancel }: PaymentOptionsProps) 
             const { signer } = await connectWhisperChain();
             const userAddress = await signer.getAddress();
             const tokenContract = new Contract(tokenAddress, ERC20_ABI, signer);
-            const amountWei = parseEther(amount);
+            const amountRaw = await getTokenAmountRaw(tokenAddress, amount, signer);
             const allowance = await tokenContract.allowance(userAddress, WHISPERCHAIN_ADDRESS);
 
-            if (allowance >= amountWei) {
+            if (allowance >= amountRaw) {
                 setApprovalStatus('approved');
             } else {
                 setApprovalStatus('needs-approval');
@@ -59,8 +65,8 @@ export function PaymentOptions({ onPaymentSet, onCancel }: PaymentOptionsProps) 
             setError(null);
             const { signer } = await connectWhisperChain();
             const tokenContract = new Contract(tokenAddress, ERC20_ABI, signer);
-            const amountWei = parseEther(amount);
-            const tx = await tokenContract.approve(WHISPERCHAIN_ADDRESS, amountWei);
+            const amountRaw = await getTokenAmountRaw(tokenAddress, amount, signer);
+            const tx = await tokenContract.approve(WHISPERCHAIN_ADDRESS, amountRaw);
             await tx.wait();
             setApprovalStatus('approved');
         } catch (error: any) {
@@ -70,7 +76,7 @@ export function PaymentOptions({ onPaymentSet, onCancel }: PaymentOptionsProps) 
         }
     };
 
-    const handleSet = () => {
+    const handleSet = async () => {
         setError(null);
 
         if (!amount || parseFloat(amount) <= 0) {
@@ -89,9 +95,15 @@ export function PaymentOptions({ onPaymentSet, onCancel }: PaymentOptionsProps) 
         }
 
         try {
-            const amountWei = parseEther(amount);
+            let amountRaw: bigint;
+            if (useToken && tokenAddress.trim()) {
+                const { signer } = await connectWhisperChain();
+                amountRaw = await getTokenAmountRaw(tokenAddress, amount, signer);
+            } else {
+                amountRaw = parseEther(amount);
+            }
             const token = useToken && tokenAddress ? tokenAddress : ZeroAddress;
-            onPaymentSet(amountWei, token);
+            onPaymentSet(amountRaw, token);
         } catch (error) {
             setError('Invalid amount format');
         }
@@ -150,7 +162,7 @@ export function PaymentOptions({ onPaymentSet, onCancel }: PaymentOptionsProps) 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                 <div>
                     <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 500, color: 'rgba(255, 255, 255, 0.7)', marginBottom: '0.5rem' }}>
-                        Amount (Base ETH)
+                        Amount {useToken ? '(token units)' : '(Base ETH)'}
                     </label>
                     <input
                         type="number"

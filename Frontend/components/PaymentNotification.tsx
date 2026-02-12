@@ -2,8 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import { Coins, X, CheckCircle2 } from 'lucide-react';
-import { formatEther, ZeroAddress } from 'ethers';
+import { ZeroAddress } from 'ethers';
 import type { BigNumberish, AddressLike } from 'ethers';
+import { formatTokenAmount } from '@WhisperChain/lib/token';
+import { useTokenInfo } from '../hooks/useTokenInfo';
 
 type PaymentNotificationProps = {
     paymentAmount: BigNumberish;
@@ -23,6 +25,8 @@ export function PaymentNotification({
     onDismiss,
 }: PaymentNotificationProps) {
     const [isVisible, setIsVisible] = useState(false);
+    const tokenAddr = paymentToken != null ? String(paymentToken) : ZeroAddress;
+    const tokenInfo = useTokenInfo(tokenAddr);
 
     useEffect(() => {
         setIsVisible(true);
@@ -33,8 +37,8 @@ export function PaymentNotification({
         return () => clearTimeout(timer);
     }, [onDismiss]);
 
-    const isToken = paymentToken && paymentToken !== ZeroAddress;
-    const amount = formatEther(paymentAmount);
+    const amountStr = formatTokenAmount(BigInt(paymentAmount ?? 0), tokenInfo.decimals);
+    const label = tokenAddr === ZeroAddress ? 'Base ETH' : tokenInfo.symbol;
 
     return (
         <div
@@ -95,7 +99,7 @@ export function PaymentNotification({
                             marginBottom: '0.375rem',
                         }}
                     >
-                        {amount} {isToken ? 'Tokens' : 'Base ETH'}
+                        {tokenInfo.loading ? '...' : amountStr} {label}
                     </div>
                     {isReceived && from && (
                         <div
@@ -117,18 +121,6 @@ export function PaymentNotification({
                             }}
                         >
                             To: {to.slice(0, 6)}...{to.slice(-4)}
-                        </div>
-                    )}
-                    {isToken && paymentToken && (
-                        <div
-                            style={{
-                                fontSize: '0.6875rem',
-                                color: 'rgba(255, 255, 255, 0.7)',
-                                fontFamily: 'monospace',
-                                marginTop: '0.25rem',
-                            }}
-                        >
-                            Token: {String(paymentToken).slice(0, 8)}...{String(paymentToken).slice(-6)}
                         </div>
                     )}
                 </div>

@@ -4,8 +4,10 @@ import { CheckCheck, Image, Video, Music, FileText, ExternalLink, Coins, CheckCi
 import { format } from 'date-fns';
 import { useState, useEffect } from 'react';
 import { getIPFSUrl, getMediaTypeName } from '@WhisperChain/lib/ipfs';
-import { formatEther, ZeroAddress } from 'ethers';
+import { formatTokenAmount } from '@WhisperChain/lib/token';
+import { ZeroAddress } from 'ethers';
 import { useIsMobile } from '../hooks/useMediaQuery';
+import { useTokenInfo } from '../hooks/useTokenInfo';
 
 type Message = {
     id: string;
@@ -49,6 +51,11 @@ export function MessageBubble({ message, index = 0, showAvatar = true, isGrouped
     const showReadStatus = isSelf && message.status === 'read';
     const hasMedia = Boolean(message.ipfsHash && (message.mediaType ?? 0) > 0);
     const isImage = message.mediaType === 1;
+    const paymentTokenInfo = useTokenInfo(message.paymentToken ?? ZeroAddress);
+    const paymentLabel = message.paymentToken === ZeroAddress ? 'Base ETH' : paymentTokenInfo.symbol;
+    const paymentAmountStr = message.paymentAmount != null
+        ? formatTokenAmount(BigInt(message.paymentAmount), paymentTokenInfo.decimals)
+        : '';
 
     const getMediaIcon = (type?: number) => {
         switch (type) {
@@ -441,8 +448,7 @@ export function MessageBubble({ message, index = 0, showAvatar = true, isGrouped
                                         : '#fbbf24',
                             }} />
                             <span style={{ fontSize: '0.8125rem', fontWeight: 500, color: '#ffffff' }}>
-                                {isSelf ? 'Sent' : 'Received'} {formatEther(message.paymentAmount)}{' '}
-                                {message.paymentToken === ZeroAddress ? 'Base ETH' : 'Tokens'}
+                                {isSelf ? 'Sent' : 'Received'} {paymentTokenInfo.loading ? '...' : paymentAmountStr} {paymentLabel}
                             </span>
                             {message.paymentSettled && (
                                 <CheckCheck style={{ width: '0.75rem', height: '0.75rem', color: '#34d399', flexShrink: 0 }} />

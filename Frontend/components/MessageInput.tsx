@@ -6,8 +6,10 @@ import { FileUpload } from './FileUpload';
 import { PaymentOptions } from './PaymentOptions';
 import { uploadToIPFS, getMediaTypeFromFile } from '@WhisperChain/lib/ipfs';
 import { isIPFSHashUsed } from '@WhisperChain/lib/whisperchainActions';
-import { formatEther } from 'ethers';
+import { formatTokenAmount } from '@WhisperChain/lib/token';
+import { ZeroAddress } from 'ethers';
 import { useIsMobile } from '../hooks/useMediaQuery';
+import { useTokenInfo } from '../hooks/useTokenInfo';
 import type { AddressLike, BigNumberish } from 'ethers';
 
 type MessageInputProps = {
@@ -37,6 +39,8 @@ export function MessageInput({
     const [paymentAmount, setPaymentAmount] = useState<BigNumberish | undefined>();
     const [paymentToken, setPaymentToken] = useState<AddressLike | undefined>();
     const textareaRef = useRef<HTMLTextAreaElement>(null);
+    const paymentTokenStr = paymentToken != null ? String(paymentToken) : ZeroAddress;
+    const paymentTokenInfo = useTokenInfo(paymentTokenStr);
 
     useEffect(() => {
         if (textareaRef.current) {
@@ -237,13 +241,9 @@ export function MessageInput({
                             <Coins style={{ width: '1rem', height: '1rem', color: '#fbbf24' }} />
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.125rem' }}>
                                 <span style={{ fontSize: '0.75rem', color: '#ffffff', fontWeight: 500 }}>
-                                    {formatEther(paymentAmount)} Base ETH
+                                    {paymentTokenInfo.loading ? '...' : formatTokenAmount(BigInt(paymentAmount ?? 0), paymentTokenInfo.decimals)}{' '}
+                                    {paymentTokenStr === ZeroAddress ? 'Base ETH' : paymentTokenInfo.symbol}
                                 </span>
-                                {paymentToken && paymentToken !== '0x0000000000000000000000000000000000000000' && (
-                                    <span style={{ fontSize: '0.6875rem', color: 'rgba(255, 255, 255, 0.6)', fontFamily: 'monospace' }}>
-                                        Token: {String(paymentToken).slice(0, 6)}...{String(paymentToken).slice(-4)}
-                                    </span>
-                                )}
                             </div>
                             <button
                                 onClick={() => {

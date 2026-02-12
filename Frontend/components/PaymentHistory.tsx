@@ -5,6 +5,8 @@ import { Coins, ArrowUpRight, ArrowDownLeft, ExternalLink, Loader2 } from 'lucid
 import { formatEther, ZeroAddress } from 'ethers';
 import { fetchUserMessages, fetchMessage, isPaymentSettled } from '@WhisperChain/lib/whisperchainActions';
 import { BASE_CHAIN } from '@WhisperChain/lib/blockchain';
+import { formatTokenAmount } from '@WhisperChain/lib/token';
+import { useTokenInfo } from '../hooks/useTokenInfo';
 import type { AddressLike, BytesLike } from 'ethers';
 import { format } from 'date-fns';
 
@@ -89,9 +91,10 @@ export function PaymentHistory({ userAddress, onClose }: PaymentHistoryProps) {
         return true;
     });
 
-    const totalReceived = payments.filter((p) => p.isReceived && p.settled).reduce((sum, p) => sum + p.amount, BigInt(0));
-    const totalSent = payments.filter((p) => !p.isReceived).reduce((sum, p) => sum + p.amount, BigInt(0));
-    const pendingReceived = payments.filter((p) => p.isReceived && !p.settled).reduce((sum, p) => sum + p.amount, BigInt(0));
+    const ethOnly = (p: PaymentTransaction) => !p.token || p.token === ZeroAddress;
+    const totalReceived = payments.filter((p) => p.isReceived && p.settled && ethOnly(p)).reduce((sum, p) => sum + p.amount, BigInt(0));
+    const totalSent = payments.filter((p) => !p.isReceived && ethOnly(p)).reduce((sum, p) => sum + p.amount, BigInt(0));
+    const pendingReceived = payments.filter((p) => p.isReceived && !p.settled && ethOnly(p)).reduce((sum, p) => sum + p.amount, BigInt(0));
 
     return (
         <div
@@ -183,7 +186,7 @@ export function PaymentHistory({ userAddress, onClose }: PaymentHistoryProps) {
                         }}
                     >
                         <div style={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.6)', marginBottom: '0.5rem' }}>
-                            Total Received
+                            Total Received (ETH)
                         </div>
                         <div style={{ fontSize: '1.25rem', fontWeight: 600, color: '#10b981' }}>
                             {formatEther(totalReceived)} Base ETH
@@ -198,7 +201,7 @@ export function PaymentHistory({ userAddress, onClose }: PaymentHistoryProps) {
                         }}
                     >
                         <div style={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.6)', marginBottom: '0.5rem' }}>
-                            Total Sent
+                            Total Sent (ETH)
                         </div>
                         <div style={{ fontSize: '1.25rem', fontWeight: 600, color: '#fbbf24' }}>
                             {formatEther(totalSent)} Base ETH
@@ -213,7 +216,7 @@ export function PaymentHistory({ userAddress, onClose }: PaymentHistoryProps) {
                         }}
                     >
                         <div style={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.6)', marginBottom: '0.5rem' }}>
-                            Pending
+                            Pending (ETH)
                         </div>
                         <div style={{ fontSize: '1.25rem', fontWeight: 600, color: '#a5b4fc' }}>
                             {formatEther(pendingReceived)} Base ETH
@@ -274,119 +277,125 @@ export function PaymentHistory({ userAddress, onClose }: PaymentHistoryProps) {
                         </div>
                     ) : (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                            {filteredPayments.map((payment) => {
-                                const isToken = payment.token && payment.token !== ZeroAddress;
-                                return (
-                                    <div
-                                        key={payment.messageId}
-                                        style={{
-                                            padding: '1rem',
-                                            borderRadius: '0.75rem',
-                                            background: payment.isReceived
-                                                ? payment.settled
-                                                    ? 'rgba(16, 185, 129, 0.1)'
-                                                    : 'rgba(99, 102, 241, 0.1)'
-                                                : 'rgba(245, 158, 11, 0.1)',
-                                            border: `1px solid ${payment.isReceived
-                                                ? payment.settled
-                                                    ? 'rgba(16, 185, 129, 0.2)'
-                                                    : 'rgba(99, 102, 241, 0.2)'
-                                                : 'rgba(245, 158, 11, 0.2)'
-                                                }`,
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: '1rem',
-                                        }}
-                                    >
-                                        <div
-                                            style={{
-                                                width: '2.5rem',
-                                                height: '2.5rem',
-                                                borderRadius: '50%',
-                                                background: payment.isReceived
-                                                    ? payment.settled
-                                                        ? 'rgba(16, 185, 129, 0.2)'
-                                                        : 'rgba(99, 102, 241, 0.2)'
-                                                    : 'rgba(245, 158, 11, 0.2)',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                justifyContent: 'center',
-                                                flexShrink: 0,
-                                            }}
-                                        >
-                                            {payment.isReceived ? (
-                                                <ArrowDownLeft
-                                                    style={{
-                                                        width: '1.25rem',
-                                                        height: '1.25rem',
-                                                        color: payment.settled ? '#10b981' : '#a5b4fc',
-                                                    }}
-                                                />
-                                            ) : (
-                                                <ArrowUpRight style={{ width: '1.25rem', height: '1.25rem', color: '#fbbf24' }} />
-                                            )}
-                                        </div>
-                                        <div style={{ flex: 1, minWidth: 0 }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
-                                                <span style={{ fontSize: '0.9375rem', fontWeight: 600, color: '#ffffff' }}>
-                                                    {formatEther(payment.amount)} {isToken ? 'Tokens' : 'Base ETH'}
-                                                </span>
-                                                {!payment.settled && (
-                                                    <span
-                                                        style={{
-                                                            padding: '0.125rem 0.5rem',
-                                                            borderRadius: '0.25rem',
-                                                            background: 'rgba(99, 102, 241, 0.2)',
-                                                            color: '#a5b4fc',
-                                                            fontSize: '0.6875rem',
-                                                            fontWeight: 500,
-                                                        }}
-                                                    >
-                                                        Pending
-                                                    </span>
-                                                )}
-                                            </div>
-                                            <div style={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.6)', fontFamily: 'monospace' }}>
-                                                {payment.isReceived ? 'From' : 'To'}:{' '}
-                                                {(payment.isReceived ? payment.from : payment.to).slice(0, 6)}...
-                                                {(payment.isReceived ? payment.from : payment.to).slice(-4)}
-                                            </div>
-                                            <div style={{ fontSize: '0.6875rem', color: 'rgba(255, 255, 255, 0.5)', marginTop: '0.25rem' }}>
-                                                {format(new Date(payment.timestamp * 1000), 'MMM d, yyyy HH:mm')}
-                                            </div>
-                                        </div>
-                                        <a
-                                            href={`${BASE_CHAIN.explorer}/tx/${payment.messageId}`}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            style={{
-                                                padding: '0.5rem',
-                                                borderRadius: '0.5rem',
-                                                background: 'transparent',
-                                                border: '1px solid rgba(255, 255, 255, 0.1)',
-                                                color: 'rgba(255, 255, 255, 0.7)',
-                                                cursor: 'pointer',
-                                                transition: 'all 0.2s',
-                                                flexShrink: 0,
-                                            }}
-                                            onMouseEnter={(e) => {
-                                                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
-                                                e.currentTarget.style.color = '#ffffff';
-                                            }}
-                                            onMouseLeave={(e) => {
-                                                e.currentTarget.style.background = 'transparent';
-                                                e.currentTarget.style.color = 'rgba(255, 255, 255, 0.7)';
-                                            }}
-                                        >
-                                            <ExternalLink style={{ width: '1rem', height: '1rem' }} />
-                                        </a>
-                                    </div>
-                                );
-                            })}
+                            {filteredPayments.map((payment) => (
+                                <PaymentHistoryRow key={payment.messageId} payment={payment} />
+                            ))}
                         </div>
                     )}
                 </div>
             </div>
+        </div>
+    );
+}
+
+function PaymentHistoryRow({ payment }: { payment: PaymentTransaction }) {
+    const tokenInfo = useTokenInfo(payment.token ?? ZeroAddress);
+    const amountStr = formatTokenAmount(payment.amount, tokenInfo.decimals);
+    const label = (payment.token ?? ZeroAddress) === ZeroAddress ? 'Base ETH' : tokenInfo.symbol;
+
+    return (
+        <div
+            style={{
+                padding: '1rem',
+                borderRadius: '0.75rem',
+                background: payment.isReceived
+                    ? payment.settled
+                        ? 'rgba(16, 185, 129, 0.1)'
+                        : 'rgba(99, 102, 241, 0.1)'
+                    : 'rgba(245, 158, 11, 0.1)',
+                border: `1px solid ${payment.isReceived
+                    ? payment.settled
+                        ? 'rgba(16, 185, 129, 0.2)'
+                        : 'rgba(99, 102, 241, 0.2)'
+                    : 'rgba(245, 158, 11, 0.2)'
+                    }`,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '1rem',
+            }}
+        >
+            <div
+                style={{
+                    width: '2.5rem',
+                    height: '2.5rem',
+                    borderRadius: '50%',
+                    background: payment.isReceived
+                        ? payment.settled
+                            ? 'rgba(16, 185, 129, 0.2)'
+                            : 'rgba(99, 102, 241, 0.2)'
+                        : 'rgba(245, 158, 11, 0.2)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                }}
+            >
+                {payment.isReceived ? (
+                    <ArrowDownLeft
+                        style={{
+                            width: '1.25rem',
+                            height: '1.25rem',
+                            color: payment.settled ? '#10b981' : '#a5b4fc',
+                        }}
+                    />
+                ) : (
+                    <ArrowUpRight style={{ width: '1.25rem', height: '1.25rem', color: '#fbbf24' }} />
+                )}
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
+                    <span style={{ fontSize: '0.9375rem', fontWeight: 600, color: '#ffffff' }}>
+                        {tokenInfo.loading ? '...' : amountStr} {label}
+                    </span>
+                    {!payment.settled && (
+                        <span
+                            style={{
+                                padding: '0.125rem 0.5rem',
+                                borderRadius: '0.25rem',
+                                background: 'rgba(99, 102, 241, 0.2)',
+                                color: '#a5b4fc',
+                                fontSize: '0.6875rem',
+                                fontWeight: 500,
+                            }}
+                        >
+                            Pending
+                        </span>
+                    )}
+                </div>
+                <div style={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.6)', fontFamily: 'monospace' }}>
+                    {payment.isReceived ? 'From' : 'To'}:{' '}
+                    {(payment.isReceived ? payment.from : payment.to).slice(0, 6)}...
+                    {(payment.isReceived ? payment.from : payment.to).slice(-4)}
+                </div>
+                <div style={{ fontSize: '0.6875rem', color: 'rgba(255, 255, 255, 0.5)', marginTop: '0.25rem' }}>
+                    {format(new Date(payment.timestamp * 1000), 'MMM d, yyyy HH:mm')}
+                </div>
+            </div>
+            <a
+                href={`${BASE_CHAIN.explorer}/tx/${payment.messageId}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                    padding: '0.5rem',
+                    borderRadius: '0.5rem',
+                    background: 'transparent',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    color: 'rgba(255, 255, 255, 0.7)',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    flexShrink: 0,
+                }}
+                onMouseEnter={(e) => {
+                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
+                    e.currentTarget.style.color = '#ffffff';
+                }}
+                onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'transparent';
+                    e.currentTarget.style.color = 'rgba(255, 255, 255, 0.7)';
+                }}
+            >
+                <ExternalLink style={{ width: '1rem', height: '1rem' }} />
+            </a>
         </div>
     );
 }
