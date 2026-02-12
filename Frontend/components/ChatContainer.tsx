@@ -274,10 +274,10 @@ export function ChatContainer() {
 				messageIds.slice(0, 100).map(async (id) => {
 					try {
 						const msg = await fetchMessage(id);
-						const msgAny = msg as Record<string, unknown> & { ipfsHash?: string; mediaType?: number | unknown; textContent?: string };
-						const ipfsHash = typeof msgAny.ipfsHash === 'string' ? msgAny.ipfsHash : String((msg as any)[8] ?? '');
-						const mediaTypeNum = Number(msgAny.mediaType ?? (msg as any)[9] ?? 0);
-						const textContentStr = typeof msgAny.textContent === 'string' ? msgAny.textContent : String((msg as any)[11] ?? '');
+						const msgAny = msg as unknown as { ipfsHash?: string; mediaType?: number | bigint; textContent?: string };
+						const ipfsHash = typeof msgAny.ipfsHash === 'string' ? msgAny.ipfsHash : String((msg as unknown as Record<number, unknown>)[8] ?? '');
+						const mediaTypeNum = Number(msgAny.mediaType ?? (msg as unknown as Record<number, unknown>)[9] ?? 0);
+						const textContentStr = typeof msgAny.textContent === 'string' ? msgAny.textContent : String((msg as unknown as Record<number, unknown>)[11] ?? '');
 						const isSelf = msg.sender.toLowerCase() === connectedAddress.toLowerCase();
 						const otherAddress = isSelf ? msg.recipient : msg.sender;
 
