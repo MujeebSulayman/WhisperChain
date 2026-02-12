@@ -87,10 +87,15 @@ async function uploadToPinata(
 }
 
 export function getIPFSUrl(hash: string): string {
-	if (hash.startsWith('ipfs://')) {
-		hash = hash.replace('ipfs://', '');
+	if (!hash || typeof hash !== 'string') return '';
+	const trimmed = hash.trim();
+	if (trimmed.startsWith('ipfs://')) {
+		hash = trimmed.replace('ipfs://', '');
+	} else {
+		hash = trimmed;
 	}
 	const cleanHash = hash.startsWith('/') ? hash.slice(1) : hash;
+	if (!cleanHash) return '';
 	const cleanGateway = IPFS_GATEWAY.endsWith('/')
 		? IPFS_GATEWAY
 		: `${IPFS_GATEWAY}/`;

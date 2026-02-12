@@ -23,6 +23,8 @@ import {
 	fetchUserMessages,
 	fetchMessage,
 	fetchConversation,
+	getIPFSHash,
+	getMediaType,
 	isUserRegistered,
 	getUserConversations,
 	getUserPublicKey,
@@ -297,10 +299,25 @@ export function ChatContainer() {
 				messageIds.slice(0, 100).map(async (id) => {
 					try {
 						const msg = await fetchMessage(id);
-						const msgAny = msg as unknown as { ipfsHash?: string; mediaType?: number | bigint; textContent?: string };
-						const ipfsHash = typeof msgAny.ipfsHash === 'string' ? msgAny.ipfsHash : String((msg as unknown as Record<number, unknown>)[8] ?? '');
-						const mediaTypeNum = Number(msgAny.mediaType ?? (msg as unknown as Record<number, unknown>)[9] ?? 0);
-						const textContentStr = typeof msgAny.textContent === 'string' ? msgAny.textContent : String((msg as unknown as Record<number, unknown>)[11] ?? '');
+						const arr = msg as unknown as Record<number, unknown>;
+						const ipfsHashRaw = arr[8] ?? (msg as unknown as { ipfsHash?: string }).ipfsHash ?? '';
+						const ipfsHash = (typeof ipfsHashRaw === 'string' ? ipfsHashRaw : String(ipfsHashRaw ?? '')).trim();
+						const mediaTypeRaw = arr[9] ?? (msg as unknown as { mediaType?: number | bigint }).mediaType ?? 0;
+						let mediaTypeNum = Number(mediaTypeRaw);
+						let ipfsHashFinal = ipfsHash;
+						if (mediaTypeNum > 0 && !ipfsHashFinal) {
+							try {
+								const [hashFromGetter, typeFromGetter] = await Promise.all([getIPFSHash(id), getMediaType(id)]);
+								const h = (typeof hashFromGetter === 'string' ? hashFromGetter : String(hashFromGetter ?? '')).trim();
+								const t = Number(typeFromGetter ?? 0);
+								if (h) ipfsHashFinal = h;
+								if (t > 0) mediaTypeNum = t;
+							} catch {
+								// keep struct values
+							}
+						}
+						const textContentRaw = arr[11] ?? (msg as unknown as { textContent?: string }).textContent ?? '';
+						const textContentStr = (typeof textContentRaw === 'string' ? textContentRaw : String(textContentRaw ?? '')).trim();
 						const isSelf = msg.sender.toLowerCase() === connectedAddress.toLowerCase();
 						const otherAddress = isSelf ? msg.recipient : msg.sender;
 
@@ -345,7 +362,7 @@ export function ChatContainer() {
 							// Media message (IMAGE, VIDEO, AUDIO, DOCUMENT)
 							const { getMediaTypeName, getIPFSUrl } = await import('@WhisperChain/lib/ipfs');
 							const mediaTypeName = getMediaTypeName(mediaTypeNum);
-							body = ipfsHash && ipfsHash.length > 0 ? `${mediaTypeName}: ${getIPFSUrl(ipfsHash)}` : `[${mediaTypeName}]`;
+							body = ipfsHashFinal && ipfsHashFinal.length > 0 ? `${mediaTypeName}: ${getIPFSUrl(ipfsHashFinal)}` : `[${mediaTypeName}]`;
 						}
 
 						return {
@@ -357,7 +374,7 @@ export function ChatContainer() {
 							isSelf,
 							status: msg.read ? 'read' : msg.delivered ? 'delivered' : 'pending',
 							messageHash: msg.messageHash,
-							ipfsHash: ipfsHash || undefined,
+							ipfsHash: ipfsHashFinal && ipfsHashFinal.length > 0 ? ipfsHashFinal : undefined,
 							mediaType: mediaTypeNum,
 							fileSize: msg.fileSize,
 							conversationId,
