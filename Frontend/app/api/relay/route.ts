@@ -6,7 +6,7 @@ import type { InterfaceAbi } from 'ethers';
 
 const PAYMASTER_ADDRESS = process.env.NEXT_PUBLIC_PAYMASTER_ADDRESS ?? '';
 const FORWARDER_ADDRESS = process.env.NEXT_PUBLIC_FORWARDER_ADDRESS ?? '';
-const RPC_URL = process.env.NEXT_PUBLIC_BASE_RPC ?? 'https://sepolia.base.org';
+const RPC_URL = process.env.NEXT_PUBLIC_BASE_RPC ?? '';
 const RELAYER_PRIVATE_KEY = process.env.RELAYER_PRIVATE_KEY ?? '';
 const REIMBURSEMENT_WEI = BigInt(process.env.RELAYER_REIMBURSEMENT_WEI ?? '50000000000000');
 

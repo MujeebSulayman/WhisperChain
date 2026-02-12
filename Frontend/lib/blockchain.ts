@@ -18,7 +18,7 @@ export type { WhisperChain } from '@WhisperChain/typechain/WhisperChain';
 export const BASE_CHAIN = {
 	id: 84532,
 	name: 'Base Sepolia',
-	rpcUrl: process.env.NEXT_PUBLIC_BASE_RPC ?? 'https://sepolia.base.org',
+	rpcUrl: process.env.NEXT_PUBLIC_BASE_RPC ?? '',
 	explorer: 'https://sepolia.basescan.org',
 } as const;
 
