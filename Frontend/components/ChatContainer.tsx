@@ -274,6 +274,10 @@ export function ChatContainer() {
 				messageIds.slice(0, 100).map(async (id) => {
 					try {
 						const msg = await fetchMessage(id);
+						const msgAny = msg as Record<string, unknown> & { ipfsHash?: string; mediaType?: number | unknown; textContent?: string };
+						const ipfsHash = typeof msgAny.ipfsHash === 'string' ? msgAny.ipfsHash : String((msg as any)[8] ?? '');
+						const mediaTypeNum = Number(msgAny.mediaType ?? (msg as any)[9] ?? 0);
+						const textContentStr = typeof msgAny.textContent === 'string' ? msgAny.textContent : String((msg as any)[11] ?? '');
 						const isSelf = msg.sender.toLowerCase() === connectedAddress.toLowerCase();
 						const otherAddress = isSelf ? msg.recipient : msg.sender;
 
@@ -294,38 +298,31 @@ export function ChatContainer() {
 
 						// Determine message body based on media type
 						let body = 'Message';
-						if (Number(msg.mediaType) === 0) {
-							// TEXT message - retrieve from contract's textContent field
-							// The contract now stores text directly in textContent field
-							if (msg.textContent && msg.textContent.length > 0) {
-								body = msg.textContent;
-							} else if (msg.ipfsHash && msg.ipfsHash.length > 0 && !msg.ipfsHash.startsWith('text-')) {
-								// Legacy text message stored on IPFS - try to download
+						if (mediaTypeNum === 0) {
+							if (textContentStr && textContentStr.length > 0) {
+								body = textContentStr;
+							} else if (ipfsHash && ipfsHash.length > 0 && !ipfsHash.startsWith('text-')) {
 								try {
 									const { downloadTextFromIPFS } = await import('@WhisperChain/lib/ipfs');
-									body = await downloadTextFromIPFS(msg.ipfsHash);
+									body = await downloadTextFromIPFS(ipfsHash);
 								} catch {
-									body = `Message (IPFS: ${msg.ipfsHash.slice(0, 12)}...)`;
+									body = `Message (IPFS: ${ipfsHash.slice(0, 12)}...)`;
 								}
 							} else {
-								// Fallback: try to get textContent from contract using getTextContent
 								try {
 									const { getTextContent } = await import('@WhisperChain/lib/whisperchainActions');
 									const textContent = await getTextContent(id);
-									if (textContent && textContent.length > 0) {
-										body = textContent;
-									} else {
-										body = '[Text message]';
-									}
+									if (textContent && textContent.length > 0) body = textContent;
+									else body = '[Text message]';
 								} catch {
 									body = '[Text message]';
 								}
 							}
-						} else if (msg.ipfsHash && msg.ipfsHash.length > 0) {
-							// Media message (IMAGE, VIDEO, DOCUMENT) - stored on IPFS
+						} else {
+							// Media message (IMAGE, VIDEO, AUDIO, DOCUMENT)
 							const { getMediaTypeName, getIPFSUrl } = await import('@WhisperChain/lib/ipfs');
-							const mediaTypeName = getMediaTypeName(Number(msg.mediaType));
-							body = `${mediaTypeName}: ${getIPFSUrl(msg.ipfsHash)}`;
+							const mediaTypeName = getMediaTypeName(mediaTypeNum);
+							body = ipfsHash && ipfsHash.length > 0 ? `${mediaTypeName}: ${getIPFSUrl(ipfsHash)}` : `[${mediaTypeName}]`;
 						}
 
 						return {
@@ -333,14 +330,14 @@ export function ChatContainer() {
 							messageId: id,
 							author: isSelf ? 'You' : otherAddress.slice(0, 6) + '...' + otherAddress.slice(-4),
 							timestamp: Number(msg.timestamp),
-							body: body,
-							isSelf: isSelf,
+							body,
+							isSelf,
 							status: msg.read ? 'read' : msg.delivered ? 'delivered' : 'pending',
 							messageHash: msg.messageHash,
-							ipfsHash: msg.ipfsHash,
-							mediaType: Number(msg.mediaType),
+							ipfsHash: ipfsHash || undefined,
+							mediaType: mediaTypeNum,
 							fileSize: msg.fileSize,
-							conversationId: conversationId,
+							conversationId,
 							sender: msg.sender,
 							recipient: msg.recipient,
 							paymentAmount: msg.paymentAmount,

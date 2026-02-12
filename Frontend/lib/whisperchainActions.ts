@@ -353,14 +353,20 @@ export async function getConversationIdFromTxHash(txHash: string): Promise<strin
 	}
 	if (!receipt) throw new Error('Transaction not found or not yet mined');
 	const iface = new Interface(WHISPERCHAIN_ABI as any);
+	const convCreatedFragment = iface.getEvent('ConversationCreated');
+	const expectedTopic0 = convCreatedFragment?.topicHash ?? null;
 	for (const log of receipt.logs) {
+		const topics = Array.isArray(log.topics) ? [...log.topics] : [];
+		if (expectedTopic0 && topics[0] === expectedTopic0 && topics.length >= 2) {
+			return topics[1] as string;
+		}
 		try {
-			const parsed = iface.parseLog({ topics: [...log.topics], data: log.data });
+			const parsed = iface.parseLog({ topics, data: log.data });
 			if (parsed && parsed.name === 'ConversationCreated') {
-				return parsed.args[0]; // conversationId
+				return parsed.args[0];
 			}
 		} catch {
-			// not this event, skip
+			// skip
 		}
 	}
 	throw new Error('ConversationCreated event not found in transaction');
