@@ -18,12 +18,15 @@ type CreateConversationProps = {
     onCreated: (conversationId: string, participants: string[]) => void;
     onCancel: () => void;
     currentUser: string;
+    /** If 1:1 chat with this address already exists, return that thread id so we open it instead of creating duplicate */
+    findExisting1on1Thread?: (otherAddress: string) => string | null;
 };
 
 export function CreateConversation({
     onCreated,
     onCancel,
     currentUser,
+    findExisting1on1Thread,
 }: CreateConversationProps) {
     const [participants, setParticipants] = useState<string[]>([]);
     const [newParticipant, setNewParticipant] = useState('');
@@ -67,10 +70,18 @@ export function CreateConversation({
         setError(null);
 
         try {
-            // Auto-generate a conversation key (using participants + timestamp + random)
+            const allParticipants = [currentUser, ...participants] as AddressLike[];
+
+            if (participants.length === 1 && findExisting1on1Thread) {
+                const existingId = findExisting1on1Thread(participants[0]);
+                if (existingId) {
+                    onCreated(existingId, allParticipants as string[]);
+                    return;
+                }
+            }
+
             const keyToUse = `${currentUser}-${participants.join('-')}-${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;
             const keyHash = ethers.keccak256(ethers.toUtf8Bytes(keyToUse));
-            const allParticipants = [currentUser, ...participants] as AddressLike[];
 
             let txHash: string;
             if (isGaslessConfigured()) {

@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { Sidebar } from './Sidebar';
 import { ConversationsSidebar } from './ConversationsSidebar';
 import { ChatHeader } from './ChatHeader';
@@ -62,10 +63,32 @@ type Thread = {
 	participants?: string[];
 };
 
+const CHAT_PARAM = 'c';
+
 export function ChatContainer() {
+	const router = useRouter();
+	const pathname = usePathname();
+	const searchParams = useSearchParams();
 	const { connectedAddress, connect, disconnect } = useWallet();
 	const isMobile = useIsMobile();
-	const [activeThreadId, setActiveThreadId] = useState<string>('');
+	const [activeThreadId, setActiveThreadIdState] = useState<string>('');
+
+	const setActiveThreadId = useCallback(
+		(threadId: string) => {
+			setActiveThreadIdState(threadId);
+			const params = new URLSearchParams(searchParams.toString());
+			if (threadId) params.set(CHAT_PARAM, threadId);
+			else params.delete(CHAT_PARAM);
+			const qs = params.toString();
+			router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+		},
+		[pathname, router, searchParams]
+	);
+
+	const cFromUrl = searchParams.get(CHAT_PARAM);
+	useEffect(() => {
+		if (cFromUrl !== null && cFromUrl !== activeThreadId) setActiveThreadIdState(cFromUrl);
+	}, [cFromUrl, activeThreadId]);
 	const [messages, setMessages] = useState<Record<string, Message[]>>({});
 	const [threads, setThreads] = useState<Thread[]>([]);
 	const [isLoading, setIsLoading] = useState(false);
@@ -370,17 +393,7 @@ export function ChatContainer() {
 				});
 			});
 
-			setMessages((prev) => {
-				const next = { ...messagesByThread };
-				for (const threadId of Object.keys(prev)) {
-					const pending = (prev[threadId] ?? []).filter((m) => String(m.id).startsWith('pending-msg-'));
-					if (pending.length) {
-						next[threadId] = [...(next[threadId] ?? []), ...pending];
-						next[threadId].sort((a, b) => (typeof a.timestamp === 'number' ? a.timestamp : 0) - (typeof b.timestamp === 'number' ? b.timestamp : 0));
-					}
-				}
-				return next;
-			});
+			setMessages(messagesByThread);
 
 			// Create thread list from conversations
 			const threadData = validConversations.map((conv) => {
@@ -808,18 +821,27 @@ export function ChatContainer() {
 					<div style={{ width: '100%', maxWidth: '28rem' }}>
 						<CreateConversation
 							currentUser={connectedAddress}
+							findExisting1on1Thread={(otherAddress) => {
+								const other = otherAddress.toLowerCase();
+								const me = connectedAddress?.toLowerCase() ?? '';
+								const found = threads.find((t) => {
+									const p = t.participants?.map((a) => a.toLowerCase()) ?? [];
+									return p.length === 2 && p.includes(me) && p.includes(other);
+								});
+								return found?.id ?? null;
+							}}
 							onCreated={(conversationId, participants) => {
 								setShowCreateConversation(false);
-								const other = participants.filter((p) => p.toLowerCase() !== connectedAddress?.toLowerCase());
-								const title = other.length === 1 ? `${other[0].slice(0, 6)}...${other[0].slice(-4)}` : `${participants.length} participants`;
-								setThreads((prev) => {
-									if (prev.some((t) => t.id === conversationId)) return prev;
-									return [
+								const isExisting = threads.some((t) => t.id === conversationId);
+								if (!isExisting) {
+									const other = participants.filter((p) => p.toLowerCase() !== connectedAddress?.toLowerCase());
+									const title = other.length === 1 ? `${other[0].slice(0, 6)}...${other[0].slice(-4)}` : `${participants.length} participants`;
+									setThreads((prev) => [
 										{ id: conversationId, title, lastMessage: 'No messages yet', timestamp: 'Just now', participants },
 										...prev,
-									];
-								});
-								setMessages((prev) => ({ ...prev, [conversationId]: [] }));
+									]);
+									setMessages((prev) => ({ ...prev, [conversationId]: [] }));
+								}
 								setActiveThreadId(conversationId);
 								loadUserData();
 							}}
