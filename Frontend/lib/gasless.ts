@@ -68,6 +68,7 @@ export async function buildForwardRequest(params: {
 	let gas = params.gasLimit;
 	if (gas === undefined || gas === BigInt(0)) {
 		const estimated = await provider.estimateGas({
+			from: params.from,
 			to: target,
 			data: params.data,
 			value,
