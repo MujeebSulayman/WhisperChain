@@ -5,7 +5,6 @@ const IPFS_GATEWAY =
 const PINATA_API_KEY = process.env.NEXT_PUBLIC_PINATA_API_KEY;
 const PINATA_SECRET_KEY = process.env.NEXT_PUBLIC_PINATA_SECRET_KEY;
 
-// Contract enum: 0=TEXT, 1=IMAGE, 2=VIDEO, 3=AUDIO, 4=DOCUMENT
 export const MEDIA_TYPE = {
 	TEXT: 0,
 	IMAGE: 1,

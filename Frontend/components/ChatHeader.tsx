@@ -129,7 +129,6 @@ export function ChatHeader({ threadTitle, onMenuClick, showMenu = false, onConve
                     </>
                 )}
             </div>
-            {/* Conversations toggle button - only on mobile */}
             {isMobile && onConversationsClick && (
                 <button
                     onClick={onConversationsClick}

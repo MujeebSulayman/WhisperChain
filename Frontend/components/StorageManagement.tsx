@@ -14,8 +14,7 @@ import { isGaslessConfigured } from '@WhisperChain/lib/gasless';
 import { getErrorMessage } from '@WhisperChain/lib/errors';
 import type { AddressLike } from 'ethers';
 
-// Contract constants
-const MAX_STORAGE_PER_USER = 1000000000; // 1GB
+const MAX_STORAGE_PER_USER = 1000000000;
 
 type StorageManagementProps = {
     userAddress: AddressLike;

@@ -124,7 +124,6 @@ export function PaymentHistory({ userAddress, onClose }: PaymentHistoryProps) {
                 }}
                 onClick={(e) => e.stopPropagation()}
             >
-                {/* Header */}
                 <div
                     style={{
                         padding: '1.5rem',
@@ -166,7 +165,6 @@ export function PaymentHistory({ userAddress, onClose }: PaymentHistoryProps) {
                     </button>
                 </div>
 
-                {/* Stats */}
                 <div
                     style={{
                         padding: '1.5rem',
@@ -223,7 +221,6 @@ export function PaymentHistory({ userAddress, onClose }: PaymentHistoryProps) {
                     </div>
                 </div>
 
-                {/* Filters */}
                 <div
                     style={{
                         padding: '1rem 1.5rem',
@@ -265,7 +262,6 @@ export function PaymentHistory({ userAddress, onClose }: PaymentHistoryProps) {
                     ))}
                 </div>
 
-                {/* Payment List */}
                 <div style={{ flex: 1, overflowY: 'auto', padding: '1rem' }}>
                     {isLoading ? (
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '3rem' }}>

@@ -10,10 +10,9 @@ import {
 } from '@WhisperChain/lib/whisperchainActions';
 import type { AddressLike } from 'ethers';
 
-// Contract constants
 const MAX_MESSAGES_PER_USER = 10000;
-const MAX_STORAGE_PER_USER = 1000000000; // 1GB in bytes
-const MAX_FILE_SIZE = 50000000; // 50MB in bytes
+const MAX_STORAGE_PER_USER = 1000000000;
+const MAX_FILE_SIZE = 50000000;
 
 type UserStatsProps = {
     userAddress: AddressLike;
@@ -113,7 +112,6 @@ export function UserStats({ userAddress }: UserStatsProps) {
                 </button>
             </div>
 
-            {/* User Balance */}
             {userBalance !== null && (
                 <div
                     style={{
@@ -135,7 +133,6 @@ export function UserStats({ userAddress }: UserStatsProps) {
                 </div>
             )}
 
-            {/* Message Count */}
             {messageCount !== null && (
                 <div
                     style={{
@@ -172,7 +169,6 @@ export function UserStats({ userAddress }: UserStatsProps) {
                 </div>
             )}
 
-            {/* Storage Usage */}
             {storage && (
                 <div
                     style={{
@@ -211,7 +207,6 @@ export function UserStats({ userAddress }: UserStatsProps) {
                 </div>
             )}
 
-            {/* Contract Stats */}
             {contractStats && (
                 <div
                     style={{

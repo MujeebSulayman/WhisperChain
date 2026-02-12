@@ -21,11 +21,9 @@ export function WalletConnect({ onConnect, onDisconnect, connectedAddress }: Wal
 		setError(null);
 
 		try {
-			// Check if we're on mobile without wallet
 			if (isMobileDevice()) {
 				const ethereum = (window as typeof window & { ethereum?: any }).ethereum;
 				if (!ethereum) {
-					// Try to open MetaMask
 					openMetaMaskMobile();
 					setError('Opening MetaMask... Please open this page in MetaMask browser or install MetaMask.');
 					setIsConnecting(false);
@@ -51,13 +49,11 @@ export function WalletConnect({ onConnect, onDisconnect, connectedAddress }: Wal
 				throw new Error('No wallet detected');
 			}
 
-			// Request account switch via MetaMask
 			await ethereum.request({
 				method: 'wallet_requestPermissions',
 				params: [{ eth_accounts: {} }],
 			});
 
-			// Get the new account and reconnect
 			const accounts = await ethereum.request({ method: 'eth_accounts' });
 			if (accounts.length > 0) {
 				await onConnect();

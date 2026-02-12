@@ -10,11 +10,9 @@ import {
 } from '@WhisperChain/lib/whisperchainActions';
 import { isGaslessConfigured } from '@WhisperChain/lib/gasless';
 import { getErrorMessage } from '@WhisperChain/lib/errors';
-// Text messages are not stored on IPFS, only media files are
 import { ethers } from 'ethers';
 import type { AddressLike } from 'ethers';
 
-// Contract constant
 const MAX_BATCH_MESSAGES = 10;
 
 type BatchMessagingProps = {
@@ -74,7 +72,6 @@ export function BatchMessaging({ onComplete, onCancel }: BatchMessagingProps) {
             return;
         }
 
-        // Validate addresses
         for (const recipient of recipients) {
             if (!ethers.isAddress(recipient.trim())) {
                 setError(`Invalid address: ${recipient}`);
@@ -86,11 +83,9 @@ export function BatchMessaging({ onComplete, onCancel }: BatchMessagingProps) {
         setError(null);
 
         try {
-            // For text messages, don't upload to IPFS - store text content directly in contract
             const messageHashes = messages.map((msg) =>
                 ethers.keccak256(ethers.toUtf8Bytes(msg))
             );
-            // Use empty IPFS hashes for text messages (contract allows it now)
             const ipfsHashes = messages.map(() => '');
 
             const payload = {

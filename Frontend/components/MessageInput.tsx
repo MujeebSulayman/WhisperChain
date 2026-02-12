@@ -60,7 +60,6 @@ export function MessageInput({
             let mediaType: number | undefined;
             let fileSize: bigint | undefined;
 
-            // Upload file if selected
             if (currentFile) {
                 try {
                     ipfsHash = await uploadToIPFS(currentFile, currentFile.name, async (hash) => {

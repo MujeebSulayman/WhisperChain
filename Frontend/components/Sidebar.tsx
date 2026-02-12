@@ -58,7 +58,6 @@ export function Sidebar({
                 boxShadow: isMobile && isOpen ? '4px 0 24px rgba(0, 0, 0, 0.5)' : 'none',
             }}
         >
-            {/* Header - Fixed */}
             <div
                 style={{
                     padding: isOpen ? '1rem' : '0.75rem',
@@ -160,7 +159,6 @@ export function Sidebar({
                 )}
             </div>
 
-            {/* Scrollable Content */}
             <div
                 style={{
                     flex: 1,
@@ -170,7 +168,6 @@ export function Sidebar({
                     flexDirection: 'column',
                 }}
             >
-                {/* User Profile */}
                 {profile && connectedAddress && (
                     <div
                         style={{
@@ -328,7 +325,6 @@ export function Sidebar({
                     </div>
                 )}
 
-                {/* Actions */}
                 <div
                     style={{
                         padding: isOpen ? '1rem' : '0.5rem',
@@ -516,14 +512,12 @@ export function Sidebar({
                     )}
                 </div>
 
-                {/* Stats - Only show when open */}
                 {connectedAddress && isOpen && (
                     <div style={{ padding: '1rem', borderBottom: '1px solid rgba(255, 255, 255, 0.08)' }}>
                         <UserStats userAddress={connectedAddress} />
                     </div>
                 )}
 
-                {/* Storage Management - Inside scrollable area, only show when open */}
                 {connectedAddress && isOpen && (
                     <div
                         style={{

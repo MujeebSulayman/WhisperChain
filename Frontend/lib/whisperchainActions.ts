@@ -366,7 +366,6 @@ export async function getConversationIdFromTxHash(txHash: string): Promise<strin
 				return parsed.args[0];
 			}
 		} catch {
-			// skip
 		}
 	}
 	throw new Error('ConversationCreated event not found in transaction');

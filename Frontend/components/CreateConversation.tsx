@@ -18,7 +18,6 @@ type CreateConversationProps = {
     onCreated: (conversationId: string, participants: string[]) => void;
     onCancel: () => void;
     currentUser: string;
-    /** If 1:1 chat with this address already exists, return that thread id so we open it instead of creating duplicate */
     findExisting1on1Thread?: (otherAddress: string) => string | null;
 };
 

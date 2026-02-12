@@ -114,7 +114,6 @@ export function ChatContainer() {
 
 	const { profile, isRegistered, refresh } = useWhisperChain(connectedAddress);
 
-	// Close sidebars on mobile when thread is selected
 	useEffect(() => {
 		if (isMobile && activeThreadId) {
 			setSidebarOpen(false);
@@ -122,14 +121,12 @@ export function ChatContainer() {
 		}
 	}, [isMobile, activeThreadId]);
 
-	// Show conversations sidebar on mobile when wallet is connected
 	useEffect(() => {
 		if (isMobile && connectedAddress && !activeThreadId) {
 			setConversationsSidebarOpen(true);
 		}
 	}, [isMobile, connectedAddress, activeThreadId]);
 
-	// Ensure only one sidebar is open at a time on mobile
 	useEffect(() => {
 		if (isMobile && sidebarOpen && conversationsSidebarOpen) {
 			setConversationsSidebarOpen(false);
@@ -142,7 +139,6 @@ export function ChatContainer() {
 		}
 	}, [isMobile, conversationsSidebarOpen]);
 
-	// Load user public key
 	useEffect(() => {
 		if (!connectedAddress) return;
 
@@ -172,7 +168,6 @@ export function ChatContainer() {
 		}
 	}, [connectedAddress]);
 
-	// Set up event listeners separately
 	useEffect(() => {
 		if (!connectedAddress) return;
 
@@ -189,7 +184,6 @@ export function ChatContainer() {
 		};
 	}, [connectedAddress]);
 
-	// Set up real-time event listeners
 	const setupEventListeners = async () => {
 		if (!connectedAddress) return;
 
@@ -197,32 +191,26 @@ export function ChatContainer() {
 			const { getReadOnlyContract } = await import('@WhisperChain/lib/blockchain');
 			const contract = getReadOnlyContract();
 
-			// Listen for new messages
 			const handleMessageSent = async (messageId: string, sender: string, recipient: string) => {
 				const senderLower = sender.toLowerCase();
 				const recipientLower = recipient.toLowerCase();
 				const connectedLower = connectedAddress.toLowerCase();
 
-				// Only process if message is for or from the connected user
 				if (senderLower === connectedLower || recipientLower === connectedLower) {
-					// Small delay to ensure transaction is mined
 					setTimeout(() => {
 						loadUserData();
 					}, 1000);
 				}
 			};
 
-			// Listen for MessageSent events using proper TypeChain event types
 			const messageSentEvent = contract.getEvent('MessageSent');
 			contract.on(messageSentEvent, (messageId, sender, recipient, timestamp, paymentAmount, event) => {
 				handleMessageSent(messageId, sender, recipient);
 			});
 
-			// Listen for PaymentSettled events
 			const paymentSettledEvent = contract.getEvent('PaymentSettled');
 			contract.on(paymentSettledEvent, async (messageId, amount, event) => {
 				try {
-					// Get message details to show notification
 					const msg = await fetchMessage(messageId);
 					const isReceived = msg.recipient.toLowerCase() === connectedAddress.toLowerCase();
 					if (isReceived) {
@@ -241,7 +229,6 @@ export function ChatContainer() {
 				}
 			});
 
-			// Cleanup function
 			return () => {
 				contract.removeAllListeners(messageSentEvent);
 				contract.removeAllListeners(paymentSettledEvent);
@@ -251,13 +238,12 @@ export function ChatContainer() {
 		}
 	};
 
-	// Polling fallback for real-time updates (every 10 seconds)
 	useEffect(() => {
 		if (!connectedAddress || !activeThreadId) return;
 
 		const pollInterval = setInterval(() => {
 			loadUserData();
-		}, 10000); // Poll every 10 seconds
+		}, 10000);
 
 		return () => clearInterval(pollInterval);
 	}, [connectedAddress, activeThreadId]);
@@ -279,7 +265,6 @@ export function ChatContainer() {
 			const messageIds = await fetchUserMessages(connectedAddress);
 			const conversationIds = await getUserConversations(connectedAddress);
 
-			// Load all conversations first
 			const conversations = await Promise.all(
 				conversationIds.slice(0, 20).map(async (id) => {
 					try {
@@ -294,7 +279,6 @@ export function ChatContainer() {
 
 			const validConversations = conversations.filter((c): c is { id: string; conversation: any } => c !== null);
 
-			// Load messages: one fetch per message (msg + getters for ipfsHash/mediaType from chain).
 			const messageData = await Promise.all(
 				messageIds.slice(0, 100).map(async (id) => {
 					try {
@@ -369,7 +353,6 @@ export function ChatContainer() {
 			const validMessages = messageData.filter((m): m is Message & { conversationId: string; sender: string; recipient: string } => m !== null);
 			const messagesByThread: Record<string, Message[]> = {};
 
-			// Group messages by conversation ID
 			validMessages.forEach((msg) => {
 				const threadId = msg.conversationId;
 				if (!messagesByThread[threadId]) {
@@ -378,7 +361,6 @@ export function ChatContainer() {
 				messagesByThread[threadId].push(msg);
 			});
 
-			// Sort messages by timestamp
 			Object.keys(messagesByThread).forEach((threadId) => {
 				messagesByThread[threadId].sort((a, b) => {
 					const timeA = typeof a.timestamp === 'number' ? a.timestamp : 0;
@@ -389,7 +371,6 @@ export function ChatContainer() {
 
 			setMessages(messagesByThread);
 
-			// Create thread list from conversations
 			const threadData = validConversations.map((conv) => {
 				const idStr = conv.id;
 				const lastMsg = messagesByThread[idStr]?.[messagesByThread[idStr].length - 1];
@@ -410,7 +391,6 @@ export function ChatContainer() {
 				} as Thread;
 			});
 
-			// Also add 1-on-1 threads from messages that don't belong to conversations
 			const oneOnOneThreads = new Map<string, { lastMsg: Message; otherAddress: string }>();
 			validMessages.forEach((msg) => {
 				if (!validConversations.find(c => c.id === msg.conversationId)) {
@@ -435,7 +415,6 @@ export function ChatContainer() {
 				} as Thread);
 			});
 
-			// Sort threads by last message timestamp
 			threadData.sort((a, b) => {
 				const msgA = messagesByThread[a.id]?.[messagesByThread[a.id].length - 1];
 				const msgB = messagesByThread[b.id]?.[messagesByThread[b.id].length - 1];
@@ -480,13 +459,9 @@ export function ChatContainer() {
 
 		const isTextMessage = !args.ipfsHash && (!args.mediaType || args.mediaType === 0);
 
-		// For TEXT messages, use empty IPFS hash (contract allows it now)
-		// For media messages, IPFS hash is required
 		const ipfsHash = args.ipfsHash || (isTextMessage ? '' : `ipfs-${Date.now()}`);
 		const mediaType = args.mediaType ?? 0;
-		// For text messages, fileSize should be 0 since we're not storing on IPFS
 		const fileSize = isTextMessage ? BigInt(0) : (args.fileSize ?? BigInt(0));
-		// For TEXT messages, store text content directly in the contract
 		const textContent = isTextMessage ? args.text : '';
 
 		const txHash = `pending-${Date.now()}`;
@@ -625,7 +600,6 @@ export function ChatContainer() {
 				overflow: 'hidden',
 			}}
 		>
-			{/* Mobile Backdrop */}
 			{isMobile && (sidebarOpen || conversationsSidebarOpen) && (
 				<div
 					style={{
@@ -655,12 +629,10 @@ export function ChatContainer() {
 					try {
 						await connect();
 					} catch (error) {
-						// Error handled by useWallet hook
 					}
 				}}
 				onDisconnect={() => {
 					disconnect();
-					// Clear state on disconnect
 					setActiveThreadId('');
 					setMessages({});
 					setThreads([]);
@@ -689,7 +661,6 @@ export function ChatContainer() {
 				isMobile={isMobile}
 			/>
 
-			{/* Main Chat Area */}
 			<main style={{
 				flex: 1,
 				display: 'flex',
@@ -710,7 +681,6 @@ export function ChatContainer() {
 					/>
 				)}
 
-				{/* Always show header on mobile, or when there's an active thread */}
 				{(isMobile || activeThreadId) && (
 					<ChatHeader
 						threadTitle={activeThreadId ? threads.find((t) => t.id === activeThreadId)?.title : undefined}
@@ -761,7 +731,6 @@ export function ChatContainer() {
 				)}
 			</main>
 
-			{/* Right Sidebar - Conversations */}
 			<ConversationsSidebar
 				isOpen={conversationsSidebarOpen}
 				onToggle={() => {
@@ -780,7 +749,6 @@ export function ChatContainer() {
 				isMobile={isMobile}
 			/>
 
-			{/* Payment Notification */}
 			{paymentNotification && (
 				<PaymentNotification
 					paymentAmount={paymentNotification.amount}
@@ -792,12 +760,10 @@ export function ChatContainer() {
 				/>
 			)}
 
-			{/* Payment History */}
 			{showPaymentHistory && connectedAddress && (
 				<PaymentHistory userAddress={connectedAddress} onClose={() => setShowPaymentHistory(false)} />
 			)}
 
-			{/* Modals */}
 			{showCreateConversation && connectedAddress && (
 				<div
 					style={{

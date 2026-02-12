@@ -12,7 +12,6 @@ export function useWallet() {
 	const [isConnecting, setIsConnecting] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 
-	// Load saved wallet on mount
 	useEffect(() => {
 		const loadSavedWallet = async () => {
 			if (typeof window === 'undefined') return;
@@ -20,7 +19,6 @@ export function useWallet() {
 			const savedAddress = localStorage.getItem(WALLET_STORAGE_KEY);
 			if (!savedAddress) return;
 
-			// Check if wallet is still connected
 			const ethereum = (window as typeof window & { ethereum?: any }).ethereum;
 			if (!ethereum) {
 				localStorage.removeItem(WALLET_STORAGE_KEY);
@@ -28,20 +26,16 @@ export function useWallet() {
 			}
 
 			try {
-				// Check if we have permission to access accounts
 				const accounts = await ethereum.request({ method: 'eth_accounts' });
 				if (
 					accounts.length > 0 &&
 					accounts[0].toLowerCase() === savedAddress.toLowerCase()
 				) {
-					// Wallet is still connected, restore state
 					setConnectedAddress(accounts[0]);
 				} else {
-					// Account changed or disconnected, clear storage
 					localStorage.removeItem(WALLET_STORAGE_KEY);
 				}
 			} catch (error) {
-				// Failed to check accounts, clear storage
 				localStorage.removeItem(WALLET_STORAGE_KEY);
 			}
 		};
@@ -49,7 +43,6 @@ export function useWallet() {
 		loadSavedWallet();
 	}, []);
 
-	// Listen for account changes
 	useEffect(() => {
 		if (typeof window === 'undefined') return;
 
@@ -62,14 +55,12 @@ export function useWallet() {
 				setConnectedAddress(address);
 				localStorage.setItem(WALLET_STORAGE_KEY, address);
 			} else {
-				// User disconnected wallet
 				setConnectedAddress(undefined);
 				localStorage.removeItem(WALLET_STORAGE_KEY);
 			}
 		};
 
 		const handleChainChanged = () => {
-			// Reload page on chain change to ensure proper state
 			window.location.reload();
 		};
 
@@ -88,12 +79,10 @@ export function useWallet() {
 
 		try {
 			const { signer } = await connectWhisperChain();
-			// Get address, catching ENS errors (Base Sepolia doesn't support ENS)
 			let address: string;
 			try {
 				address = await signer.getAddress();
 			} catch (ensError: any) {
-				// If ENS error, try getting address directly from provider
 				if (
 					ensError.code === 'UNSUPPORTED_OPERATION' &&
 					ensError.operation === 'getEnsAddress'

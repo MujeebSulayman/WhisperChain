@@ -60,7 +60,6 @@ export function ConversationsSidebar({
                 boxShadow: isMobile && isOpen ? '-4px 0 24px rgba(0, 0, 0, 0.5)' : 'none',
             }}
         >
-            {/* Header - Fixed */}
             <div
                 style={{
                     padding: isOpen ? '1rem' : '0.75rem',
@@ -123,7 +122,6 @@ export function ConversationsSidebar({
                     </button>
                 </div>
 
-                {/* Search - Only show when open */}
                 {isOpen && (
                     <div
                         style={{
@@ -171,7 +169,6 @@ export function ConversationsSidebar({
                 )}
             </div>
 
-            {/* Conversations List - Scrollable */}
             {connectedAddress && (
                 <div
                     style={{

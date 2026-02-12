@@ -4,8 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Upload, X, Image, Video, Music, FileText, AlertCircle } from 'lucide-react';
 import { getMediaTypeFromFile } from '@WhisperChain/lib/ipfs';
 
-// Contract constant
-const MAX_FILE_SIZE = 50000000; // 50MB
+const MAX_FILE_SIZE = 50000000;
 
 type FileUploadProps = {
     onFileSelected?: (file: File) => void;
@@ -18,7 +17,6 @@ export function FileUpload({ onFileSelected, onCancel, selectedFile: externalFil
     const [error, setError] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    // Sync with external file prop
     useEffect(() => {
         if (externalFile !== undefined) {
             setFile(externalFile);

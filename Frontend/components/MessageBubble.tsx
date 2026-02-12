@@ -101,7 +101,6 @@ export function MessageBubble({ message, index = 0, showAvatar = true, isGrouped
             }}
             className="animate-slide-up"
         >
-            {/* Avatar - Only show for received messages and when not grouped */}
             {!isSelf && showAvatar && !isGrouped && (
                 <div
                     style={{
@@ -125,7 +124,6 @@ export function MessageBubble({ message, index = 0, showAvatar = true, isGrouped
                 <div style={{ width: isMobile ? '2rem' : '2.25rem', flexShrink: 0 }} />
             )}
 
-            {/* Message Content */}
             <div
                 style={{
                     maxWidth: isMobile ? '85%' : '75%',
@@ -135,7 +133,6 @@ export function MessageBubble({ message, index = 0, showAvatar = true, isGrouped
                     gap: '0.375rem',
                 }}
             >
-                {/* Author Header */}
                 {!isSelf && !isGrouped && (
                     <div
                         style={{
@@ -155,7 +152,6 @@ export function MessageBubble({ message, index = 0, showAvatar = true, isGrouped
                     </div>
                 )}
 
-                {/* Message Bubble */}
                 <div
                     style={{
                         borderRadius: isSelf
@@ -205,7 +201,6 @@ export function MessageBubble({ message, index = 0, showAvatar = true, isGrouped
                         </p>
                     )}
 
-                    {/* Media: show when we have ipfsHash and mediaType 1–4 */}
                     {message.ipfsHash && (message.mediaType ?? 0) > 0 && (
                         <div
                             style={{
@@ -217,7 +212,6 @@ export function MessageBubble({ message, index = 0, showAvatar = true, isGrouped
                                 gap: '0.625rem',
                             }}
                         >
-                            {/* Image Preview */}
                             {message.mediaType === 1 && (
                                 <div
                                     style={{
@@ -257,7 +251,6 @@ export function MessageBubble({ message, index = 0, showAvatar = true, isGrouped
                                 </div>
                             )}
 
-                            {/* Document Preview */}
                             {message.mediaType === 4 && (
                                 <a
                                     href={getIPFSUrl(message.ipfsHash!)}
@@ -340,7 +333,6 @@ export function MessageBubble({ message, index = 0, showAvatar = true, isGrouped
                                 </a>
                             )}
 
-                            {/* Video and Audio - Show as cards with play icon */}
                             {(message.mediaType === 2 || message.mediaType === 3) && (
                                 <a
                                     href={getIPFSUrl(message.ipfsHash!)}
@@ -413,7 +405,6 @@ export function MessageBubble({ message, index = 0, showAvatar = true, isGrouped
                         </div>
                     )}
 
-                    {/* Payment Indicator */}
                     {message.paymentAmount !== undefined && message.paymentAmount !== null && message.paymentAmount > BigInt(0) && (
                         <div
                             style={{
@@ -459,7 +450,6 @@ export function MessageBubble({ message, index = 0, showAvatar = true, isGrouped
                         </div>
                     )}
 
-                    {/* Timestamp and Status Footer */}
                     <div
                         style={{
                             display: 'flex',
