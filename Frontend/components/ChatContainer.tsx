@@ -339,8 +339,7 @@ export function ChatContainer() {
 								}
 							}
 						} else {
-							const { getMediaTypeName, getIPFSUrl } = await import('@WhisperChain/lib/ipfs');
-							body = hash ? `${getMediaTypeName(media)}: ${getIPFSUrl(hash)}` : `[${getMediaTypeName(media)}]`;
+							body = '';
 						}
 
 						return {

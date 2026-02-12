@@ -385,8 +385,8 @@ export async function fetchUserMessages(user: AddressLike) {
 	try {
 		const contract = getReadOnlyContract();
 		return await contract.getUserMessages(user);
-	} catch (error: any) {
-		throw new Error(`Failed to fetch user messages: ${error.message}`);
+	} catch {
+		return [];
 	}
 }
 
