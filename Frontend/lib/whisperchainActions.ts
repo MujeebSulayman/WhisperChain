@@ -1,11 +1,14 @@
 'use client';
 
 import type { AddressLike, BigNumberish, BytesLike } from 'ethers';
-import { ZeroAddress } from 'ethers';
+import { Interface, JsonRpcProvider, ZeroAddress } from 'ethers';
 
 import {
+	BASE_CHAIN,
 	connectWhisperChain,
 	getReadOnlyContract,
+	WHISPERCHAIN_ABI,
+	WHISPERCHAIN_ADDRESS,
 	type WhisperChain,
 } from './blockchain';
 import {
@@ -339,6 +342,28 @@ export async function fetchConversation(conversationId: BytesLike) {
 	} catch (error: any) {
 		throw new Error(`Failed to fetch conversation: ${error.message}`);
 	}
+}
+
+export async function getConversationIdFromTxHash(txHash: string): Promise<string> {
+	const provider = new JsonRpcProvider(BASE_CHAIN.rpcUrl);
+	let receipt = await provider.getTransactionReceipt(txHash);
+	for (let i = 0; i < 30 && !receipt; i++) {
+		await new Promise((r) => setTimeout(r, 1500));
+		receipt = await provider.getTransactionReceipt(txHash);
+	}
+	if (!receipt) throw new Error('Transaction not found or not yet mined');
+	const iface = new Interface(WHISPERCHAIN_ABI as any);
+	for (const log of receipt.logs) {
+		try {
+			const parsed = iface.parseLog({ topics: [...log.topics], data: log.data });
+			if (parsed && parsed.name === 'ConversationCreated') {
+				return parsed.args[0]; // conversationId
+			}
+		} catch {
+			// not this event, skip
+		}
+	}
+	throw new Error('ConversationCreated event not found in transaction');
 }
 
 export async function fetchMessage(messageId: BytesLike) {

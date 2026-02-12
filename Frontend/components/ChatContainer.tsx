@@ -48,6 +48,8 @@ type Message = {
 	fileSize?: bigint;
 	paymentAmount?: bigint;
 	paymentToken?: string;
+	sender?: string;
+	recipient?: string;
 };
 
 type Thread = {
@@ -371,7 +373,17 @@ export function ChatContainer() {
 				});
 			});
 
-			setMessages(messagesByThread);
+			setMessages((prev) => {
+				const next = { ...messagesByThread };
+				for (const threadId of Object.keys(prev)) {
+					const pending = (prev[threadId] ?? []).filter((m) => String(m.id).startsWith('pending-msg-'));
+					if (pending.length) {
+						next[threadId] = [...(next[threadId] ?? []), ...pending];
+						next[threadId].sort((a, b) => (typeof a.timestamp === 'number' ? a.timestamp : 0) - (typeof b.timestamp === 'number' ? b.timestamp : 0));
+					}
+				}
+				return next;
+			});
 
 			// Create thread list from conversations
 			const threadData = validConversations.map((conv) => {
@@ -473,29 +485,44 @@ export function ChatContainer() {
 		// For TEXT messages, store text content directly in the contract
 		const textContent = isTextMessage ? args.text : '';
 
-		// Don't add message optimistically - wait for transaction confirmation
-		// Track pending transaction
 		const txHash = `pending-${Date.now()}`;
 		setPendingTransactions((prev) => new Set([...prev, txHash]));
 
+		const activeThread = threads.find((t) => t.id === activeThreadId);
+		if (!activeThread) {
+			setError('Conversation not found');
+			throw new Error('Conversation not found');
+		}
+		const otherParticipants = activeThread.participants?.filter(
+			(p: string) => p.toLowerCase() !== connectedAddress.toLowerCase()
+		) || [];
+		if (otherParticipants.length === 0) {
+			setError('No recipients in conversation');
+			throw new Error('No recipients in conversation');
+		}
+		const recipient = otherParticipants[0];
+
+		const optimisticId = `pending-msg-${Date.now()}`;
+		const optimisticMessage: Message = {
+			id: optimisticId,
+			messageId: optimisticId,
+			author: 'You',
+			timestamp: Math.floor(Date.now() / 1000),
+			body: args.text,
+			isSelf: true,
+			status: 'pending',
+			...(args.ipfsHash ? { ipfsHash: args.ipfsHash } : {}),
+			...(args.mediaType !== undefined && args.mediaType !== 0 ? { mediaType: args.mediaType } : {}),
+			...(args.fileSize !== undefined ? { fileSize: args.fileSize } : {}),
+			...(args.paymentAmount && args.paymentAmount > BigInt(0) ? { paymentAmount: args.paymentAmount, paymentToken: args.paymentToken } : {}),
+		};
+		const optimisticWithMeta: Message = { ...optimisticMessage, sender: connectedAddress, recipient };
+		setMessages((prev) => ({
+			...prev,
+			[activeThreadId]: [...(prev[activeThreadId] ?? []), optimisticWithMeta],
+		}));
+
 		try {
-			// Find the active thread to get recipient(s)
-			const activeThread = threads.find(t => t.id === activeThreadId);
-			if (!activeThread) {
-				throw new Error('Conversation not found');
-			}
-
-
-			const otherParticipants = activeThread.participants?.filter(
-				(p: string) => p.toLowerCase() !== connectedAddress.toLowerCase()
-			) || [];
-
-			if (otherParticipants.length === 0) {
-				throw new Error('No recipients in conversation');
-			}
-
-			const recipient = otherParticipants[0];
-
 			if (isGaslessConfigured()) {
 				const { request, signature } = await sendWhisperGasless({
 					recipient,
@@ -543,6 +570,10 @@ export function ChatContainer() {
 			refresh();
 		} catch (error: any) {
 			setError(getErrorMessage(error, 'Failed to send message'));
+			setMessages((prev) => ({
+				...prev,
+				[activeThreadId]: (prev[activeThreadId] ?? []).filter((m) => m.id !== optimisticId),
+			}));
 			setPendingTransactions((prev) => {
 				const next = new Set(prev);
 				next.delete(txHash);
@@ -780,8 +811,18 @@ export function ChatContainer() {
 					<div style={{ width: '100%', maxWidth: '28rem' }}>
 						<CreateConversation
 							currentUser={connectedAddress}
-							onCreated={(conversationId) => {
+							onCreated={(conversationId, participants) => {
 								setShowCreateConversation(false);
+								const other = participants.filter((p) => p.toLowerCase() !== connectedAddress?.toLowerCase());
+								const title = other.length === 1 ? `${other[0].slice(0, 6)}...${other[0].slice(-4)}` : `${participants.length} participants`;
+								setThreads((prev) => {
+									if (prev.some((t) => t.id === conversationId)) return prev;
+									return [
+										{ id: conversationId, title, lastMessage: 'No messages yet', timestamp: 'Just now', participants },
+										...prev,
+									];
+								});
+								setMessages((prev) => ({ ...prev, [conversationId]: [] }));
 								setActiveThreadId(conversationId);
 								loadUserData();
 							}}
