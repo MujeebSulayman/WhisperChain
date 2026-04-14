@@ -31,13 +31,13 @@ A modern, decentralized messaging application built on Base Chain with IPFS stor
 
 ## Features
 
-- 🔐 **Encrypted Messaging** - Messages stored on IPFS with on-chain verification
-- 💰 **Pay-to-Message** - Send payments with messages (ETH or ERC20)
-- 📁 **File Sharing** - Upload images, videos, audio, documents
-- 👥 **Group Conversations** - Multi-participant conversations
-- 📊 **Storage Management** - Track and manage your storage usage
-- ⚡ **Batch Messaging** - Send multiple messages at once
-- 🎨 **Modern UI** - Beautiful, responsive design with animations
+-  **Encrypted Messaging** - Messages stored on IPFS with on-chain verification
+-  **Pay-to-Message** - Send payments with messages (ETH or ERC20)
+-  **File Sharing** - Upload images, videos, audio, documents
+-  **Group Conversations** - Multi-participant conversations
+-  **Storage Management** - Track and manage your storage usage
+-  **Batch Messaging** - Send multiple messages at once
+-  **Modern UI** - Beautiful, responsive design with animations
 
 ## IPFS Setup
 
@@ -61,8 +61,8 @@ NEXT_PUBLIC_PINATA_API_KEY=your_key
 NEXT_PUBLIC_PINATA_SECRET_KEY=your_secret
 NEXT_PUBLIC_IPFS_GATEWAY=https://ipfs.io/ipfs/
 
-# Blockchain (Already configured)
-NEXT_PUBLIC_WHISPERCHAIN_ADDRESS=0xCCA7f351fA1689b33F22b66A8a69509F6b428718
+# Blockchain 
+NEXT_PUBLIC_WHISPERCHAIN_ADDRESS=
 NEXT_PUBLIC_BASE_RPC=https://mainnet.base.org
 ```
 
@@ -85,12 +85,7 @@ Frontend/
 - `npm run start` - Start production server
 - `npm run typechain` - Regenerate contract types
 
-## Smart Contract
 
-Deployed on Base Chain:
-
-- Address: `0xCCA7f351fA1689b33F22b66A8a69509F6b428718`
-- Explorer: [BaseScan](https://basescan.org/address/0xCCA7f351fA1689b33F22b66A8a69509F6b428718)
 
 ## Tech Stack
 
@@ -102,6 +97,3 @@ Deployed on Base Chain:
 - **IPFS** - Decentralized storage
 - **Base Chain** - Ethereum L2
 
-## License
-
-MIT
