@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "WhisperChain - Decentralized Messaging on Blockchain",
   description: "Secure, private, and decentralized messaging platform built on blockchain. Send encrypted messages, files, and payments directly on-chain.",
-  keywords: ["blockchain", "messaging", "decentralized", "web3", "ethereum", "crypto", "encrypted messaging"],
+  keywords: ["blockchain", "messaging", "decentralized", "web3", "crypto", "encrypted messaging"],
   authors: [{ name: "WhisperChain" }],
   openGraph: {
     title: "WhisperChain - Decentralized Messaging",
