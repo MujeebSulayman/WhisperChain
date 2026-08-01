@@ -3,13 +3,8 @@
 import Link from 'next/link';
 import { motion, useReducedMotion } from 'framer-motion';
 import { Wallet } from 'lucide-react';
-import { fadeUp, staggerContainer, EASE_OUT, ACCENT_SOLID } from './motion';
-import {
-	HeroIllustration,
-	EncryptedEnvelopeIllustration,
-	GroupChatIllustration,
-	BatchSendIllustration,
-} from './illustrations';
+import { fadeUp, staggerContainer, EASE_OUT, ACCENT_SOLID_DARK, BG_LIGHT, TEXT_MUTED_DARK, BORDER_LIGHT } from './motion';
+import { EncryptedEnvelopeIllustration, GroupChatIllustration, BatchSendIllustration } from './illustrations';
 
 const PILLS = [
 	{ Illustration: EncryptedEnvelopeIllustration, label: 'End-to-end encrypted' },
@@ -31,6 +26,7 @@ export function Hero() {
 				padding: '7rem 1.5rem 5rem',
 				perspective: 1200,
 				overflow: 'hidden',
+				background: BG_LIGHT,
 			}}
 		>
 			<motion.div
@@ -39,13 +35,6 @@ export function Hero() {
 				initial="hidden"
 				animate="show"
 			>
-				<motion.div
-					variants={fadeUp}
-					style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem' }}
-				>
-					<HeroIllustration size={160} />
-				</motion.div>
-
 				<motion.h1
 					variants={prefersReducedMotion ? fadeUp : { hidden: { opacity: 0, rotateX: 20, z: -120, y: 24 }, show: { opacity: 1, rotateX: 0, z: 0, y: 0, transition: { duration: 0.8, ease: EASE_OUT } } }}
 					style={{
@@ -64,7 +53,7 @@ export function Hero() {
 					variants={fadeUp}
 					style={{
 						fontSize: 'clamp(1rem, 2vw, 1.1875rem)',
-						color: 'rgba(245, 245, 247, 0.6)',
+						color: TEXT_MUTED_DARK,
 						maxWidth: '38rem',
 						margin: '1.5rem auto 0',
 						lineHeight: 1.65,
@@ -91,8 +80,8 @@ export function Hero() {
 							style={{
 								padding: '0.875rem 1.75rem',
 								borderRadius: '9999px',
-								background: ACCENT_SOLID,
-								color: '#0a0a0f',
+								background: ACCENT_SOLID_DARK,
+								color: '#ffffff',
 								fontWeight: 600,
 								fontSize: '0.9375rem',
 								display: 'inline-flex',
@@ -113,8 +102,8 @@ export function Hero() {
 							padding: '0.875rem 1.75rem',
 							borderRadius: '9999px',
 							background: 'transparent',
-							border: '1px solid rgba(255, 255, 255, 0.18)',
-							color: '#f5f5f7',
+							border: `1px solid ${BORDER_LIGHT}`,
+							color: '#0a0a0f',
 							fontWeight: 600,
 							fontSize: '0.9375rem',
 						}}
@@ -145,13 +134,13 @@ export function Hero() {
 									gap: '0.4375rem',
 									padding: '0.375rem 0.875rem 0.375rem 0.5rem',
 									borderRadius: '9999px',
-									border: '1px solid rgba(255, 255, 255, 0.12)',
+									border: `1px solid ${BORDER_LIGHT}`,
 									fontSize: '0.8125rem',
 									fontWeight: 500,
-									color: 'rgba(245, 245, 247, 0.65)',
+									color: TEXT_MUTED_DARK,
 								}}
 							>
-								<Illustration size={20} />
+								<Illustration size={20} invert />
 								{pill.label}
 							</div>
 						);

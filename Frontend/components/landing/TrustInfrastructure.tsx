@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, useReducedMotion } from 'framer-motion';
-import { fadeUp, staggerContainer, viewportOnce, tiltIn, SURFACE } from './motion';
+import { fadeUp, staggerContainer, viewportOnce, tiltIn, BG_LIGHT, BORDER_LIGHT, TEXT_PRIMARY_DARK, TEXT_MUTED_DARK } from './motion';
 import { Tilt3DCard } from './Tilt3DCard';
 import {
 	KeyIllustration,
@@ -49,7 +49,7 @@ export function TrustInfrastructure() {
 	const prefersReducedMotion = useReducedMotion();
 
 	return (
-		<section style={{ background: '#13131a', borderTop: '1px solid rgba(255, 255, 255, 0.08)', borderBottom: '1px solid rgba(255, 255, 255, 0.08)' }}>
+		<section style={{ background: BG_LIGHT, color: TEXT_PRIMARY_DARK, borderTop: `1px solid ${BORDER_LIGHT}`, borderBottom: `1px solid ${BORDER_LIGHT}` }}>
 			<div style={{ maxWidth: '72rem', margin: '0 auto', padding: '6rem 1.5rem' }}>
 				<motion.div
 					variants={fadeUp}
@@ -61,7 +61,7 @@ export function TrustInfrastructure() {
 					<h2 style={{ fontSize: 'clamp(1.75rem, 3.5vw, 2.5rem)', fontWeight: 800, letterSpacing: '-0.02em' }}>
 						Built so no one has to trust a company
 					</h2>
-					<p style={{ fontSize: '1rem', color: 'rgba(245, 245, 247, 0.6)', marginTop: '0.875rem', lineHeight: 1.6 }}>
+					<p style={{ fontSize: '1rem', color: TEXT_MUTED_DARK, marginTop: '0.875rem', lineHeight: 1.6 }}>
 						Security and privacy come from the protocol itself, not a policy that can change.
 					</p>
 				</motion.div>
@@ -87,8 +87,8 @@ export function TrustInfrastructure() {
 								style={{
 									padding: '1.75rem',
 									borderRadius: '1rem',
-									border: '1px solid rgba(255, 255, 255, 0.08)',
-									background: SURFACE,
+									border: `1px solid ${BORDER_LIGHT}`,
+									background: '#fafafa',
 								}}
 							>
 								<div
@@ -96,17 +96,17 @@ export function TrustInfrastructure() {
 										width: '4rem',
 										height: '4rem',
 										borderRadius: '0.875rem',
-										background: 'rgba(245, 245, 247, 0.06)',
+										background: 'rgba(10, 10, 15, 0.05)',
 										display: 'flex',
 										alignItems: 'center',
 										justifyContent: 'center',
 										marginBottom: '1.25rem',
 									}}
 								>
-									<Illustration size={44} />
+									<Illustration size={44} invert />
 								</div>
 								<h3 style={{ fontSize: '1.0625rem', fontWeight: 700, marginBottom: '0.5rem' }}>{point.title}</h3>
-								<p style={{ fontSize: '0.9375rem', color: 'rgba(245, 245, 247, 0.6)', lineHeight: 1.6 }}>{point.description}</p>
+								<p style={{ fontSize: '0.9375rem', color: TEXT_MUTED_DARK, lineHeight: 1.6 }}>{point.description}</p>
 							</Tilt3DCard>
 						);
 					})}

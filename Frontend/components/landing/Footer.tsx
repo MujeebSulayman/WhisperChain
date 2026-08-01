@@ -1,9 +1,9 @@
 import { MessageSquare } from 'lucide-react';
-import { ACCENT_SOLID } from './motion';
+import { ACCENT_SOLID_DARK, BG_LIGHT, BORDER_LIGHT, TEXT_MUTED_DARK } from './motion';
 
 export function Footer() {
 	return (
-		<footer style={{ borderTop: '1px solid rgba(255, 255, 255, 0.08)' }}>
+		<footer style={{ background: BG_LIGHT, borderTop: `1px solid ${BORDER_LIGHT}` }}>
 			<div
 				style={{
 					maxWidth: '72rem',
@@ -22,17 +22,17 @@ export function Footer() {
 							width: '1.75rem',
 							height: '1.75rem',
 							borderRadius: '0.4rem',
-							background: ACCENT_SOLID,
+							background: ACCENT_SOLID_DARK,
 							display: 'flex',
 							alignItems: 'center',
 							justifyContent: 'center',
 						}}
 					>
-						<MessageSquare style={{ width: '1rem', height: '1rem', color: '#0a0a0f' }} />
+						<MessageSquare style={{ width: '1rem', height: '1rem', color: '#ffffff' }} />
 					</div>
-					<span style={{ fontSize: '0.9375rem', fontWeight: 700, color: '#f5f5f7' }}>WhisperChain</span>
+					<span style={{ fontSize: '0.9375rem', fontWeight: 700, color: '#0a0a0f' }}>WhisperChain</span>
 				</div>
-				<p style={{ fontSize: '0.8125rem', color: 'rgba(245, 245, 247, 0.5)' }}>
+				<p style={{ fontSize: '0.8125rem', color: TEXT_MUTED_DARK }}>
 					Private messaging on the blockchain. You own the keys.
 				</p>
 			</div>

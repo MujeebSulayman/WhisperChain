@@ -1,14 +1,30 @@
-const LINE = 'rgba(245, 245, 247, 0.85)';
-const LINE_SOFT = 'rgba(245, 245, 247, 0.35)';
-const PANEL = 'rgba(245, 245, 247, 0.08)';
-const PANEL_SOFT = 'rgba(245, 245, 247, 0.14)';
-const PAPER = '#f5f5f7';
-const ACCENT = '#e5e5e7';
-const DARK = '#0a0a0f';
+type IllustrationProps = { size?: number; invert?: boolean };
 
-type IllustrationProps = { size?: number };
+function palette(invert: boolean | undefined) {
+	if (invert) {
+		return {
+			LINE: 'rgba(10, 10, 15, 0.85)',
+			LINE_SOFT: 'rgba(10, 10, 15, 0.35)',
+			PANEL: 'rgba(10, 10, 15, 0.06)',
+			PANEL_SOFT: 'rgba(10, 10, 15, 0.1)',
+			PAPER: '#0a0a0f',
+			ACCENT: '#0a0a0f',
+			DARK: '#ffffff',
+		};
+	}
+	return {
+		LINE: 'rgba(245, 245, 247, 0.85)',
+		LINE_SOFT: 'rgba(245, 245, 247, 0.35)',
+		PANEL: 'rgba(245, 245, 247, 0.08)',
+		PANEL_SOFT: 'rgba(245, 245, 247, 0.14)',
+		PAPER: '#f5f5f7',
+		ACCENT: '#e5e5e7',
+		DARK: '#0a0a0f',
+	};
+}
 
-export function EncryptedEnvelopeIllustration({ size = 56 }: IllustrationProps) {
+export function EncryptedEnvelopeIllustration({ size = 56, invert }: IllustrationProps) {
+	const { LINE, PANEL, ACCENT, DARK } = palette(invert);
 	return (
 		<svg width={size} height={size} viewBox="0 0 56 56" fill="none">
 			<rect x="6" y="14" width="44" height="30" rx="4" fill={PANEL} stroke={LINE} strokeWidth="2" />
@@ -20,7 +36,8 @@ export function EncryptedEnvelopeIllustration({ size = 56 }: IllustrationProps) 
 	);
 }
 
-export function GroupChatIllustration({ size = 56 }: IllustrationProps) {
+export function GroupChatIllustration({ size = 56, invert }: IllustrationProps) {
+	const { LINE, PANEL, ACCENT, DARK } = palette(invert);
 	return (
 		<svg width={size} height={size} viewBox="0 0 56 56" fill="none">
 			<rect x="6" y="10" width="30" height="20" rx="5" fill={PANEL} />
@@ -35,7 +52,8 @@ export function GroupChatIllustration({ size = 56 }: IllustrationProps) {
 	);
 }
 
-export function WalletPaymentIllustration({ size = 56 }: IllustrationProps) {
+export function WalletPaymentIllustration({ size = 56, invert }: IllustrationProps) {
+	const { LINE, PANEL, ACCENT, DARK } = palette(invert);
 	return (
 		<svg width={size} height={size} viewBox="0 0 56 56" fill="none">
 			<rect x="6" y="14" width="38" height="26" rx="5" fill={PANEL} stroke={LINE} strokeWidth="2" />
@@ -46,7 +64,8 @@ export function WalletPaymentIllustration({ size = 56 }: IllustrationProps) {
 	);
 }
 
-export function BatchSendIllustration({ size = 56 }: IllustrationProps) {
+export function BatchSendIllustration({ size = 56, invert }: IllustrationProps) {
+	const { LINE, PANEL, PANEL_SOFT, ACCENT, DARK } = palette(invert);
 	return (
 		<svg width={size} height={size} viewBox="0 0 56 56" fill="none">
 			<rect x="6" y="10" width="26" height="16" rx="4" fill={PANEL} />
@@ -58,7 +77,8 @@ export function BatchSendIllustration({ size = 56 }: IllustrationProps) {
 	);
 }
 
-export function StorageVaultIllustration({ size = 56 }: IllustrationProps) {
+export function StorageVaultIllustration({ size = 56, invert }: IllustrationProps) {
+	const { LINE, PANEL, PANEL_SOFT } = palette(invert);
 	return (
 		<svg width={size} height={size} viewBox="0 0 56 56" fill="none">
 			<ellipse cx="28" cy="14" rx="18" ry="6" fill={PANEL_SOFT} />
@@ -69,7 +89,8 @@ export function StorageVaultIllustration({ size = 56 }: IllustrationProps) {
 	);
 }
 
-export function RichMediaIllustration({ size = 56 }: IllustrationProps) {
+export function RichMediaIllustration({ size = 56, invert }: IllustrationProps) {
+	const { LINE, PANEL, ACCENT } = palette(invert);
 	return (
 		<svg width={size} height={size} viewBox="0 0 56 56" fill="none">
 			<rect x="7" y="10" width="42" height="30" rx="4" fill={PANEL} stroke={LINE} strokeWidth="2" />
@@ -79,17 +100,19 @@ export function RichMediaIllustration({ size = 56 }: IllustrationProps) {
 	);
 }
 
-export function SignatureIllustration({ size = 48 }: IllustrationProps) {
+export function SignatureIllustration({ size = 48, invert }: IllustrationProps) {
+	const { LINE_SOFT, PANEL, PAPER } = palette(invert);
 	return (
 		<svg width={size} height={size} viewBox="0 0 48 48" fill="none">
-			<rect x="8" y="10" width="32" height="24" rx="4" fill={PANEL} stroke={LINE} strokeWidth="2" />
+			<rect x="8" y="10" width="32" height="24" rx="4" fill={PANEL} stroke={palette(invert).LINE} strokeWidth="2" />
 			<path d="M13 27C16 21 18 30 21 25C24 20 26 29 30 24C33 20.5 34.5 25 35 23" stroke={PAPER} strokeWidth="2" strokeLinecap="round" fill="none" />
 			<path d="M13 18H27" stroke={LINE_SOFT} strokeWidth="2" strokeLinecap="round" />
 		</svg>
 	);
 }
 
-export function RelayIllustration({ size = 48 }: IllustrationProps) {
+export function RelayIllustration({ size = 48, invert }: IllustrationProps) {
+	const { LINE, PANEL_SOFT, ACCENT } = palette(invert);
 	return (
 		<svg width={size} height={size} viewBox="0 0 48 48" fill="none">
 			<circle cx="10" cy="24" r="6" fill={PANEL_SOFT} />
@@ -102,7 +125,8 @@ export function RelayIllustration({ size = 48 }: IllustrationProps) {
 	);
 }
 
-export function PaymasterIllustration({ size = 48 }: IllustrationProps) {
+export function PaymasterIllustration({ size = 48, invert }: IllustrationProps) {
+	const { LINE, PANEL, PANEL_SOFT } = palette(invert);
 	return (
 		<svg width={size} height={size} viewBox="0 0 48 48" fill="none">
 			<rect x="8" y="14" width="32" height="22" rx="4" fill={PANEL} stroke={LINE} strokeWidth="2" />
@@ -112,7 +136,8 @@ export function PaymasterIllustration({ size = 48 }: IllustrationProps) {
 	);
 }
 
-export function KeyIllustration({ size = 56 }: IllustrationProps) {
+export function KeyIllustration({ size = 56, invert }: IllustrationProps) {
+	const { LINE, PANEL, ACCENT } = palette(invert);
 	return (
 		<svg width={size} height={size} viewBox="0 0 56 56" fill="none">
 			<circle cx="18" cy="28" r="10" fill={PANEL} stroke={LINE} strokeWidth="2" />
@@ -124,7 +149,8 @@ export function KeyIllustration({ size = 56 }: IllustrationProps) {
 	);
 }
 
-export function ForwarderIllustration({ size = 56 }: IllustrationProps) {
+export function ForwarderIllustration({ size = 56, invert }: IllustrationProps) {
+	const { LINE, PANEL_SOFT, ACCENT, DARK } = palette(invert);
 	return (
 		<svg width={size} height={size} viewBox="0 0 56 56" fill="none">
 			<rect x="8" y="20" width="16" height="16" rx="3" fill={PANEL_SOFT} />
@@ -136,7 +162,8 @@ export function ForwarderIllustration({ size = 56 }: IllustrationProps) {
 	);
 }
 
-export function OnChainLimitIllustration({ size = 56 }: IllustrationProps) {
+export function OnChainLimitIllustration({ size = 56, invert }: IllustrationProps) {
+	const { LINE, PANEL_SOFT, ACCENT } = palette(invert);
 	return (
 		<svg width={size} height={size} viewBox="0 0 56 56" fill="none">
 			<rect x="8" y="10" width="14" height="14" rx="3" fill={PANEL_SOFT} />
@@ -148,7 +175,8 @@ export function OnChainLimitIllustration({ size = 56 }: IllustrationProps) {
 	);
 }
 
-export function NoServerIllustration({ size = 56 }: IllustrationProps) {
+export function NoServerIllustration({ size = 56, invert }: IllustrationProps) {
+	const { PANEL_SOFT, PAPER } = palette(invert);
 	return (
 		<svg width={size} height={size} viewBox="0 0 56 56" fill="none">
 			<rect x="12" y="10" width="32" height="9" rx="2.5" fill={PANEL_SOFT} />
@@ -159,7 +187,8 @@ export function NoServerIllustration({ size = 56 }: IllustrationProps) {
 	);
 }
 
-export function OpenContractIllustration({ size = 56 }: IllustrationProps) {
+export function OpenContractIllustration({ size = 56, invert }: IllustrationProps) {
+	const { LINE, LINE_SOFT, PANEL } = palette(invert);
 	return (
 		<svg width={size} height={size} viewBox="0 0 56 56" fill="none">
 			<rect x="10" y="8" width="36" height="40" rx="4" fill={PANEL} stroke={LINE} strokeWidth="2" />
@@ -171,7 +200,8 @@ export function OpenContractIllustration({ size = 56 }: IllustrationProps) {
 	);
 }
 
-export function WalletIdentityIllustration({ size = 56 }: IllustrationProps) {
+export function WalletIdentityIllustration({ size = 56, invert }: IllustrationProps) {
+	const { LINE, LINE_SOFT, PANEL, PANEL_SOFT } = palette(invert);
 	return (
 		<svg width={size} height={size} viewBox="0 0 56 56" fill="none">
 			<rect x="8" y="16" width="40" height="26" rx="5" fill={PANEL} stroke={LINE} strokeWidth="2" />
@@ -182,7 +212,8 @@ export function WalletIdentityIllustration({ size = 56 }: IllustrationProps) {
 	);
 }
 
-export function TrustBadgeIllustration({ size = 22 }: IllustrationProps) {
+export function TrustBadgeIllustration({ size = 22, invert }: IllustrationProps) {
+	const { ACCENT, DARK } = palette(invert);
 	return (
 		<svg width={size} height={size} viewBox="0 0 22 22" fill="none">
 			<path d="M11 2L18 5V10C18 14.5 15 17.8 11 20C7 17.8 4 14.5 4 10V5L11 2Z" fill={ACCENT} />
@@ -191,7 +222,8 @@ export function TrustBadgeIllustration({ size = 22 }: IllustrationProps) {
 	);
 }
 
-export function QuoteMarkIllustration({ size = 32 }: IllustrationProps) {
+export function QuoteMarkIllustration({ size = 32, invert }: IllustrationProps) {
+	const { LINE } = palette(invert);
 	return (
 		<svg width={size} height={size} viewBox="0 0 32 32" fill="none">
 			<path
@@ -206,11 +238,14 @@ export function QuoteMarkIllustration({ size = 32 }: IllustrationProps) {
 	);
 }
 
-export function HeroIllustration({ size = 220 }: IllustrationProps) {
+export function HeroIllustration({ size = 220, invert }: IllustrationProps) {
+	const { LINE, LINE_SOFT, PANEL, ACCENT, DARK } = palette(invert);
+	const ringA = invert ? 'rgba(10, 10, 15, 0.1)' : 'rgba(245, 245, 247, 0.1)';
+	const ringB = invert ? 'rgba(10, 10, 15, 0.14)' : 'rgba(245, 245, 247, 0.14)';
 	return (
 		<svg width={size} height={size} viewBox="0 0 220 220" fill="none">
-			<circle cx="110" cy="110" r="96" fill="none" stroke="rgba(245, 245, 247, 0.1)" strokeWidth="1.5" />
-			<circle cx="110" cy="110" r="72" fill="none" stroke="rgba(245, 245, 247, 0.14)" strokeWidth="1.5" />
+			<circle cx="110" cy="110" r="96" fill="none" stroke={ringA} strokeWidth="1.5" />
+			<circle cx="110" cy="110" r="72" fill="none" stroke={ringB} strokeWidth="1.5" />
 			<rect x="46" y="86" width="52" height="38" rx="7" fill={PANEL} stroke={LINE} strokeWidth="2" />
 			<path d="M46 92L72 108L98 92" stroke={LINE} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
 			<path d="M100 105H122" stroke={LINE_SOFT} strokeWidth="2" strokeDasharray="1 7" strokeLinecap="round" />

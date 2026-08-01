@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, useReducedMotion } from 'framer-motion';
-import { tiltIn, viewportOnce, SURFACE } from './motion';
+import { tiltIn, viewportOnce, BG_LIGHT, BORDER_LIGHT, TEXT_MUTED_DARK } from './motion';
 import { SignatureIllustration, StorageVaultIllustration, BatchSendIllustration } from './illustrations';
 
 const ROWS = [
@@ -32,84 +32,86 @@ export function DetailHighlights() {
 	const prefersReducedMotion = useReducedMotion();
 
 	return (
-		<section style={{ maxWidth: '72rem', margin: '0 auto', padding: '6rem 1.5rem', display: 'flex', flexDirection: 'column', gap: '5rem' }}>
-			{ROWS.map((row, i) => {
-				const { Illustration } = row;
-				const reversed = i % 2 === 1;
-				return (
-					<div
-						key={row.title}
-						style={{
-							display: 'grid',
-							gridTemplateColumns: 'repeat(auto-fit, minmax(20rem, 1fr))',
-							gap: '3rem',
-							alignItems: 'center',
-							perspective: 1300,
-						}}
-					>
-						<motion.div
-							variants={tiltIn(reversed ? 'y' : 'y', reversed ? 24 : -24, !!prefersReducedMotion)}
-							initial="hidden"
-							whileInView="show"
-							viewport={viewportOnce}
+		<section style={{ background: BG_LIGHT, maxWidth: '100%', margin: '0 auto', padding: 0 }}>
+			<div style={{ maxWidth: '72rem', margin: '0 auto', padding: '6rem 1.5rem', display: 'flex', flexDirection: 'column', gap: '5rem' }}>
+				{ROWS.map((row, i) => {
+					const { Illustration } = row;
+					const reversed = i % 2 === 1;
+					return (
+						<div
+							key={row.title}
 							style={{
-								order: reversed ? 2 : 1,
-								transformStyle: 'preserve-3d',
+								display: 'grid',
+								gridTemplateColumns: 'repeat(auto-fit, minmax(20rem, 1fr))',
+								gap: '3rem',
+								alignItems: 'center',
+								perspective: 1300,
 							}}
 						>
-							<div
+							<motion.div
+								variants={tiltIn(reversed ? 'y' : 'y', reversed ? 24 : -24, !!prefersReducedMotion)}
+								initial="hidden"
+								whileInView="show"
+								viewport={viewportOnce}
 								style={{
-									fontSize: '0.8125rem',
-									fontWeight: 700,
-									color: 'rgba(245, 245, 247, 0.45)',
-									textTransform: 'uppercase',
-									letterSpacing: '0.06em',
-									marginBottom: '0.75rem',
+									order: reversed ? 2 : 1,
+									transformStyle: 'preserve-3d',
 								}}
 							>
-								{row.stat}
-							</div>
-							<h3 style={{ fontSize: '1.5rem', fontWeight: 800, letterSpacing: '-0.015em', marginBottom: '0.75rem' }}>
-								{row.title}
-							</h3>
-							<p style={{ fontSize: '1rem', color: 'rgba(245, 245, 247, 0.6)', lineHeight: 1.7 }}>{row.description}</p>
-						</motion.div>
+								<div
+									style={{
+										fontSize: '0.8125rem',
+										fontWeight: 700,
+										color: TEXT_MUTED_DARK,
+										textTransform: 'uppercase',
+										letterSpacing: '0.06em',
+										marginBottom: '0.75rem',
+									}}
+								>
+									{row.stat}
+								</div>
+								<h3 style={{ fontSize: '1.5rem', fontWeight: 800, letterSpacing: '-0.015em', marginBottom: '0.75rem' }}>
+									{row.title}
+								</h3>
+								<p style={{ fontSize: '1rem', color: TEXT_MUTED_DARK, lineHeight: 1.7 }}>{row.description}</p>
+							</motion.div>
 
-						<motion.div
-							variants={tiltIn('y', reversed ? -24 : 24, !!prefersReducedMotion)}
-							initial="hidden"
-							whileInView="show"
-							viewport={viewportOnce}
-							style={{
-								order: reversed ? 1 : 2,
-								transformStyle: 'preserve-3d',
-								display: 'flex',
-								alignItems: 'center',
-								justifyContent: 'center',
-								padding: '3.5rem',
-								borderRadius: '1.25rem',
-								border: '1px solid rgba(255, 255, 255, 0.08)',
-								background: SURFACE,
-							}}
-						>
-							<div
+							<motion.div
+								variants={tiltIn('y', reversed ? -24 : 24, !!prefersReducedMotion)}
+								initial="hidden"
+								whileInView="show"
+								viewport={viewportOnce}
 								style={{
-									width: '5.5rem',
-									height: '5.5rem',
-									borderRadius: '1.25rem',
-									background: 'rgba(245, 245, 247, 0.06)',
-									border: '1px solid rgba(255, 255, 255, 0.08)',
+									order: reversed ? 1 : 2,
+									transformStyle: 'preserve-3d',
 									display: 'flex',
 									alignItems: 'center',
 									justifyContent: 'center',
+									padding: '3.5rem',
+									borderRadius: '1.25rem',
+									border: `1px solid ${BORDER_LIGHT}`,
+									background: '#fafafa',
 								}}
 							>
-								<Illustration size={56} />
-							</div>
-						</motion.div>
-					</div>
-				);
-			})}
+								<div
+									style={{
+										width: '5.5rem',
+										height: '5.5rem',
+										borderRadius: '1.25rem',
+										background: '#ffffff',
+										border: `1px solid ${BORDER_LIGHT}`,
+										display: 'flex',
+										alignItems: 'center',
+										justifyContent: 'center',
+									}}
+								>
+									<Illustration size={56} invert />
+								</div>
+							</motion.div>
+						</div>
+					);
+				})}
+			</div>
 		</section>
 	);
 }

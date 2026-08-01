@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, useReducedMotion } from 'framer-motion';
-import { staggerContainer, tiltIn, viewportOnce } from './motion';
+import { staggerContainer, tiltIn, viewportOnce, BG_LIGHT, BORDER_LIGHT, TEXT_MUTED_DARK } from './motion';
 import { TrustBadgeIllustration } from './illustrations';
 
 const BADGES = [
@@ -15,7 +15,7 @@ export function TrustBar() {
 	const prefersReducedMotion = useReducedMotion();
 
 	return (
-		<section style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.08)' }}>
+		<section style={{ background: BG_LIGHT, borderBottom: `1px solid ${BORDER_LIGHT}` }}>
 			<motion.div
 				variants={staggerContainer(0.08)}
 				initial="hidden"
@@ -42,12 +42,12 @@ export function TrustBar() {
 							alignItems: 'center',
 							gap: '0.5rem',
 							fontSize: '0.8125rem',
-							color: 'rgba(245, 245, 247, 0.6)',
+							color: TEXT_MUTED_DARK,
 							fontWeight: 500,
 							transformStyle: 'preserve-3d',
 						}}
 					>
-						<TrustBadgeIllustration size={18} />
+						<TrustBadgeIllustration size={18} invert />
 						{badge.label}
 					</motion.div>
 				))}

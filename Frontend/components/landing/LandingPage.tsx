@@ -11,7 +11,7 @@ import { GaslessExplainer } from './GaslessExplainer';
 import { TrustInfrastructure } from './TrustInfrastructure';
 import { ClosingCta } from './ClosingCta';
 import { Footer } from './Footer';
-import { BG_DARK, TEXT_PRIMARY } from './motion';
+import { BG_LIGHT, TEXT_PRIMARY_DARK } from './motion';
 
 export function LandingPage() {
 	useEffect(() => {
@@ -24,13 +24,13 @@ export function LandingPage() {
 	}, []);
 
 	return (
-		<div style={{ background: BG_DARK, color: TEXT_PRIMARY, minHeight: '100vh', width: '100%' }}>
+		<div style={{ background: BG_LIGHT, color: TEXT_PRIMARY_DARK, minHeight: '100vh', width: '100%' }}>
 			<Nav />
 			<Hero />
-			<TrustBar />
+			<TrustInfrastructure />
 			<DetailHighlights />
 			<GaslessExplainer />
-			<TrustInfrastructure />
+			<TrustBar />
 			<ClosingCta />
 			<Footer />
 
@@ -42,7 +42,7 @@ export function LandingPage() {
 				}
 				.landing-mobile-menu a:hover,
 				.landing-desktop-nav a:hover {
-					color: #f5f5f7;
+					color: #0a0a0f;
 				}
 				details summary::-webkit-details-marker {
 					display: none;

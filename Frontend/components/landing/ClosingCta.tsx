@@ -3,7 +3,7 @@
 import { motion, useReducedMotion } from 'framer-motion';
 import Link from 'next/link';
 import { Wallet } from 'lucide-react';
-import { fadeUp, staggerContainer, viewportOnce, EASE_OUT, ACCENT_SOLID } from './motion';
+import { fadeUp, staggerContainer, viewportOnce, EASE_OUT, ACCENT_SOLID_DARK, BG_LIGHT, TEXT_PRIMARY_DARK, TEXT_MUTED_DARK } from './motion';
 import type { Variants } from 'framer-motion';
 
 const arrival = (reduced: boolean): Variants =>
@@ -18,7 +18,7 @@ export function ClosingCta() {
 	const prefersReducedMotion = useReducedMotion();
 
 	return (
-		<div style={{ perspective: 1400 }}>
+		<div style={{ perspective: 1400, background: BG_LIGHT, color: TEXT_PRIMARY_DARK }}>
 			<motion.section
 				variants={arrival(!!prefersReducedMotion)}
 				initial="hidden"
@@ -35,7 +35,7 @@ export function ClosingCta() {
 					</motion.h2>
 					<motion.p
 						variants={fadeUp}
-						style={{ fontSize: '1rem', color: 'rgba(245, 245, 247, 0.6)', maxWidth: '32rem', margin: '0.875rem auto 0', lineHeight: 1.6 }}
+						style={{ fontSize: '1rem', color: TEXT_MUTED_DARK, maxWidth: '32rem', margin: '0.875rem auto 0', lineHeight: 1.6 }}
 					>
 						Connect your wallet and start messaging in seconds. No sign-up, no server, no middleman.
 					</motion.p>
@@ -46,8 +46,8 @@ export function ClosingCta() {
 								style={{
 									padding: '0.875rem 1.75rem',
 									borderRadius: '9999px',
-									background: ACCENT_SOLID,
-									color: '#0a0a0f',
+									background: ACCENT_SOLID_DARK,
+									color: '#ffffff',
 									fontWeight: 600,
 									fontSize: '0.9375rem',
 									display: 'inline-flex',

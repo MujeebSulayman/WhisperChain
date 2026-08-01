@@ -9,6 +9,13 @@ export const TEXT_PRIMARY = '#f5f5f7';
 export const TEXT_MUTED = 'rgba(245, 245, 247, 0.6)';
 export const ACCENT_SOLID = '#f5f5f7';
 
+export const BG_LIGHT = '#ffffff';
+export const SURFACE_LIGHT = '#f4f4f5';
+export const BORDER_LIGHT = 'rgba(10, 10, 15, 0.08)';
+export const TEXT_PRIMARY_DARK = '#0a0a0f';
+export const TEXT_MUTED_DARK = 'rgba(10, 10, 15, 0.6)';
+export const ACCENT_SOLID_DARK = '#0a0a0f';
+
 export const fadeUp: Variants = {
 	hidden: { opacity: 0, y: 28 },
 	show: { opacity: 1, y: 0, transition: { duration: 0.7, ease: EASE_OUT } },
