@@ -25,6 +25,12 @@ body {
 	overflow: hidden;
 }
 
+html.landing-scroll,
+body.landing-scroll {
+	height: auto;
+	overflow: auto;
+}
+
 @keyframes fadeIn {
 	from {
 		opacity: 0;
