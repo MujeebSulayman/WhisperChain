@@ -9,6 +9,7 @@ import { FeatureGrid } from './FeatureGrid';
 import { DetailHighlights } from './DetailHighlights';
 import { GaslessExplainer } from './GaslessExplainer';
 import { TrustInfrastructure } from './TrustInfrastructure';
+import { Faq } from './Faq';
 import { ClosingCta } from './ClosingCta';
 import { Footer } from './Footer';
 import { BG_LIGHT, TEXT_PRIMARY_DARK } from './motion';
@@ -31,6 +32,7 @@ export function LandingPage() {
 			<DetailHighlights />
 			<GaslessExplainer />
 			<TrustBar />
+			<Faq />
 			<ClosingCta />
 			<Footer />
 

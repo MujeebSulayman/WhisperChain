@@ -59,7 +59,7 @@ export function Hero() {
 						lineHeight: 1.65,
 					}}
 				>
-					Send encrypted messages and media, create group chats, and attach payments —
+					Send encrypted messages and media, create group chats, and attach payments
 					without giving up control of your data. Your wallet is your identity.
 				</motion.p>
 
@@ -76,7 +76,7 @@ export function Hero() {
 				>
 					<motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }} transition={{ duration: 0.2, ease: EASE_OUT }}>
 						<Link
-							href="/"
+							href="/app"
 							style={{
 								padding: '0.875rem 1.75rem',
 								borderRadius: '9999px',

@@ -42,7 +42,7 @@ export function ClosingCta() {
 					<motion.div variants={fadeUp} style={{ marginTop: '2rem', display: 'inline-block' }}>
 						<motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }} transition={{ duration: 0.2, ease: EASE_OUT }}>
 							<Link
-								href="/"
+								href="/app"
 								style={{
 									padding: '0.875rem 1.75rem',
 									borderRadius: '9999px',

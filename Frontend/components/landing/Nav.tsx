@@ -9,6 +9,7 @@ import { ACCENT_SOLID_DARK, TEXT_MUTED_DARK } from './motion';
 const NAV_LINKS = [
 	{ label: 'Features', href: '#features' },
 	{ label: 'Gasless', href: '#gasless' },
+	{ label: 'FAQ', href: '#faq' },
 ];
 
 export function Nav() {
@@ -72,7 +73,7 @@ export function Nav() {
 				<div style={{ display: 'none', alignItems: 'center', gap: '0.75rem' }} className="landing-desktop-cta">
 					<motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.96 }}>
 						<Link
-							href="/"
+							href="/app"
 							style={{
 								padding: '0.625rem 1.25rem',
 								borderRadius: '9999px',
@@ -137,7 +138,7 @@ export function Nav() {
 						</a>
 					))}
 					<Link
-						href="/"
+						href="/app"
 						style={{
 							marginTop: '0.75rem',
 							padding: '0.75rem 1.25rem',
