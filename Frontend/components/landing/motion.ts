@@ -1,4 +1,5 @@
-import type { Transition, Variants } from 'framer-motion';
+import { useRef } from 'react';
+import { useScroll, useTransform, useSpring, type MotionValue, type Transition, type Variants } from 'framer-motion';
 
 export const EASE_OUT: Transition['ease'] = [0.16, 1, 0.3, 1];
 
@@ -58,5 +59,47 @@ export function tiltIn(axis: TiltAxis, angle: number, reduced = false): Variants
 	return {
 		hidden: { opacity: 0, rotateY: angle, z: -160 },
 		show: { opacity: 1, rotateY: 0, z: 0, transition },
+	};
+}
+
+export type ScrollTiltOptions = {
+	/** Axis to rotate on as the element scrubs through the viewport. */
+	axis?: TiltAxis;
+	/** Max rotation in degrees at the extremes of the scroll range. */
+	angle?: number;
+	/** Max depth (negative translateZ) at the extremes of the scroll range. */
+	depth?: number;
+	/** Vertical drift in px, applied as a parallax offset. */
+	rise?: number;
+	reduced?: boolean;
+};
+
+/**
+ * Ties an element's 3D tilt/depth/parallax continuously to its own scroll
+ * progress through the viewport, rather than firing once on entry. Progress
+ * runs 0 (entering bottom) -> 0.5 (centered) -> 1 (leaving top), so the
+ * element rotates in, settles flat mid-viewport, then rotates out.
+ */
+export function useScrollTilt({ axis = 'y', angle = 10, depth = 90, rise = 24, reduced = false }: ScrollTiltOptions = {}) {
+	const ref = useRef<HTMLDivElement | null>(null);
+	const { scrollYProgress } = useScroll({ target: ref, offset: ['start end', 'end start'] });
+
+	const smooth = useSpring(scrollYProgress, { stiffness: 90, damping: 26, mass: 0.5 });
+
+	const rotate = useTransform(smooth, [0, 0.5, 1], [angle, 0, -angle]);
+	const z = useTransform(smooth, [0, 0.5, 1], [-depth, 0, -depth]);
+	const y = useTransform(smooth, [0, 0.5, 1], [rise, 0, -rise]);
+
+	if (reduced) {
+		return { ref, style: {} as Record<string, number | MotionValue<number>> };
+	}
+
+	return {
+		ref,
+		style: {
+			[axis === 'x' ? 'rotateX' : 'rotateY']: rotate,
+			z,
+			y,
+		} as Record<string, number | MotionValue<number>>,
 	};
 }

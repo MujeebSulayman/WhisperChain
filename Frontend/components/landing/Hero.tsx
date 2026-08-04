@@ -1,7 +1,8 @@
 'use client';
 
+import { useRef } from 'react';
 import Link from 'next/link';
-import { motion, useReducedMotion } from 'framer-motion';
+import { motion, useReducedMotion, useScroll, useTransform } from 'framer-motion';
 import { Wallet } from 'lucide-react';
 import { fadeUp, staggerContainer, EASE_OUT, ACCENT_SOLID_DARK, BG_LIGHT, TEXT_MUTED_DARK, BORDER_LIGHT } from './motion';
 import { EncryptedEnvelopeIllustration, GroupChatIllustration, BatchSendIllustration } from './illustrations';
@@ -14,9 +15,17 @@ const PILLS = [
 
 export function Hero() {
 	const prefersReducedMotion = useReducedMotion();
+	const sectionRef = useRef<HTMLElement>(null);
+	const { scrollYProgress } = useScroll({ target: sectionRef, offset: ['start start', 'end start'] });
+
+	const exitY = useTransform(scrollYProgress, [0, 1], [0, prefersReducedMotion ? 0 : -60]);
+	const exitZ = useTransform(scrollYProgress, [0, 1], [0, prefersReducedMotion ? 0 : -220]);
+	const exitRotateX = useTransform(scrollYProgress, [0, 1], [0, prefersReducedMotion ? 0 : -10]);
+	const exitOpacity = useTransform(scrollYProgress, [0, 0.85], [1, prefersReducedMotion ? 1 : 0.25]);
 
 	return (
 		<section
+			ref={sectionRef}
 			style={{
 				position: 'relative',
 				display: 'flex',
@@ -30,7 +39,16 @@ export function Hero() {
 			}}
 		>
 			<motion.div
-				style={{ textAlign: 'center', maxWidth: '48rem', position: 'relative', transformStyle: 'preserve-3d' }}
+				style={{
+					textAlign: 'center',
+					maxWidth: '48rem',
+					position: 'relative',
+					transformStyle: 'preserve-3d',
+					y: exitY,
+					z: exitZ,
+					rotateX: exitRotateX,
+					opacity: exitOpacity,
+				}}
 				variants={staggerContainer(0.12)}
 				initial="hidden"
 				animate="show"

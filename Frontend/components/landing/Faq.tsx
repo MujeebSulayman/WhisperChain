@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, useReducedMotion } from 'framer-motion';
-import { fadeUp, staggerContainer, viewportOnce, tiltIn, BG_LIGHT, BORDER_LIGHT, TEXT_MUTED_DARK, SURFACE_LIGHT } from './motion';
+import { fadeUp, viewportOnce, useScrollTilt, BG_LIGHT, BORDER_LIGHT, TEXT_MUTED_DARK, SURFACE_LIGHT } from './motion';
 
 const FAQS = [
 	{
@@ -23,7 +23,8 @@ const FAQS = [
 ];
 
 export function Faq() {
-	const prefersReducedMotion = useReducedMotion();
+	const prefersReducedMotion = !!useReducedMotion();
+	const scrub = useScrollTilt({ axis: 'x', angle: 5, depth: 40, rise: 20, reduced: prefersReducedMotion });
 
 	return (
 		<section id="faq" style={{ background: SURFACE_LIGHT, borderTop: `1px solid ${BORDER_LIGHT}`, borderBottom: `1px solid ${BORDER_LIGHT}` }}>
@@ -39,22 +40,17 @@ export function Faq() {
 				</motion.h2>
 
 				<motion.div
-					variants={staggerContainer(0.08)}
-					initial="hidden"
-					whileInView="show"
-					viewport={viewportOnce}
-					style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}
+					ref={scrub.ref}
+					style={{ ...scrub.style, display: 'flex', flexDirection: 'column', gap: '1rem', transformStyle: 'preserve-3d' }}
 				>
 					{FAQS.map((faq) => (
-						<motion.details
+						<details
 							key={faq.q}
-							variants={tiltIn('x', 10, !!prefersReducedMotion)}
 							style={{
 								padding: '1.25rem 1.5rem',
 								borderRadius: '0.75rem',
 								border: `1px solid ${BORDER_LIGHT}`,
 								background: BG_LIGHT,
-								transformStyle: 'preserve-3d',
 							}}
 						>
 							<summary style={{ fontWeight: 600, fontSize: '1rem', cursor: 'pointer', listStyle: 'none' }}>
@@ -63,7 +59,7 @@ export function Faq() {
 							<p style={{ fontSize: '0.9375rem', color: TEXT_MUTED_DARK, lineHeight: 1.65, marginTop: '0.875rem' }}>
 								{faq.a}
 							</p>
-						</motion.details>
+						</details>
 					))}
 				</motion.div>
 			</div>

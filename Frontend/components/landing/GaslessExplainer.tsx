@@ -1,8 +1,8 @@
 'use client';
 
 import { motion, useReducedMotion } from 'framer-motion';
-import { fadeUp, staggerContainer, viewportOnce, tiltIn, BG_LIGHT, BORDER_LIGHT, TEXT_PRIMARY_DARK, TEXT_MUTED_DARK } from './motion';
-import { Tilt3DCard } from './Tilt3DCard';
+import { fadeUp, viewportOnce, BG_LIGHT, BORDER_LIGHT, TEXT_PRIMARY_DARK, TEXT_MUTED_DARK } from './motion';
+import { ScrollTiltCard } from './ScrollTiltCard';
 import { SignatureIllustration, RelayIllustration, PaymasterIllustration } from './illustrations';
 
 const GASLESS_POINTS = [
@@ -24,8 +24,6 @@ const GASLESS_POINTS = [
 ];
 
 export function GaslessExplainer() {
-	const prefersReducedMotion = useReducedMotion();
-
 	return (
 		<section id="gasless" style={{ background: BG_LIGHT, color: TEXT_PRIMARY_DARK }}>
 			<div style={{ maxWidth: '72rem', margin: '0 auto', padding: '6rem 1.5rem' }}>
@@ -45,11 +43,7 @@ export function GaslessExplainer() {
 					</p>
 				</motion.div>
 
-				<motion.div
-					variants={staggerContainer(0.08)}
-					initial="hidden"
-					whileInView="show"
-					viewport={viewportOnce}
+				<div
 					style={{
 						display: 'grid',
 						gridTemplateColumns: 'repeat(auto-fit, minmax(16rem, 1fr))',
@@ -60,9 +54,12 @@ export function GaslessExplainer() {
 					{GASLESS_POINTS.map((point, i) => {
 						const { Illustration } = point;
 						return (
-							<Tilt3DCard
+							<ScrollTiltCard
 								key={point.title}
-								variants={tiltIn(i % 2 === 0 ? 'y' : 'x', i % 2 === 0 ? -20 : 20, !!prefersReducedMotion)}
+								axis={i % 2 === 0 ? 'y' : 'x'}
+								angle={9}
+								depth={70}
+								rise={18}
 								style={{
 									padding: '1.75rem',
 									borderRadius: '1rem',
@@ -74,10 +71,10 @@ export function GaslessExplainer() {
 								</div>
 								<h3 style={{ fontSize: '1.0625rem', fontWeight: 700, marginBottom: '0.5rem' }}>{point.title}</h3>
 								<p style={{ fontSize: '0.9375rem', color: TEXT_MUTED_DARK, lineHeight: 1.6 }}>{point.description}</p>
-							</Tilt3DCard>
+							</ScrollTiltCard>
 						);
 					})}
-				</motion.div>
+				</div>
 			</div>
 		</section>
 	);

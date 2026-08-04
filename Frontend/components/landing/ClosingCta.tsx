@@ -3,28 +3,24 @@
 import { motion, useReducedMotion } from 'framer-motion';
 import Link from 'next/link';
 import { Wallet } from 'lucide-react';
-import { fadeUp, staggerContainer, viewportOnce, EASE_OUT, ACCENT_SOLID_DARK, BG_LIGHT, TEXT_PRIMARY_DARK, TEXT_MUTED_DARK } from './motion';
-import type { Variants } from 'framer-motion';
-
-const arrival = (reduced: boolean): Variants =>
-	reduced
-		? { hidden: { opacity: 0 }, show: { opacity: 1, transition: { duration: 0.7, ease: EASE_OUT } } }
-		: {
-				hidden: { opacity: 0, scale: 0.92, z: -200, rotateX: 8 },
-				show: { opacity: 1, scale: 1, z: 0, rotateX: 0, transition: { duration: 0.9, ease: EASE_OUT } },
-			};
+import { fadeUp, staggerContainer, useScrollTilt, EASE_OUT, ACCENT_SOLID_DARK, BG_LIGHT, TEXT_PRIMARY_DARK, TEXT_MUTED_DARK } from './motion';
 
 export function ClosingCta() {
-	const prefersReducedMotion = useReducedMotion();
+	const prefersReducedMotion = !!useReducedMotion();
+	const scrub = useScrollTilt({ axis: 'x', angle: 6, depth: 120, rise: 0, reduced: prefersReducedMotion });
 
 	return (
 		<div style={{ perspective: 1400, background: BG_LIGHT, color: TEXT_PRIMARY_DARK }}>
 			<motion.section
-				variants={arrival(!!prefersReducedMotion)}
-				initial="hidden"
-				whileInView="show"
-				viewport={viewportOnce}
-				style={{ maxWidth: '72rem', margin: '0 auto', padding: '6rem 1.5rem', textAlign: 'center', transformStyle: 'preserve-3d' }}
+				ref={scrub.ref}
+				style={{
+					...scrub.style,
+					maxWidth: '72rem',
+					margin: '0 auto',
+					padding: '6rem 1.5rem',
+					textAlign: 'center',
+					transformStyle: 'preserve-3d',
+				}}
 			>
 				<motion.div variants={staggerContainer(0.12)} initial="hidden" animate="show">
 					<motion.h2
