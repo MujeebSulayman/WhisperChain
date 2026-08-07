@@ -70,7 +70,7 @@ export function isMobileDevice(): boolean {
 	if (typeof window === 'undefined') return false;
 	return (
 		/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-			navigator.userAgent
+			navigator.userAgent,
 		) || window.innerWidth <= 768
 	);
 }
@@ -80,7 +80,7 @@ export function openMetaMaskMobile(): void {
 
 	const currentUrl = window.location.href;
 	const metamaskUrl = `https://metamask.app.link/dapp/${encodeURIComponent(
-		currentUrl
+		currentUrl,
 	)}`;
 
 	window.location.href = metamaskUrl;
@@ -89,11 +89,11 @@ export function openMetaMaskMobile(): void {
 		const userAgent = navigator.userAgent.toLowerCase();
 		if (userAgent.includes('iphone') || userAgent.includes('ipad')) {
 			alert(
-				'Please open this page in MetaMask browser or install MetaMask from the App Store.'
+				'Please open this page in MetaMask browser or install MetaMask from the App Store.',
 			);
 		} else if (userAgent.includes('android')) {
 			alert(
-				'Please open this page in MetaMask browser or install MetaMask from Google Play Store.'
+				'Please open this page in MetaMask browser or install MetaMask from Google Play Store.',
 			);
 		}
 	}, 1000);
@@ -114,11 +114,11 @@ export async function connectWhisperChain(): Promise<ConnectResult> {
 		if (isMobileDevice()) {
 			openMetaMaskMobile();
 			throw new Error(
-				'Please open this page in MetaMask browser or install MetaMask to continue.'
+				'Please open this page in MetaMask browser or install MetaMask to continue.',
 			);
 		}
 		throw new Error(
-			'No EIP-1193 wallet detected. Please install MetaMask or another Web3 wallet.'
+			'No EIP-1193 wallet detected. Please install MetaMask or another Web3 wallet.',
 		);
 	}
 
