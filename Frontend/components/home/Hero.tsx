@@ -14,7 +14,7 @@ function AppWindow() {
   return (
     <figure
       className="relative mx-auto mt-16 w-full max-w-[1080px] text-left lg:mt-20"
-      aria-label="The WhisperChain app: an inbox of conversations and an open chat with a photo, messages and a payment."
+      aria-label="The Scarf app: an inbox of conversations and an open chat with a photo, messages and a payment."
     >
       <div className="sheet rise overflow-hidden !rounded-[24px]" style={{ animationDelay: "320ms" }}>
         {/* Window chrome */}
@@ -22,7 +22,7 @@ function AppWindow() {
           {[0, 1, 2].map((i) => (
             <span key={i} className="h-2.5 w-2.5 rounded-full bg-fg/15" />
           ))}
-          <span className="mx-auto rounded-full bg-fg/[.05] px-4 py-1 font-mono text-[11px] text-mute">whisperchain / app</span>
+          <span className="mx-auto rounded-full bg-fg/[.05] px-4 py-1 font-mono text-[11px] text-mute">scarf / app</span>
         </div>
 
         <div className="grid md:grid-cols-[280px_1fr]">
@@ -147,7 +147,7 @@ export function Hero() {
         </h1>
 
         <p className="rise mx-auto mt-6 max-w-[54ch] text-[clamp(16px,1.5vw,19px)] leading-relaxed text-dim" style={{ animationDelay: "160ms" }}>
-          WhisperChain is a messaging app where your wallet is your account. Talk one-to-one or in groups, share photos, video and
+          Scarf is a messaging app where your wallet is your account. Talk one-to-one or in groups, share photos, video and
           files, and send a payment right in the conversation.
         </p>
 

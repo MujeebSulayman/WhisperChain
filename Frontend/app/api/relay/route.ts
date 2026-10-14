@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { Contract, JsonRpcProvider, Wallet } from 'ethers';
-import paymasterAbi from '@/blockchain/WhisperChainPaymaster.json';
-import forwarderAbi from '@/blockchain/Forwarder.json';
+import paymasterAbi from '@/blockchain/ScarfPaymaster.json';
+import forwarderAbi from '@/blockchain/ScarfForwarder.json';
 import type { InterfaceAbi } from 'ethers';
 
 const PAYMASTER_ADDRESS = process.env.NEXT_PUBLIC_PAYMASTER_ADDRESS ?? '';

@@ -1,13 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { FORWARDER_ADDRESS, PAYMASTER_ADDRESS, WHISPERCHAIN_ADDRESS } from "@/lib/deployments";
+import { FORWARDER_ADDRESS, PAYMASTER_ADDRESS, SCARF_ADDRESS } from "@/lib/deployments";
 import { explorerAddress } from "@/lib/links";
 import { Icon } from "../site/Icons";
 import { Reveal } from "../site/Reveal";
 
 const CONTRACTS = [
-  { name: "WhisperChain", role: "Profiles, conversations, messages, media and payments.", address: WHISPERCHAIN_ADDRESS },
+  { name: "Scarf", role: "Profiles, conversations, messages, media and payments.", address: SCARF_ADDRESS },
   { name: "Forwarder", role: "Checks your wallet's signature, then sends the call as you.", address: FORWARDER_ADDRESS },
   { name: "Paymaster", role: "Covers the gas for relayed messages.", address: PAYMASTER_ADDRESS },
 ];
@@ -45,7 +45,7 @@ export function Contracts() {
           </span>
           <h2 className="h2 mt-5">Three contracts run the whole app.</h2>
           <p className="mt-4 max-w-[40ch] text-[16px] leading-relaxed text-dim">
-            There is no WhisperChain server holding your messages. The app reads and writes these contracts on Base Sepolia, and you
+            There is no Scarf server holding your messages. The app reads and writes these contracts on Base Sepolia, and you
             can inspect each one yourself.
           </p>
         </Reveal>

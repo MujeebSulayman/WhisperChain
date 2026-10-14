@@ -3,7 +3,7 @@
 /* eslint-disable */
 
 import { Contract, Interface, type ContractRunner } from "ethers";
-import type { WhisperChain, WhisperChainInterface } from "../WhisperChain";
+import type { Scarf, ScarfInterface } from "../Scarf";
 
 const _abi = [
   {
@@ -72,7 +72,7 @@ const _abi = [
       },
       {
         indexed: false,
-        internalType: "enum WhisperChain.MediaType",
+        internalType: "enum Scarf.MediaType",
         name: "mediaType",
         type: "uint8",
       },
@@ -423,7 +423,7 @@ const _abi = [
             type: "uint256",
           },
         ],
-        internalType: "struct WhisperChain.Conversation",
+        internalType: "struct Scarf.Conversation",
         name: "",
         type: "tuple",
       },
@@ -480,7 +480,7 @@ const _abi = [
     name: "getMediaType",
     outputs: [
       {
-        internalType: "enum WhisperChain.MediaType",
+        internalType: "enum Scarf.MediaType",
         name: "",
         type: "uint8",
       },
@@ -546,7 +546,7 @@ const _abi = [
             type: "string",
           },
           {
-            internalType: "enum WhisperChain.MediaType",
+            internalType: "enum Scarf.MediaType",
             name: "mediaType",
             type: "uint8",
           },
@@ -561,7 +561,7 @@ const _abi = [
             type: "string",
           },
         ],
-        internalType: "struct WhisperChain.Message",
+        internalType: "struct Scarf.Message",
         name: "",
         type: "tuple",
       },
@@ -834,7 +834,7 @@ const _abi = [
         type: "string",
       },
       {
-        internalType: "enum WhisperChain.MediaType",
+        internalType: "enum Scarf.MediaType",
         name: "mediaType",
         type: "uint8",
       },
@@ -957,7 +957,7 @@ const _abi = [
         type: "string[]",
       },
       {
-        internalType: "enum WhisperChain.MediaType[]",
+        internalType: "enum Scarf.MediaType[]",
         name: "mediaTypes",
         type: "uint8[]",
       },
@@ -1005,7 +1005,7 @@ const _abi = [
         type: "string",
       },
       {
-        internalType: "enum WhisperChain.MediaType",
+        internalType: "enum Scarf.MediaType",
         name: "mediaType",
         type: "uint8",
       },
@@ -1236,15 +1236,12 @@ const _abi = [
   },
 ] as const;
 
-export class WhisperChain__factory {
+export class Scarf__factory {
   static readonly abi = _abi;
-  static createInterface(): WhisperChainInterface {
-    return new Interface(_abi) as WhisperChainInterface;
+  static createInterface(): ScarfInterface {
+    return new Interface(_abi) as ScarfInterface;
   }
-  static connect(
-    address: string,
-    runner?: ContractRunner | null
-  ): WhisperChain {
-    return new Contract(address, _abi, runner) as unknown as WhisperChain;
+  static connect(address: string, runner?: ContractRunner | null): Scarf {
+    return new Contract(address, _abi, runner) as unknown as Scarf;
   }
 }

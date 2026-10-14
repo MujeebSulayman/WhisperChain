@@ -5,11 +5,11 @@ import { Interface, JsonRpcProvider, ZeroAddress } from 'ethers';
 
 import {
 	BASE_CHAIN,
-	connectWhisperChain,
+	connectScarf,
 	getReadOnlyContract,
-	WHISPERCHAIN_ABI,
-	WHISPERCHAIN_ADDRESS,
-	type WhisperChain,
+	SCARF_ABI,
+	SCARF_ADDRESS,
+	type Scarf,
 } from './blockchain';
 import {
 	buildForwardRequest,
@@ -29,7 +29,7 @@ import {
 } from './gasless';
 
 async function getSignerContract() {
-	const { contract } = await connectWhisperChain();
+	const { contract } = await connectScarf();
 	return contract;
 }
 
@@ -70,7 +70,7 @@ export async function registerUserGasless(args: {
 	publicKey: BytesLike;
 	username: string;
 }): Promise<{ request: ForwardRequest; signature: string }> {
-	const { signer } = await connectWhisperChain();
+	const { signer } = await connectScarf();
 	const from = await signer.getAddress();
 	const pkHex =
 		typeof args.publicKey === 'string'
@@ -89,7 +89,7 @@ export async function updatePublicKey(newKey: BytesLike) {
 	return contract.updatePublicKey(newKey);
 }
 
-export async function sendWhisper(args: {
+export async function sendChatMessage(args: {
 	recipient: AddressLike;
 	messageHash: BytesLike;
 	ipfsHash: string;
@@ -138,7 +138,7 @@ export async function sendWhisper(args: {
 	);
 }
 
-export async function sendWhisperGasless(args: {
+export async function sendChatMessageGasless(args: {
 	recipient: AddressLike;
 	messageHash: BytesLike;
 	ipfsHash: string;
@@ -149,7 +149,7 @@ export async function sendWhisperGasless(args: {
 	value?: BigNumberish;
 	textContent?: string;
 }): Promise<{ request: ForwardRequest; signature: string }> {
-	const { signer } = await connectWhisperChain();
+	const { signer } = await connectScarf();
 	const from = await signer.getAddress();
 	const paymentToken = args.paymentToken ?? ZeroAddress;
 	const paymentAmount = args.paymentAmount ?? BigInt(0);
@@ -199,7 +199,7 @@ export async function sendBatchMessagesGasless(args: {
 	value?: BigNumberish;
 	textContents?: string[];
 }): Promise<{ request: ForwardRequest; signature: string }> {
-	const { signer } = await connectWhisperChain();
+	const { signer } = await connectScarf();
 	const from = await signer.getAddress();
 	const paymentTokens =
 		args.paymentTokens ?? args.recipients.map(() => ZeroAddress);
@@ -267,20 +267,20 @@ export async function submitSignedForwardRequest(
 		const data = (await res.json().catch(() => ({}))) as { hash?: string };
 		return { hash: data.hash ?? '' };
 	}
-	const { signer } = await connectWhisperChain();
+	const { signer } = await connectScarf();
 	return submitViaForwarder(request, signature, signer);
 }
 
-export async function deleteWhisper(messageId: BytesLike) {
+export async function deleteChatMessage(messageId: BytesLike) {
 	const contract = await getSignerContract();
 	return contract.deleteMessage(messageId);
 }
 
-export async function deleteWhisperGasless(messageId: BytesLike): Promise<{
+export async function deleteChatMessageGasless(messageId: BytesLike): Promise<{
 	request: ForwardRequest;
 	signature: string;
 }> {
-	const { signer } = await connectWhisperChain();
+	const { signer } = await connectScarf();
 	const from = await signer.getAddress();
 	const msgIdHex =
 		typeof messageId === 'string'
@@ -309,7 +309,7 @@ export async function createConversationGasless(args: {
 	participants: AddressLike[];
 	conversationKeyHash: BytesLike;
 }): Promise<{ request: ForwardRequest; signature: string }> {
-	const { signer } = await connectWhisperChain();
+	const { signer } = await connectScarf();
 	const from = await signer.getAddress();
 	const participants = args.participants.map((p) =>
 		typeof p === 'string' ? p : String(p)
@@ -352,7 +352,7 @@ export async function getConversationIdFromTxHash(txHash: string): Promise<strin
 		receipt = await provider.getTransactionReceipt(txHash);
 	}
 	if (!receipt) throw new Error('Transaction not found or not yet mined');
-	const iface = new Interface(WHISPERCHAIN_ABI as any);
+	const iface = new Interface(SCARF_ABI as any);
 	const convCreatedFragment = iface.getEvent('ConversationCreated');
 	const expectedTopic0 = convCreatedFragment?.topicHash ?? null;
 	for (const log of receipt.logs) {
@@ -423,7 +423,7 @@ export async function updateLastSeenGasless(): Promise<{
 	request: ForwardRequest;
 	signature: string;
 }> {
-	const { signer } = await connectWhisperChain();
+	const { signer } = await connectScarf();
 	const from = await signer.getAddress();
 	const data = encodeUpdateLastSeenCalldata();
 	const request = await buildForwardRequest({ from, data });
@@ -435,7 +435,7 @@ export async function updatePublicKeyGasless(newKey: BytesLike): Promise<{
 	request: ForwardRequest;
 	signature: string;
 }> {
-	const { signer } = await connectWhisperChain();
+	const { signer } = await connectScarf();
 	const from = await signer.getAddress();
 	const keyHex =
 		typeof newKey === 'string'
@@ -458,7 +458,7 @@ export async function withdrawBalanceGasless(): Promise<{
 	request: ForwardRequest;
 	signature: string;
 }> {
-	const { signer } = await connectWhisperChain();
+	const { signer } = await connectScarf();
 	const from = await signer.getAddress();
 	const data = encodeWithdrawBalanceCalldata();
 	const request = await buildForwardRequest({ from, data });
@@ -475,7 +475,7 @@ export async function clearStorageGasless(): Promise<{
 	request: ForwardRequest;
 	signature: string;
 }> {
-	const { signer } = await connectWhisperChain();
+	const { signer } = await connectScarf();
 	const from = await signer.getAddress();
 	const data = encodeClearStorageCalldata();
 	const request = await buildForwardRequest({ from, data });
@@ -657,5 +657,5 @@ export async function getTextContent(messageId: BytesLike) {
 	}
 }
 
-export type WhisperChainRead = ReturnType<typeof getReadOnlyContract>;
-export type WhisperChainWrite = WhisperChain;
+export type ScarfRead = ReturnType<typeof getReadOnlyContract>;
+export type ScarfWrite = Scarf;

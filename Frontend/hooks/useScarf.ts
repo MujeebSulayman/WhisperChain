@@ -15,11 +15,11 @@ import {
 	registerUser,
 	updatePublicKey,
 	updateLastSeen,
-	sendWhisper,
-	deleteWhisper,
+	sendChatMessage,
+	deleteChatMessage,
 	createConversation,
 	waitForTransaction,
-} from '@WhisperChain/lib/whisperchainActions';
+} from '@/lib/scarfActions';
 
 type UserProfile = {
 	publicKey: string;
@@ -51,7 +51,7 @@ type Conversation = {
 	messageCount: bigint;
 };
 
-export function useWhisperChain(userAddress?: string) {
+export function useScarf(userAddress?: string) {
 	const [profile, setProfile] = useState<UserProfile | null>(null);
 	const [messages, setMessages] = useState<Message[]>([]);
 	const [conversations, setConversations] = useState<Conversation[]>([]);

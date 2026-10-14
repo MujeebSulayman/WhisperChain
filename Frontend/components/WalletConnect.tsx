@@ -2,8 +2,8 @@
 
 import { Wallet, Loader2, AlertCircle, RefreshCw, LogOut, ExternalLink } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { connectWhisperChain, BASE_CHAIN, isMobileDevice, openMetaMaskMobile } from '@WhisperChain/lib/blockchain';
-import { getErrorMessage, isUserRejectedError } from '@WhisperChain/lib/errors';
+import { connectScarf, BASE_CHAIN, isMobileDevice, openMetaMaskMobile } from '@/lib/blockchain';
+import { getErrorMessage, isUserRejectedError } from '@/lib/errors';
 
 type WalletConnectProps = {
 	onConnect: () => void | Promise<void>;

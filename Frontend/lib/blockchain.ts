@@ -8,23 +8,23 @@ import {
 	type ContractRunner,
 	type Eip1193Provider,
 } from 'ethers';
-import { WhisperChain__factory } from '@WhisperChain/typechain/factories/WhisperChain__factory';
-import type { WhisperChain } from '@WhisperChain/typechain/WhisperChain';
-import forwarderAbi from '@/blockchain/Forwarder.json';
-import paymasterAbi from '@/blockchain/WhisperChainPaymaster.json';
-import { BASE_CHAIN, FORWARDER_ADDRESS, PAYMASTER_ADDRESS, WHISPERCHAIN_ADDRESS } from './deployments';
+import { Scarf__factory } from '@/typechain/factories/Scarf__factory';
+import type { Scarf } from '@/typechain/Scarf';
+import forwarderAbi from '@/blockchain/ScarfForwarder.json';
+import paymasterAbi from '@/blockchain/ScarfPaymaster.json';
+import { BASE_CHAIN, FORWARDER_ADDRESS, PAYMASTER_ADDRESS, SCARF_ADDRESS } from './deployments';
 
-export type { WhisperChain } from '@WhisperChain/typechain/WhisperChain';
-export { BASE_CHAIN, FORWARDER_ADDRESS, PAYMASTER_ADDRESS, WHISPERCHAIN_ADDRESS };
+export type { Scarf } from '@/typechain/Scarf';
+export { BASE_CHAIN, FORWARDER_ADDRESS, PAYMASTER_ADDRESS, SCARF_ADDRESS };
 
-export const WHISPERCHAIN_ABI = WhisperChain__factory.abi;
+export const SCARF_ABI = Scarf__factory.abi;
 export const FORWARDER_ABI = forwarderAbi as InterfaceAbi;
 export const PAYMASTER_ABI = paymasterAbi as InterfaceAbi;
 
-export type WhisperChainContract = WhisperChain;
+export type ScarfContract = Scarf;
 
-export function getWhisperChainContract(runner: ContractRunner) {
-	return WhisperChain__factory.connect(WHISPERCHAIN_ADDRESS, runner);
+export function getScarfContract(runner: ContractRunner) {
+	return Scarf__factory.connect(SCARF_ADDRESS, runner);
 }
 
 export function getForwarderContract(runner: ContractRunner) {
@@ -37,13 +37,13 @@ export function getPaymasterContract(runner: ContractRunner) {
 
 export function getReadOnlyContract(rpcUrl = BASE_CHAIN.rpcUrl) {
 	const provider = new JsonRpcProvider(rpcUrl);
-	return getWhisperChainContract(provider);
+	return getScarfContract(provider);
 }
 
 type ConnectResult = {
 	provider: BrowserProvider;
 	signer: JsonRpcSigner;
-	contract: WhisperChainContract;
+	contract: ScarfContract;
 };
 
 export function isMobileDevice(): boolean {
@@ -79,7 +79,7 @@ export function openMetaMaskMobile(): void {
 	}, 1000);
 }
 
-export async function connectWhisperChain(): Promise<ConnectResult> {
+export async function connectScarf(): Promise<ConnectResult> {
 	if (typeof window === 'undefined') {
 		throw new Error('Wallet connections must run in the browser');
 	}
@@ -144,10 +144,10 @@ export async function connectWhisperChain(): Promise<ConnectResult> {
 	return {
 		provider,
 		signer,
-		contract: getWhisperChainContract(signer),
+		contract: getScarfContract(signer),
 	};
 }
 
-export function getExplorerUrl(address = WHISPERCHAIN_ADDRESS) {
+export function getExplorerUrl(address = SCARF_ADDRESS) {
 	return `${BASE_CHAIN.explorer}/address/${address}`;
 }

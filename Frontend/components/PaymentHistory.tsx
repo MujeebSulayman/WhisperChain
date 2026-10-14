@@ -3,9 +3,9 @@
 import { useState, useEffect } from 'react';
 import { Coins, ArrowUpRight, ArrowDownLeft, ExternalLink, Loader2 } from 'lucide-react';
 import { formatEther, ZeroAddress } from 'ethers';
-import { fetchUserMessages, fetchMessage, isPaymentSettled } from '@WhisperChain/lib/whisperchainActions';
-import { BASE_CHAIN } from '@WhisperChain/lib/blockchain';
-import { formatTokenAmount } from '@WhisperChain/lib/token';
+import { fetchUserMessages, fetchMessage, isPaymentSettled } from '@/lib/scarfActions';
+import { BASE_CHAIN } from '@/lib/blockchain';
+import { formatTokenAmount } from '@/lib/token';
 import { useTokenInfo } from '../hooks/useTokenInfo';
 import type { AddressLike, BytesLike } from 'ethers';
 import { format } from 'date-fns';

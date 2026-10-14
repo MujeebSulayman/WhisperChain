@@ -7,7 +7,7 @@ import {
     getUserMessageCount,
     fetchContractStats,
     getUserBalance,
-} from '@WhisperChain/lib/whisperchainActions';
+} from '@/lib/scarfActions';
 import type { AddressLike } from 'ethers';
 
 const MAX_MESSAGES_PER_USER = 10000;

@@ -9,9 +9,9 @@ import {
 	withdrawBalanceGasless,
 	submitSignedForwardRequest,
 	waitForTransaction,
-} from '@WhisperChain/lib/whisperchainActions';
-import { isGaslessConfigured } from '@WhisperChain/lib/gasless';
-import { getErrorMessage } from '@WhisperChain/lib/errors';
+} from '@/lib/scarfActions';
+import { isGaslessConfigured } from '@/lib/gasless';
+import { getErrorMessage } from '@/lib/errors';
 import type { AddressLike } from 'ethers';
 
 const MAX_STORAGE_PER_USER = 1000000000;

@@ -1,19 +1,19 @@
 import { buildModule } from "@nomicfoundation/hardhat-ignition/modules";
 
 /**
- * Deploys Forwarder -> WhisperChain -> WhisperChainPaymaster and approves the relayer.
+ * Deploys ScarfForwarder -> Scarf -> ScarfPaymaster and approves the relayer.
  * Pass the relayer's address with a parameters file, e.g. ignition/parameters/base.json.
  */
-const WhisperChainModule = buildModule("WhisperChainModule", (m) => {
+const ScarfModule = buildModule("ScarfModule", (m) => {
   const relayer = m.getParameter<string>("relayer");
 
-  const forwarder = m.contract("Forwarder");
-  const whisperChain = m.contract("WhisperChain", [forwarder]);
-  const paymaster = m.contract("WhisperChainPaymaster", [forwarder, whisperChain]);
+  const forwarder = m.contract("ScarfForwarder");
+  const scarf = m.contract("Scarf", [forwarder]);
+  const paymaster = m.contract("ScarfPaymaster", [forwarder, scarf]);
 
   m.call(paymaster, "setRelayer", [relayer, true]);
 
-  return { forwarder, whisperChain, paymaster };
+  return { forwarder, scarf, paymaster };
 });
 
-export default WhisperChainModule;
+export default ScarfModule;

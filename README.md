@@ -1,8 +1,8 @@
-# WhisperChain
+# Scarf
 
 Private messaging on the blockchain. Send encrypted messages and media, create group chats, and attach payments?without giving up control of your data.
 
-WhisperChain lets you talk to others using your wallet as your identity. Messages are encrypted and stored in a decentralized way, so you're not dependent on a single company or server. You own the keys; the network routes and stores what you send.
+Scarf lets you talk to others using your wallet as your identity. Messages are encrypted and stored in a decentralized way, so you're not dependent on a single company or server. You own the keys; the network routes and stores what you send.
 
 
 

@@ -68,14 +68,14 @@ export function Spinner({ size = 18, className = "" }: { size?: number; classNam
   );
 }
 
-/** The WhisperChain mark (two chat bubbles linked like a chain), optionally with the wordmark in the display face. */
+/** The Scarf mark (two chat bubbles linked like a chain), optionally with the wordmark in the display face. */
 export function Logo({ size = 32, wordmark = true, className = "" }: { size?: number; wordmark?: boolean; className?: string }) {
   return (
     <span className={`inline-flex items-center ${className}`} style={{ gap: size * 0.38 }}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src="/brand-mark.svg"
-        alt={wordmark ? "" : "WhisperChain"}
+        alt={wordmark ? "" : "Scarf"}
         aria-hidden={wordmark || undefined}
         width={size}
         height={size}
@@ -83,7 +83,7 @@ export function Logo({ size = 32, wordmark = true, className = "" }: { size?: nu
       />
       {wordmark ? (
         <span className="font-display leading-none tracking-[0.08em]" style={{ fontSize: size * 0.72 }}>
-          whisperchain
+          scarf
         </span>
       ) : null}
     </span>

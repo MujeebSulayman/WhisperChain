@@ -6,9 +6,9 @@ import { Logo } from './site/Icons';
 import {
 	registerUserGasless,
 	submitSignedForwardRequest,
-} from '@WhisperChain/lib/whisperchainActions';
-import { isGaslessConfigured } from '@WhisperChain/lib/gasless';
-import { getErrorMessage } from '@WhisperChain/lib/errors';
+} from '@/lib/scarfActions';
+import { isGaslessConfigured } from '@/lib/gasless';
+import { getErrorMessage } from '@/lib/errors';
 import { ethers } from 'ethers';
 
 type UserRegistrationProps = {
@@ -42,7 +42,7 @@ export function UserRegistration({ onRegistered, address }: UserRegistrationProp
                 });
                 await submitSignedForwardRequest(request, signature);
             } else {
-                const { registerUser, waitForTransaction } = await import('@WhisperChain/lib/whisperchainActions');
+                const { registerUser, waitForTransaction } = await import('@/lib/scarfActions');
                 const tx = await registerUser({ publicKey: publicKeyBytes, username: username.trim() });
                 await waitForTransaction(Promise.resolve(tx));
             }
@@ -64,7 +64,7 @@ export function UserRegistration({ onRegistered, address }: UserRegistrationProp
                     <CheckCircle2 size={30} strokeWidth={1.8} />
                 </span>
                 <h2 className="display mt-6 text-[30px]">You&apos;re registered.</h2>
-                <p className="mt-2 text-[15px] text-dim">Welcome to WhisperChain. Opening your inbox…</p>
+                <p className="mt-2 text-[15px] text-dim">Welcome to Scarf. Opening your inbox…</p>
             </div>
         );
     }

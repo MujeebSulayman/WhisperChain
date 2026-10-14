@@ -17,8 +17,8 @@ import { PaymentNotification } from './PaymentNotification';
 import { PaymentHistory } from './PaymentHistory';
 import { Modal } from './Modal';
 import {
-	sendWhisper,
-	sendWhisperGasless,
+	sendChatMessage,
+	sendChatMessageGasless,
 	submitSignedForwardRequest,
 	waitForTransaction,
 	fetchUserMessages,
@@ -29,10 +29,10 @@ import {
 	isUserRegistered,
 	getUserConversations,
 	getUserPublicKey,
-} from '@WhisperChain/lib/whisperchainActions';
-import { isGaslessConfigured } from '@WhisperChain/lib/gasless';
-import { getErrorMessage, REQUEST_CANCELLED_MESSAGE } from '@WhisperChain/lib/errors';
-import { useWhisperChain } from '../hooks/useWhisperChain';
+} from '@/lib/scarfActions';
+import { isGaslessConfigured } from '@/lib/gasless';
+import { getErrorMessage, REQUEST_CANCELLED_MESSAGE } from '@/lib/errors';
+import { useScarf } from '../hooks/useScarf';
 import { useWallet } from '../hooks/useWallet';
 import { useIsMobile } from '../hooks/useMediaQuery';
 import { ethers } from 'ethers';
@@ -113,7 +113,7 @@ export function ChatContainer() {
 	} | null>(null);
 	const [showPaymentHistory, setShowPaymentHistory] = useState(false);
 
-	const { profile, isRegistered, refresh } = useWhisperChain(connectedAddress);
+	const { profile, isRegistered, refresh } = useScarf(connectedAddress);
 
 	useEffect(() => {
 		if (isMobile && activeThreadId) {
@@ -189,7 +189,7 @@ export function ChatContainer() {
 		if (!connectedAddress) return;
 
 		try {
-			const { getReadOnlyContract } = await import('@WhisperChain/lib/blockchain');
+			const { getReadOnlyContract } = await import('@/lib/blockchain');
 			const contract = getReadOnlyContract();
 
 			const handleMessageSent = async (messageId: string, sender: string, recipient: string) => {
@@ -309,7 +309,7 @@ export function ChatContainer() {
 							body = textContent;
 							if (!body && hash && !hash.startsWith('text-')) {
 								try {
-									const { downloadTextFromIPFS } = await import('@WhisperChain/lib/ipfs');
+									const { downloadTextFromIPFS } = await import('@/lib/ipfs');
 									body = await downloadTextFromIPFS(hash);
 								} catch {
 									body = `[IPFS ${hash.slice(0, 12)}...]`;
@@ -317,7 +317,7 @@ export function ChatContainer() {
 							}
 							if (!body) {
 								try {
-									const { getTextContent } = await import('@WhisperChain/lib/whisperchainActions');
+									const { getTextContent } = await import('@/lib/scarfActions');
 									body = (await getTextContent(id)) || '[Text]';
 								} catch {
 									body = '[Text]';
@@ -504,7 +504,7 @@ export function ChatContainer() {
 
 		try {
 			if (isGaslessConfigured()) {
-				const { request, signature } = await sendWhisperGasless({
+				const { request, signature } = await sendChatMessageGasless({
 					recipient,
 					messageHash,
 					ipfsHash,
@@ -517,7 +517,7 @@ export function ChatContainer() {
 				});
 				await submitSignedForwardRequest(request, signature);
 			} else {
-				const tx = await sendWhisper({
+				const tx = await sendChatMessage({
 					recipient,
 					messageHash,
 					ipfsHash,

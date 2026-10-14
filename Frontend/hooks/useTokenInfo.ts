@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { ZeroAddress } from 'ethers';
-import { getTokenInfo } from '@WhisperChain/lib/token';
+import { getTokenInfo } from '@/lib/token';
 
 export function useTokenInfo(tokenAddress: string | undefined) {
 	const [info, setInfo] = useState<{ symbol: string; decimals: number } | null>(null);

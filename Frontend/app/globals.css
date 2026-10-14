@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /*
- * WhisperChain liquid glass (the PRINET design system). A near-black (dark) or
+ * Scarf liquid glass (the PRINET design system). A near-black (dark) or
  * cream (light) field with soft lime glows, and beveled glass on top. Colors are CSS
  * variables per theme, exposed to Tailwind so `text-mute`, `border-line`, `bg-accent` etc.
  * follow the theme.

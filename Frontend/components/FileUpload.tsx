@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { Upload, X, Image, Video, Music, FileText, AlertCircle } from 'lucide-react';
-import { getMediaTypeFromFile } from '@WhisperChain/lib/ipfs';
+import { getMediaTypeFromFile } from '@/lib/ipfs';
 
 const MAX_FILE_SIZE = 50000000;
 

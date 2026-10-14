@@ -1,4 +1,4 @@
-# WhisperChain Frontend
+# Scarf Frontend
 
 A modern, decentralized messaging application built on Base Chain with IPFS storage.
 
@@ -62,7 +62,7 @@ NEXT_PUBLIC_PINATA_SECRET_KEY=your_secret
 NEXT_PUBLIC_IPFS_GATEWAY=https://ipfs.io/ipfs/
 
 # Blockchain 
-NEXT_PUBLIC_WHISPERCHAIN_ADDRESS=
+NEXT_PUBLIC_SCARF_ADDRESS=
 NEXT_PUBLIC_BASE_RPC=https://mainnet.base.org
 ```
 

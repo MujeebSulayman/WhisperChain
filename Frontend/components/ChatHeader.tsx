@@ -1,7 +1,7 @@
 'use client';
 
 import { Menu, MessagesSquare, Zap } from 'lucide-react';
-import { isGaslessConfigured } from '@WhisperChain/lib/gasless';
+import { isGaslessConfigured } from '@/lib/gasless';
 import { BASE_CHAIN } from '@/lib/deployments';
 
 type ChatHeaderProps = {
@@ -43,7 +43,7 @@ export function ChatHeader({ threadTitle, onMenuClick, showMenu = false, onConve
                     </div>
                 </div>
             ) : (
-                <p className="label flex-1">WhisperChain</p>
+                <p className="label flex-1">Scarf</p>
             )}
 
             {!isMobile && threadTitle && isGaslessConfigured() && (

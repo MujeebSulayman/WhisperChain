@@ -5,11 +5,11 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/metatx/MinimalForwarder.sol";
 
-/// @notice Pays for gasless WhisperChain messages. Approved relayers submit users' signed
+/// @notice Pays for gasless Scarf messages. Approved relayers submit users' signed
 /// requests through the Forwarder and are refunded a capped amount per request.
-contract WhisperChainPaymaster is Ownable, ReentrancyGuard {
+contract ScarfPaymaster is Ownable, ReentrancyGuard {
     MinimalForwarder public immutable forwarder;
-    /// @notice The only contract this paymaster will pay to call (WhisperChain).
+    /// @notice The only contract this paymaster will pay to call (Scarf).
     address public immutable target;
 
     uint256 public maxReimbursementPerTx = 0.01 ether;

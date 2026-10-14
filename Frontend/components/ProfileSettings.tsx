@@ -9,9 +9,9 @@ import {
 	updateLastSeenGasless,
 	submitSignedForwardRequest,
 	waitForTransaction,
-} from '@WhisperChain/lib/whisperchainActions';
-import { isGaslessConfigured } from '@WhisperChain/lib/gasless';
-import { getErrorMessage } from '@WhisperChain/lib/errors';
+} from '@/lib/scarfActions';
+import { isGaslessConfigured } from '@/lib/gasless';
+import { getErrorMessage } from '@/lib/errors';
 import { ethers } from 'ethers';
 
 type ProfileSettingsProps = {

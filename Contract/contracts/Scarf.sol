@@ -8,7 +8,7 @@ import "@openzeppelin/contracts/security/Pausable.sol";
 import "@openzeppelin/contracts/metatx/ERC2771Context.sol";
 import "@openzeppelin/contracts/utils/Context.sol";
 
-contract WhisperChain is
+contract Scarf is
     ReentrancyGuard,
     Ownable,
     Pausable,

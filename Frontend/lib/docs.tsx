@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { A, C, Callout, Cards, Code, H2, H3, List, P, Steps, Table } from "@/components/docs/Blocks";
-import { BASE_CHAIN, FORWARDER_ADDRESS, PAYMASTER_ADDRESS, WHISPERCHAIN_ADDRESS } from "./deployments";
+import { BASE_CHAIN, FORWARDER_ADDRESS, PAYMASTER_ADDRESS, SCARF_ADDRESS } from "./deployments";
 import { APP_URL, explorerAddress } from "./links";
 
 export type DocPage = {
@@ -31,7 +31,7 @@ NEXT_PUBLIC_PINATA_SECRET_KEY=yourPinataSecret
 NEXT_PUBLIC_IPFS_GATEWAY=https://gateway.pinata.cloud/ipfs
 
 # Optional: only to use your own contracts
-# NEXT_PUBLIC_WHISPERCHAIN_ADDRESS=0x…
+# NEXT_PUBLIC_SCARF_ADDRESS=0x…
 # NEXT_PUBLIC_FORWARDER_ADDRESS=0x…
 # NEXT_PUBLIC_PAYMASTER_ADDRESS=0x…`;
 
@@ -45,7 +45,7 @@ Content-Type: application/json
 {
   "request": {
     "from": "0xYourAddress",
-    "to": "${short(WHISPERCHAIN_ADDRESS)} (WhisperChain)",
+    "to": "${short(SCARF_ADDRESS)} (Scarf)",
     "value": "0",
     "gas": "214000",
     "nonce": "7",
@@ -60,17 +60,17 @@ export const DOCS: DocPage[] = [
     slug: "",
     group: "Getting started",
     title: "Introduction",
-    description: "WhisperChain is a messaging app where your wallet is your account. Here is what it does and how these docs are organised.",
+    description: "Scarf is a messaging app where your wallet is your account. Here is what it does and how these docs are organised.",
     toc: [
-      { id: "what", label: "What WhisperChain is" },
+      { id: "what", label: "What Scarf is" },
       { id: "features", label: "What you can do" },
       { id: "next", label: "Where to go next" },
     ],
     body: () => (
       <>
-        <H2 id="what">What WhisperChain is</H2>
+        <H2 id="what">What Scarf is</H2>
         <P>
-          WhisperChain is a chat app built on {BASE_CHAIN.name}. Instead of an email and password, you connect a wallet. Every
+          Scarf is a chat app built on {BASE_CHAIN.name}. Instead of an email and password, you connect a wallet. Every
           message, file and payment you send is recorded by a smart contract, and you sign each one in your wallet.
         </P>
         <P>
@@ -284,7 +284,7 @@ export const DOCS: DocPage[] = [
         <Steps
           items={[
             { title: "Choose the token", body: "Switch to token mode and paste the ERC-20 contract address." },
-            { title: "Approve once", body: "Approve WhisperChain to spend that amount. The app checks your allowance and asks only when needed." },
+            { title: "Approve once", body: "Approve Scarf to spend that amount. The app checks your allowance and asks only when needed." },
             { title: "Send", body: "The contract moves the tokens from you to the recipient with transferFrom." },
           ]}
         />
@@ -347,8 +347,8 @@ export const DOCS: DocPage[] = [
             { title: "You sign", body: <>Your wallet signs an EIP-712 <C>ForwardRequest</C> describing the exact contract call.</> },
             { title: "The app relays", body: <>The app posts the request and signature to its relayer at <C>/api/relay</C>.</> },
             { title: "The Paymaster submits", body: <>The relayer calls <C>Paymaster.relay()</C>, which runs the request through the Forwarder.</> },
-            { title: "The Forwarder checks", body: "It verifies your signature and nonce, then calls WhisperChain with your address attached." },
-            { title: "WhisperChain records it", body: <>It reads you as the sender (ERC-2771), stores the message and emits <C>MessageSent</C>.</> },
+            { title: "The Forwarder checks", body: "It verifies your signature and nonce, then calls Scarf with your address attached." },
+            { title: "Scarf records it", body: <>It reads you as the sender (ERC-2771), stores the message and emits <C>MessageSent</C>.</> },
           ]}
         />
         <H2 id="request">The signed request</H2>
@@ -356,7 +356,7 @@ export const DOCS: DocPage[] = [
           head={["Field", "Meaning"]}
           rows={[
             [<C key="f">from</C>, "Your address."],
-            [<C key="t">to</C>, "The WhisperChain contract."],
+            [<C key="t">to</C>, "The Scarf contract."],
             [<C key="v">value</C>, "ETH sent with the call (for ETH payments)."],
             [<C key="g">gas</C>, "Gas limit: an estimate plus 80,000."],
             [<C key="n">nonce</C>, "Your next Forwarder nonce. A request can only run once."],
@@ -380,10 +380,10 @@ export const DOCS: DocPage[] = [
     slug: "contracts",
     group: "How it works",
     title: "Smart contracts",
-    description: `The three contracts behind WhisperChain on ${BASE_CHAIN.name}.`,
+    description: `The three contracts behind Scarf on ${BASE_CHAIN.name}.`,
     toc: [
       { id: "addresses", label: "Addresses" },
-      { id: "whisperchain", label: "WhisperChain" },
+      { id: "scarf", label: "Scarf" },
       { id: "forwarder", label: "Forwarder" },
       { id: "paymaster", label: "Paymaster" },
     ],
@@ -393,15 +393,15 @@ export const DOCS: DocPage[] = [
         <Table
           head={["Contract", "Address", "Role"]}
           rows={[
-            ["WhisperChain", <Addr key="w" a={WHISPERCHAIN_ADDRESS} />, "Profiles, conversations, messages, media, payments"],
+            ["Scarf", <Addr key="w" a={SCARF_ADDRESS} />, "Profiles, conversations, messages, media, payments"],
             ["Forwarder", <Addr key="f" a={FORWARDER_ADDRESS} />, "Verifies signed requests (ERC-2771)"],
-            ["WhisperChainPaymaster", <Addr key="p" a={PAYMASTER_ADDRESS} />, "Relays requests and refunds the relayer"],
+            ["ScarfPaymaster", <Addr key="p" a={PAYMASTER_ADDRESS} />, "Relays requests and refunds the relayer"],
           ]}
         />
         <P>
           Chain ID {BASE_CHAIN.id}. Built with Solidity 0.8.28 and OpenZeppelin, deployed with Hardhat Ignition.
         </P>
-        <H2 id="whisperchain">WhisperChain</H2>
+        <H2 id="scarf">Scarf</H2>
         <H3>Main functions</H3>
         <Table
           head={["Function", "What it does"]}
@@ -432,7 +432,7 @@ export const DOCS: DocPage[] = [
         <H2 id="forwarder">Forwarder</H2>
         <P>
           OpenZeppelin&apos;s <C>MinimalForwarder</C>. It checks the EIP-712 signature and nonce of a <C>ForwardRequest</C>, then calls
-          the target with the signer&apos;s address appended, which WhisperChain reads as the sender.
+          the target with the signer&apos;s address appended, which Scarf reads as the sender.
         </P>
         <H2 id="paymaster">Paymaster</H2>
         <P>
@@ -518,7 +518,7 @@ export const DOCS: DocPage[] = [
         <Code label="Terminal">{"cp .env.example .env.local"}</Code>
         <Code label=".env.local">{ENV_FRONTEND}</Code>
         <Callout tone="warn" title="Never leave a variable empty">
-          Delete or comment out a line you don&apos;t use. An empty value such as <C>NEXT_PUBLIC_WHISPERCHAIN_ADDRESS=</C> overrides
+          Delete or comment out a line you don&apos;t use. An empty value such as <C>NEXT_PUBLIC_SCARF_ADDRESS=</C> overrides
           the built-in default with an empty string and breaks the app.
         </Callout>
         <Table
@@ -546,7 +546,7 @@ export const DOCS: DocPage[] = [
     slug: "deploy",
     group: "Developers",
     title: "Deploy the contracts",
-    description: `Deploy your own WhisperChain, Forwarder and Paymaster to ${BASE_CHAIN.name}.`,
+    description: `Deploy your own Scarf, Forwarder and Paymaster to ${BASE_CHAIN.name}.`,
     toc: [
       { id: "setup", label: "Set up" },
       { id: "deploy", label: "Deploy and verify" },
@@ -562,9 +562,9 @@ export const DOCS: DocPage[] = [
         <Code label=".env">{ENV_CONTRACT}</Code>
         <H2 id="deploy">Deploy and verify</H2>
         <Code label="Terminal">{`npx hardhat compile
-npx hardhat ignition deploy ./ignition/modules/WhisperChain.ts --network sepoliaBase
+npx hardhat ignition deploy ./ignition/modules/Scarf.ts --network sepoliaBase
 npx hardhat run scripts/verify.ts --network sepoliaBase`}</Code>
-        <P>Ignition deploys in order: Forwarder, then WhisperChain and the Paymaster, both pointing at the Forwarder.</P>
+        <P>Ignition deploys in order: Forwarder, then Scarf and the Paymaster, both pointing at the Forwarder.</P>
         <H2 id="after">After deploying</H2>
         <Steps
           items={[
@@ -572,7 +572,7 @@ npx hardhat run scripts/verify.ts --network sepoliaBase`}</Code>
               title: "Point the app at your contracts",
               body: (
                 <>
-                  Set <C>NEXT_PUBLIC_WHISPERCHAIN_ADDRESS</C>, <C>NEXT_PUBLIC_FORWARDER_ADDRESS</C> and{" "}
+                  Set <C>NEXT_PUBLIC_SCARF_ADDRESS</C>, <C>NEXT_PUBLIC_FORWARDER_ADDRESS</C> and{" "}
                   <C>NEXT_PUBLIC_PAYMASTER_ADDRESS</C> in <C>Frontend/.env.local</C>.
                 </>
               ),

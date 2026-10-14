@@ -3,8 +3,8 @@
 import { CheckCheck, Image, Video, Music, FileText, ExternalLink, Coins } from 'lucide-react';
 import { format } from 'date-fns';
 import { useState, useEffect } from 'react';
-import { getIPFSUrl, getMediaTypeName } from '@WhisperChain/lib/ipfs';
-import { formatTokenAmount } from '@WhisperChain/lib/token';
+import { getIPFSUrl, getMediaTypeName } from '@/lib/ipfs';
+import { formatTokenAmount } from '@/lib/token';
 import { ZeroAddress } from 'ethers';
 import { useTokenInfo } from '../hooks/useTokenInfo';
 

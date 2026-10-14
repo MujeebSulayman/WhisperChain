@@ -3,13 +3,13 @@
 import { useState } from 'react';
 import { Trash2, Loader2 } from 'lucide-react';
 import {
-	deleteWhisper,
-	deleteWhisperGasless,
+	deleteChatMessage,
+	deleteChatMessageGasless,
 	submitSignedForwardRequest,
 	waitForTransaction,
-} from '@WhisperChain/lib/whisperchainActions';
-import { isGaslessConfigured } from '@WhisperChain/lib/gasless';
-import { getErrorMessage } from '@WhisperChain/lib/errors';
+} from '@/lib/scarfActions';
+import { isGaslessConfigured } from '@/lib/gasless';
+import { getErrorMessage } from '@/lib/errors';
 import type { BytesLike } from 'ethers';
 
 type MessageActionsProps = {
@@ -37,10 +37,10 @@ export function MessageActions({
         setIsLoading('delete');
         try {
             if (isGaslessConfigured()) {
-                const { request, signature } = await deleteWhisperGasless(messageId);
+                const { request, signature } = await deleteChatMessageGasless(messageId);
                 await submitSignedForwardRequest(request, signature);
             } else {
-                const tx = await deleteWhisper(messageId);
+                const tx = await deleteChatMessage(messageId);
                 await waitForTransaction(Promise.resolve(tx));
             }
             onUpdate();

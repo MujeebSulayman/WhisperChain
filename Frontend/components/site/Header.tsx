@@ -35,10 +35,10 @@ function ThemeButton() {
 function SocialLinks() {
   return (
     <>
-      <a href={X_URL} target="_blank" rel="noreferrer" aria-label="WhisperChain on X" className="grid h-9 w-9 place-items-center rounded-full text-mute transition-colors hover:text-fg">
+      <a href={X_URL} target="_blank" rel="noreferrer" aria-label="Scarf on X" className="grid h-9 w-9 place-items-center rounded-full text-mute transition-colors hover:text-fg">
         <XIcon className="h-[14px] w-[14px]" />
       </a>
-      <a href={TELEGRAM_URL} target="_blank" rel="noreferrer" aria-label="WhisperChain on Telegram" className="grid h-9 w-9 place-items-center rounded-full text-mute transition-colors hover:text-fg">
+      <a href={TELEGRAM_URL} target="_blank" rel="noreferrer" aria-label="Scarf on Telegram" className="grid h-9 w-9 place-items-center rounded-full text-mute transition-colors hover:text-fg">
         <TelegramIcon className="h-[16px] w-[16px]" />
       </a>
     </>
@@ -56,7 +56,7 @@ export function Header() {
   return (
     <header className="sitebar">
       <div className="mx-auto flex h-full w-full max-w-[1200px] items-center gap-8 px-4 sm:px-6">
-        <Link href="/" aria-label="WhisperChain home" className="shrink-0">
+        <Link href="/" aria-label="Scarf home" className="shrink-0">
           <Logo size={32} wordmark={false} />
         </Link>
 

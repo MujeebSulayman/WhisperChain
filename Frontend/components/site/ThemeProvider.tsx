@@ -4,7 +4,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from "
 
 export type Theme = "light" | "dark";
 
-const STORAGE_KEY = "whisperchain-theme";
+const STORAGE_KEY = "scarf-theme";
 
 /** Runs before paint so the stored theme is applied without a flash. */
 export const themeInitScript = `(function(){try{var t=localStorage.getItem("${STORAGE_KEY}");document.documentElement.dataset.theme=(t==="light"||t==="dark")?t:"dark";}catch(e){document.documentElement.dataset.theme="dark";}})();`;

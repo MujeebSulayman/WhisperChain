@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { Coins, X, CheckCircle2 } from 'lucide-react';
 import { ZeroAddress } from 'ethers';
 import type { BigNumberish, AddressLike } from 'ethers';
-import { formatTokenAmount } from '@WhisperChain/lib/token';
+import { formatTokenAmount } from '@/lib/token';
 import { useTokenInfo } from '../hooks/useTokenInfo';
 
 type PaymentNotificationProps = {

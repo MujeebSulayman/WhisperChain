@@ -11,7 +11,7 @@ type EmptyStateProps = {
 const STEPS = [
     { icon: KeyRound, title: 'Sign', description: 'Your wallet signs an EIP-712 request.' },
     { icon: Send, title: 'Relay', description: 'A relayer submits it. No gas from you.' },
-    { icon: ShieldCheck, title: 'Settle', description: 'WhisperChain records it on Base.' },
+    { icon: ShieldCheck, title: 'Settle', description: 'Scarf records it on Base.' },
 ];
 
 /** The glowing glass orb from the Prinet chat screen. */

@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { Coins, X, Loader2, CheckCircle2 } from 'lucide-react';
 import type { AddressLike, BigNumberish } from 'ethers';
 import { parseEther, parseUnits, Contract, ZeroAddress } from 'ethers';
-import { connectWhisperChain, WHISPERCHAIN_ADDRESS } from '@WhisperChain/lib/blockchain';
+import { connectScarf, SCARF_ADDRESS } from '@/lib/blockchain';
 
 type PaymentOptionsProps = {
     onPaymentSet: (amount: BigNumberish, token: AddressLike) => void;
@@ -38,11 +38,11 @@ export function PaymentOptions({ onPaymentSet, onCancel }: PaymentOptionsProps) 
         try {
             setIsCheckingApproval(true);
             setError(null);
-            const { signer } = await connectWhisperChain();
+            const { signer } = await connectScarf();
             const userAddress = await signer.getAddress();
             const tokenContract = new Contract(tokenAddress, ERC20_ABI, signer);
             const amountRaw = await getTokenAmountRaw(tokenAddress, amount, signer);
-            const allowance = await tokenContract.allowance(userAddress, WHISPERCHAIN_ADDRESS);
+            const allowance = await tokenContract.allowance(userAddress, SCARF_ADDRESS);
 
             if (allowance >= amountRaw) {
                 setApprovalStatus('approved');
@@ -63,10 +63,10 @@ export function PaymentOptions({ onPaymentSet, onCancel }: PaymentOptionsProps) 
         try {
             setIsApproving(true);
             setError(null);
-            const { signer } = await connectWhisperChain();
+            const { signer } = await connectScarf();
             const tokenContract = new Contract(tokenAddress, ERC20_ABI, signer);
             const amountRaw = await getTokenAmountRaw(tokenAddress, amount, signer);
-            const tx = await tokenContract.approve(WHISPERCHAIN_ADDRESS, amountRaw);
+            const tx = await tokenContract.approve(SCARF_ADDRESS, amountRaw);
             await tx.wait();
             setApprovalStatus('approved');
         } catch (error: any) {
@@ -97,7 +97,7 @@ export function PaymentOptions({ onPaymentSet, onCancel }: PaymentOptionsProps) 
         try {
             let amountRaw: bigint;
             if (useToken && tokenAddress.trim()) {
-                const { signer } = await connectWhisperChain();
+                const { signer } = await connectScarf();
                 amountRaw = await getTokenAmountRaw(tokenAddress, amount, signer);
             } else {
                 amountRaw = parseEther(amount);

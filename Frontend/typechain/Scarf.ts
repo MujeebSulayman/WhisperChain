@@ -23,7 +23,7 @@ import type {
   TypedContractMethod,
 } from "./common";
 
-export declare namespace WhisperChain {
+export declare namespace Scarf {
   export type ConversationStruct = {
     participants: AddressLike[];
     conversationKey: BytesLike;
@@ -90,7 +90,7 @@ export declare namespace WhisperChain {
   };
 }
 
-export interface WhisperChainInterface extends Interface {
+export interface ScarfInterface extends Interface {
   getFunction(
     nameOrSignature:
       | "MAX_FILE_SIZE"
@@ -685,11 +685,11 @@ export namespace UserRegisteredEvent {
   export type LogDescription = TypedLogDescription<Event>;
 }
 
-export interface WhisperChain extends BaseContract {
-  connect(runner?: ContractRunner | null): WhisperChain;
+export interface Scarf extends BaseContract {
+  connect(runner?: ContractRunner | null): Scarf;
   waitForDeployment(): Promise<this>;
 
-  interface: WhisperChainInterface;
+  interface: ScarfInterface;
 
   queryFilter<TCEvent extends TypedContractEvent>(
     event: TCEvent,
@@ -767,7 +767,7 @@ export interface WhisperChain extends BaseContract {
 
   getConversation: TypedContractMethod<
     [conversationId: BytesLike],
-    [WhisperChain.ConversationStructOutput],
+    [Scarf.ConversationStructOutput],
     "view"
   >;
 
@@ -779,7 +779,7 @@ export interface WhisperChain extends BaseContract {
 
   getMessage: TypedContractMethod<
     [messageId: BytesLike],
-    [WhisperChain.MessageStructOutput],
+    [Scarf.MessageStructOutput],
     "view"
   >;
 
@@ -1006,7 +1006,7 @@ export interface WhisperChain extends BaseContract {
     nameOrSignature: "getConversation"
   ): TypedContractMethod<
     [conversationId: BytesLike],
-    [WhisperChain.ConversationStructOutput],
+    [Scarf.ConversationStructOutput],
     "view"
   >;
   getFunction(
@@ -1022,7 +1022,7 @@ export interface WhisperChain extends BaseContract {
     nameOrSignature: "getMessage"
   ): TypedContractMethod<
     [messageId: BytesLike],
-    [WhisperChain.MessageStructOutput],
+    [Scarf.MessageStructOutput],
     "view"
   >;
   getFunction(

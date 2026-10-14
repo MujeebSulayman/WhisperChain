@@ -6,7 +6,7 @@ import { Icon } from "../site/Icons";
 
 const FAQS: [string, string][] = [
   [
-    "What is WhisperChain?",
+    "What is Scarf?",
     "A messaging app where your wallet is your account. Chat one-to-one or in groups, share photos, video, audio and documents, message several people at once, and send a payment in the thread when you need to. Everything runs on smart contracts on Base.",
   ],
   [

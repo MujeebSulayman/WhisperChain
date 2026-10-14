@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { connectWhisperChain } from '@WhisperChain/lib/blockchain';
+import { connectScarf } from '@/lib/blockchain';
 
-const WALLET_STORAGE_KEY = 'whisperchain_connected_wallet';
+const WALLET_STORAGE_KEY = 'scarf_connected_wallet';
 
 export function useWallet() {
 	const [connectedAddress, setConnectedAddress] = useState<
@@ -78,7 +78,7 @@ export function useWallet() {
 		setError(null);
 
 		try {
-			const { signer } = await connectWhisperChain();
+			const { signer } = await connectScarf();
 			let address: string;
 			try {
 				address = await signer.getAddress();

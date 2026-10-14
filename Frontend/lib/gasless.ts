@@ -7,7 +7,7 @@ import {
 	BASE_CHAIN,
 	FORWARDER_ADDRESS,
 	PAYMASTER_ADDRESS,
-	WHISPERCHAIN_ADDRESS,
+	SCARF_ADDRESS,
 	getForwarderContract,
 	getPaymasterContract,
 } from './blockchain';
@@ -63,7 +63,7 @@ export async function buildForwardRequest(params: {
 	data: string;
 }): Promise<ForwardRequest> {
 	const provider = new JsonRpcProvider(BASE_CHAIN.rpcUrl);
-	const target = params.to ?? WHISPERCHAIN_ADDRESS;
+	const target = params.to ?? SCARF_ADDRESS;
 	const value = params.value ?? BigInt(0);
 	let gas = params.gasLimit;
 	if (gas === undefined || gas === BigInt(0)) {

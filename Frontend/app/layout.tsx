@@ -7,19 +7,22 @@ import { ThemeProvider, themeInitScript } from "@/components/site/ThemeProvider"
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "WhisperChain - Gasless Messaging on Base",
+  metadataBase: new URL("https://scarf.chat"),
+  title: "Scarf - Gasless Messaging on Base",
   description:
     "Wallet-to-wallet messages, files and payments on Base. Sign once with EIP-712; a relayer submits it and the paymaster covers the gas.",
   keywords: ["blockchain", "messaging", "decentralized", "web3", "base", "gasless", "meta-transactions"],
-  authors: [{ name: "WhisperChain" }],
+  authors: [{ name: "Scarf" }],
   openGraph: {
-    title: "WhisperChain",
+    title: "Scarf",
     description: "Wallet-to-wallet messaging, settled on Base. You sign; the paymaster pays the gas.",
     type: "website",
+    url: "/",
+    siteName: "Scarf",
   },
   twitter: {
     card: "summary_large_image",
-    title: "WhisperChain",
+    title: "Scarf",
     description: "Wallet-to-wallet messaging, settled on Base. You sign; the paymaster pays the gas.",
   },
 };

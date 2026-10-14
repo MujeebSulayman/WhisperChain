@@ -1,13 +1,13 @@
 'use client';
 
 import { Send, Paperclip, Loader2, Coins, X, Image, Video, Music, FileText, Zap } from 'lucide-react';
-import { isGaslessConfigured } from '@WhisperChain/lib/gasless';
+import { isGaslessConfigured } from '@/lib/gasless';
 import { useState, KeyboardEvent, useRef, useEffect } from 'react';
 import { FileUpload } from './FileUpload';
 import { PaymentOptions } from './PaymentOptions';
-import { uploadToIPFS, getMediaTypeFromFile } from '@WhisperChain/lib/ipfs';
-import { isIPFSHashUsed } from '@WhisperChain/lib/whisperchainActions';
-import { formatTokenAmount } from '@WhisperChain/lib/token';
+import { uploadToIPFS, getMediaTypeFromFile } from '@/lib/ipfs';
+import { isIPFSHashUsed } from '@/lib/scarfActions';
+import { formatTokenAmount } from '@/lib/token';
 import { ZeroAddress } from 'ethers';
 import { useIsMobile } from '../hooks/useMediaQuery';
 import { useTokenInfo } from '../hooks/useTokenInfo';

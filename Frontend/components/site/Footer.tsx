@@ -39,7 +39,7 @@ export function Footer() {
         </div>
       </div>
       <div className="border-t border-line">
-        <p className="mx-auto w-full max-w-[1200px] px-4 py-5 text-[13px] text-mute sm:px-6">© {new Date().getFullYear()} WhisperChain</p>
+        <p className="mx-auto w-full max-w-[1200px] px-4 py-5 text-[13px] text-mute sm:px-6">© {new Date().getFullYear()} Scarf</p>
       </div>
     </footer>
   );
