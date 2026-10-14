@@ -33,7 +33,7 @@ export function Deployments() {
     <section className="fuel pt-28 lg:pt-36">
       <Container>
         <SectionTitle
-          eyebrow={`Live on ${BASE_CHAIN.name}`}
+          eyebrow="Live on Base"
           title="Deployed and open to inspect."
           description={`Chain ID ${BASE_CHAIN.id}. Deployed with Hardhat Ignition, so you can check every claim on this page on BaseScan.`}
         />

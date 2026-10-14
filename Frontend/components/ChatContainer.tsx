@@ -15,6 +15,8 @@ import { ProfileSettings } from './ProfileSettings';
 import { BatchMessaging } from './BatchMessaging';
 import { PaymentNotification } from './PaymentNotification';
 import { PaymentHistory } from './PaymentHistory';
+import { Modal } from './Modal';
+import { GlassBoot } from './landing/GlassBoot';
 import {
 	sendWhisper,
 	sendWhisperGasless,
@@ -562,192 +564,164 @@ export function ChatContainer() {
 		}
 	};
 
+	const closeDrawers = () => {
+		setSidebarOpen(false);
+		setConversationsSidebarOpen(false);
+	};
+	const drawerOpen = isMobile && (sidebarOpen || conversationsSidebarOpen);
+
 	if (needsRegistration && connectedAddress) {
 		return (
-			<div
-				style={{
-					display: 'flex',
-					height: '100vh',
-					alignItems: 'center',
-					justifyContent: 'center',
-					background: '#0f0f0f',
-					position: 'relative',
-					zIndex: 1000,
-				}}
-			>
-				<div style={{ width: '100%', maxWidth: '28rem', position: 'relative', zIndex: 1001 }}>
-					<UserRegistration
-						address={connectedAddress}
-						onRegistered={() => {
-							setNeedsRegistration(false);
-							checkRegistration();
-							loadUserData();
-						}}
-					/>
+			<div className='wc wc-app'>
+				<GlassBoot />
+				<div className='grid h-full place-items-center overflow-y-auto p-4'>
+					<div className='w-full max-w-[28rem]'>
+						<UserRegistration
+							address={connectedAddress}
+							onRegistered={() => {
+								setNeedsRegistration(false);
+								checkRegistration();
+								loadUserData();
+							}}
+						/>
+					</div>
 				</div>
 			</div>
 		);
 	}
 
 	return (
-		<div
-			style={{
-				display: 'flex',
-				height: '100vh',
-				background: '#0f0f0f',
-				color: '#ffffff',
-				position: 'relative',
-				overflow: 'hidden',
-			}}
-		>
-			{isMobile && (sidebarOpen || conversationsSidebarOpen) && (
-				<div
-					style={{
-						position: 'fixed',
-						inset: 0,
-						background: 'rgba(0, 0, 0, 0.7)',
-						backdropFilter: 'blur(4px)',
-						zIndex: 40,
+		<div className='wc wc-app'>
+			<GlassBoot />
+			<div className={`relative flex h-full ${isMobile ? 'p-2' : 'gap-3 p-3'}`}>
+				{drawerOpen && <div className='scrim z-40' aria-hidden onClick={closeDrawers} />}
+
+				<Sidebar
+					isOpen={sidebarOpen}
+					onToggle={() => {
+						if (isMobile && conversationsSidebarOpen) {
+							setConversationsSidebarOpen(false);
+						}
+						setSidebarOpen(!sidebarOpen);
 					}}
-					onClick={() => {
-						setSidebarOpen(false);
-						setConversationsSidebarOpen(false);
+					connectedAddress={connectedAddress}
+					onConnect={async () => {
+						try {
+							await connect();
+						} catch (error) {
+						}
 					}}
-				/>
-			)}
-
-			<Sidebar
-				isOpen={sidebarOpen}
-				onToggle={() => {
-					if (isMobile && conversationsSidebarOpen) {
-						setConversationsSidebarOpen(false);
-					}
-					setSidebarOpen(!sidebarOpen);
-				}}
-				connectedAddress={connectedAddress}
-				onConnect={async () => {
-					try {
-						await connect();
-					} catch (error) {
-					}
-				}}
-				onDisconnect={() => {
-					disconnect();
-					setActiveThreadId('');
-					setMessages({});
-					setThreads([]);
-				}}
-				profile={profile ? { ...profile, publicKey: userPublicKey } : undefined}
-				onNewChat={() => {
-					if (!connectedAddress) {
-						setError('Please connect your wallet to create a new conversation');
-						return;
-					}
-					setShowCreateConversation(true);
-					if (isMobile) setSidebarOpen(false);
-				}}
-				onBatchSend={() => {
-					setShowBatchMessaging(true);
-					if (isMobile) setSidebarOpen(false);
-				}}
-				onSettings={() => {
-					setShowProfileSettings(true);
-					if (isMobile) setSidebarOpen(false);
-				}}
-				onPaymentHistory={() => {
-					setShowPaymentHistory(true);
-					if (isMobile) setSidebarOpen(false);
-				}}
-				isMobile={isMobile}
-			/>
-
-			<main style={{
-				flex: 1,
-				display: 'flex',
-				flexDirection: 'column',
-				position: 'relative',
-				background: 'radial-gradient(ellipse 120% 80% at 50% 0%, rgba(30, 27, 45, 0.4) 0%, transparent 50%), linear-gradient(180deg, #0c0c0e 0%, #0a0a0c 100%)',
-				minWidth: 0,
-				backdropFilter: isMobile && (sidebarOpen || conversationsSidebarOpen) ? 'blur(8px)' : 'none',
-				opacity: isMobile && (sidebarOpen || conversationsSidebarOpen) ? 0.7 : 1,
-				transition: 'opacity 0.3s ease-out, backdrop-filter 0.3s ease-out',
-			}}>
-				{error && (
-					<ErrorToast
-						message={error}
-						onDismiss={() => setError(null)}
-						variant={error === REQUEST_CANCELLED_MESSAGE ? 'cancel' : 'error'}
-						autoHideDelay={error === REQUEST_CANCELLED_MESSAGE ? 2500 : 5000}
-					/>
-				)}
-
-				{(isMobile || activeThreadId) && (
-					<ChatHeader
-						threadTitle={activeThreadId ? threads.find((t) => t.id === activeThreadId)?.title : undefined}
-						onMenuClick={() => {
-							if (isMobile && conversationsSidebarOpen) {
-								setConversationsSidebarOpen(false);
-							}
-							setSidebarOpen(true);
-						}}
-						showMenu={isMobile}
-						onConversationsClick={() => {
-							if (isMobile && sidebarOpen) {
-								setSidebarOpen(false);
-							}
-							setConversationsSidebarOpen(!conversationsSidebarOpen);
-						}}
-						showConversations={conversationsSidebarOpen}
-						isMobile={isMobile}
-					/>
-				)}
-
-				{activeThreadId ? (
-					<>
-						<div style={{ flex: 1, overflowY: 'auto', position: 'relative', minHeight: 0 }}>
-							<MessageList
-								messages={messages[activeThreadId] ?? []}
-								isLoading={isLoading}
-								onMessageUpdate={() => {
-									loadUserData();
-									refresh();
-								}}
-								connectedAddress={connectedAddress}
-							/>
-						</div>
-						<MessageInput
-							onSend={handleSendMessage}
-							disabled={!connectedAddress || !isRegistered}
-						/>
-					</>
-				) : (
-					<EmptyState onNewConversation={() => {
+					onDisconnect={() => {
+						disconnect();
+						setActiveThreadId('');
+						setMessages({});
+						setThreads([]);
+					}}
+					profile={profile ? { ...profile, publicKey: userPublicKey } : undefined}
+					onNewChat={() => {
 						if (!connectedAddress) {
 							setError('Please connect your wallet to create a new conversation');
 							return;
 						}
 						setShowCreateConversation(true);
-					}} />
-				)}
-			</main>
+						if (isMobile) setSidebarOpen(false);
+					}}
+					onBatchSend={() => {
+						setShowBatchMessaging(true);
+						if (isMobile) setSidebarOpen(false);
+					}}
+					onSettings={() => {
+						setShowProfileSettings(true);
+						if (isMobile) setSidebarOpen(false);
+					}}
+					onPaymentHistory={() => {
+						setShowPaymentHistory(true);
+						if (isMobile) setSidebarOpen(false);
+					}}
+					isMobile={isMobile}
+				/>
 
-			<ConversationsSidebar
-				isOpen={conversationsSidebarOpen}
-				onToggle={() => {
-					if (isMobile && sidebarOpen) {
-						setSidebarOpen(false);
-					}
-					setConversationsSidebarOpen(!conversationsSidebarOpen);
-				}}
-				threads={threads}
-				activeThreadId={activeThreadId}
-				onSelectThread={(threadId) => {
-					setActiveThreadId(threadId);
-					if (isMobile) setConversationsSidebarOpen(false);
-				}}
-				connectedAddress={connectedAddress}
-				isMobile={isMobile}
-			/>
+				<main className='glass relative flex min-w-0 flex-1 flex-col overflow-hidden rounded-[var(--r-card)]'>
+					{error && (
+						<ErrorToast
+							message={error}
+							onDismiss={() => setError(null)}
+							variant={error === REQUEST_CANCELLED_MESSAGE ? 'cancel' : 'error'}
+							autoHideDelay={error === REQUEST_CANCELLED_MESSAGE ? 2500 : 5000}
+						/>
+					)}
+
+					{(isMobile || activeThreadId) && (
+						<ChatHeader
+							threadTitle={activeThreadId ? threads.find((t) => t.id === activeThreadId)?.title : undefined}
+							onMenuClick={() => {
+								if (isMobile && conversationsSidebarOpen) {
+									setConversationsSidebarOpen(false);
+								}
+								setSidebarOpen(true);
+							}}
+							showMenu={isMobile}
+							onConversationsClick={() => {
+								if (isMobile && sidebarOpen) {
+									setSidebarOpen(false);
+								}
+								setConversationsSidebarOpen(!conversationsSidebarOpen);
+							}}
+							showConversations={conversationsSidebarOpen}
+							isMobile={isMobile}
+						/>
+					)}
+
+					{activeThreadId ? (
+						<>
+							<div className='relative min-h-0 flex-1 overflow-y-auto'>
+								<MessageList
+									messages={messages[activeThreadId] ?? []}
+									isLoading={isLoading}
+									onMessageUpdate={() => {
+										loadUserData();
+										refresh();
+									}}
+									connectedAddress={connectedAddress}
+								/>
+							</div>
+							<MessageInput
+								onSend={handleSendMessage}
+								disabled={!connectedAddress || !isRegistered}
+							/>
+						</>
+					) : (
+						<EmptyState
+							connected={Boolean(connectedAddress)}
+							onNewConversation={() => {
+								if (!connectedAddress) {
+									setError('Please connect your wallet to create a new conversation');
+									return;
+								}
+								setShowCreateConversation(true);
+							}}
+						/>
+					)}
+				</main>
+
+				<ConversationsSidebar
+					isOpen={conversationsSidebarOpen}
+					onToggle={() => {
+						if (isMobile && sidebarOpen) {
+							setSidebarOpen(false);
+						}
+						setConversationsSidebarOpen(!conversationsSidebarOpen);
+					}}
+					threads={threads}
+					activeThreadId={activeThreadId}
+					onSelectThread={(threadId) => {
+						setActiveThreadId(threadId);
+						if (isMobile) setConversationsSidebarOpen(false);
+					}}
+					connectedAddress={connectedAddress}
+					isMobile={isMobile}
+				/>
+			</div>
 
 			{paymentNotification && (
 				<PaymentNotification
@@ -765,104 +739,62 @@ export function ChatContainer() {
 			)}
 
 			{showCreateConversation && connectedAddress && (
-				<div
-					style={{
-						position: 'fixed',
-						inset: 0,
-						zIndex: 50,
-						display: 'flex',
-						alignItems: 'center',
-						justifyContent: 'center',
-						background: 'rgba(0, 0, 0, 0.8)',
-						backdropFilter: 'blur(4px)',
-						padding: '1rem',
-					}}
-				>
-					<div style={{ width: '100%', maxWidth: '28rem' }}>
-						<CreateConversation
-							currentUser={connectedAddress}
-							findExisting1on1Thread={(otherAddress) => {
-								const other = otherAddress.toLowerCase();
-								const me = connectedAddress?.toLowerCase() ?? '';
-								const found = threads.find((t) => {
-									const p = t.participants?.map((a) => a.toLowerCase()) ?? [];
-									return p.length === 2 && p.includes(me) && p.includes(other);
-								});
-								return found?.id ?? null;
-							}}
-							onCreated={(conversationId, participants) => {
-								setShowCreateConversation(false);
-								const isExisting = threads.some((t) => t.id === conversationId);
-								if (!isExisting) {
-									const other = participants.filter((p) => p.toLowerCase() !== connectedAddress?.toLowerCase());
-									const title = other.length === 1 ? `${other[0].slice(0, 6)}...${other[0].slice(-4)}` : `${participants.length} participants`;
-									setThreads((prev) => [
-										{ id: conversationId, title, lastMessage: 'No messages yet', timestamp: 'Just now', participants },
-										...prev,
-									]);
-									setMessages((prev) => ({ ...prev, [conversationId]: [] }));
-								}
-								setActiveThreadId(conversationId);
-								loadUserData();
-							}}
-							onCancel={() => setShowCreateConversation(false)}
-						/>
-					</div>
-				</div>
+				<Modal onDismiss={() => setShowCreateConversation(false)}>
+					<CreateConversation
+						currentUser={connectedAddress}
+						findExisting1on1Thread={(otherAddress) => {
+							const other = otherAddress.toLowerCase();
+							const me = connectedAddress?.toLowerCase() ?? '';
+							const found = threads.find((t) => {
+								const p = t.participants?.map((a) => a.toLowerCase()) ?? [];
+								return p.length === 2 && p.includes(me) && p.includes(other);
+							});
+							return found?.id ?? null;
+						}}
+						onCreated={(conversationId, participants) => {
+							setShowCreateConversation(false);
+							const isExisting = threads.some((t) => t.id === conversationId);
+							if (!isExisting) {
+								const other = participants.filter((p) => p.toLowerCase() !== connectedAddress?.toLowerCase());
+								const title = other.length === 1 ? `${other[0].slice(0, 6)}...${other[0].slice(-4)}` : `${participants.length} participants`;
+								setThreads((prev) => [
+									{ id: conversationId, title, lastMessage: 'No messages yet', timestamp: 'Just now', participants },
+									...prev,
+								]);
+								setMessages((prev) => ({ ...prev, [conversationId]: [] }));
+							}
+							setActiveThreadId(conversationId);
+							loadUserData();
+						}}
+						onCancel={() => setShowCreateConversation(false)}
+					/>
+				</Modal>
 			)}
 
 			{showProfileSettings && (
-				<div
-					style={{
-						position: 'fixed',
-						inset: 0,
-						zIndex: 50,
-						display: 'flex',
-						alignItems: 'center',
-						justifyContent: 'center',
-						background: 'rgba(0, 0, 0, 0.8)',
-						backdropFilter: 'blur(4px)',
-						padding: '1rem',
-					}}
-				>
-					<div style={{ width: '100%', maxWidth: '28rem' }}>
-						<ProfileSettings
-							onUpdate={() => {
-								refresh();
-								loadUserData();
-							}}
-							onClose={() => setShowProfileSettings(false)}
-						/>
-					</div>
-				</div>
+				<Modal onDismiss={() => setShowProfileSettings(false)}>
+					<ProfileSettings
+						onUpdate={() => {
+							refresh();
+							loadUserData();
+						}}
+						onClose={() => setShowProfileSettings(false)}
+					/>
+				</Modal>
 			)}
 
 			{showBatchMessaging && (
-				<div
-					style={{
-						position: 'fixed',
-						inset: 0,
-						zIndex: 50,
-						display: 'flex',
-						alignItems: 'center',
-						justifyContent: 'center',
-						background: 'rgba(0, 0, 0, 0.8)',
-						backdropFilter: 'blur(4px)',
-						padding: '1rem',
-					}}
-				>
-					<div style={{ width: '100%', maxWidth: '42rem' }}>
-						<BatchMessaging
-							onComplete={() => {
-								setShowBatchMessaging(false);
-								loadUserData();
-								refresh();
-							}}
-							onCancel={() => setShowBatchMessaging(false)}
-						/>
-					</div>
-				</div>
+				<Modal maxWidth='42rem' onDismiss={() => setShowBatchMessaging(false)}>
+					<BatchMessaging
+						onComplete={() => {
+							setShowBatchMessaging(false);
+							loadUserData();
+							refresh();
+						}}
+						onCancel={() => setShowBatchMessaging(false)}
+					/>
+				</Modal>
 			)}
 		</div>
 	);
-}
+

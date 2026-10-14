@@ -118,7 +118,7 @@ export function Banner() {
       <div>
         <p className="pill rise" style={{ animationDelay: "40ms" }}>
           <span className="h-1.5 w-1.5 rounded-full bg-good" />
-          Live on {BASE_CHAIN.name}
+          Live on Base
         </p>
 
         <h1 className="display rise mt-7 max-w-[14ch] text-[clamp(40px,5.6vw,76px)]" style={{ animationDelay: "100ms" }}>

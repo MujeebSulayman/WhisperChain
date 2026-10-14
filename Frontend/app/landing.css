@@ -36,21 +36,25 @@
   --ease-spring: cubic-bezier(0.25, 1.15, 0.35, 1);
 }
 
-/* ── Document: the app locks the page to the viewport; the landing page scrolls ── */
+/* ── Document: the landing page scrolls; the chat app (.wc-app) stays locked to the viewport ── */
 html:has(.wc) {
-  height: auto;
-  overflow-x: clip;
-  overflow-y: auto;
   background: #05070c;
-  scroll-padding-top: 96px;
   -webkit-text-size-adjust: 100%;
   color-scheme: dark;
 }
+html:has(.wc:not(.wc-app)) {
+  height: auto;
+  overflow-x: clip;
+  overflow-y: auto;
+  scroll-padding-top: 96px;
+}
 /* Transparent so the fixed WebGL backdrop behind it shows through. */
-body:has(.wc):not(.overflow-hidden) {
+body:has(.wc) {
+  background: transparent;
+}
+body:has(.wc:not(.wc-app)):not(.overflow-hidden) {
   height: auto;
   overflow: visible;
-  background: transparent;
 }
 
 /* ── Theme tokens ─────────────────────────────────────────────── */
@@ -537,5 +541,120 @@ html.gl.scrolling [data-lg="surface"] {
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
+  }
+}
+
+/* ── Chat app (/app): the same glass, pebbles and type as the landing page ── */
+@layer components {
+  .wc-app {
+    height: 100dvh;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  /* A recessed text field; lights its rim on focus. */
+  .field {
+    width: 100%;
+    border-radius: var(--r-inset);
+    padding: 11px 14px;
+    font-size: 14px;
+    color: var(--fg);
+    background: var(--field-bg);
+    box-shadow: var(--field-in);
+    outline: none;
+    transition: box-shadow 0.2s;
+  }
+  .field::placeholder {
+    color: var(--mute);
+  }
+  .field:focus {
+    box-shadow: var(--field-in), 0 0 0 1px color-mix(in srgb, var(--accent) 55%, transparent);
+  }
+  .field:disabled {
+    opacity: 0.6;
+  }
+
+  /* A round glass pebble holding a single icon. */
+  .icon-btn {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: 999px;
+    color: var(--dim);
+    transition:
+      color 0.2s,
+      background-color 0.2s,
+      transform 0.15s var(--ease-out);
+  }
+  .icon-btn:hover:not(:disabled) {
+    color: var(--fg);
+    background: var(--steel);
+  }
+  .icon-btn:active:not(:disabled) {
+    transform: translateY(1px);
+  }
+  .icon-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+  .icon-btn.is-on {
+    color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 14%, transparent);
+  }
+
+  /* A row in a list (menu item, conversation). */
+  .row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    border-radius: var(--r-inset);
+    padding: 10px 12px;
+    text-align: left;
+    color: var(--dim);
+    transition:
+      background-color 0.2s,
+      color 0.2s;
+  }
+  .row:hover {
+    color: var(--fg);
+    background: rgba(255, 255, 255, 0.04);
+  }
+  .row.is-on {
+    color: var(--fg);
+    background: var(--knob);
+    box-shadow: var(--edge-sm);
+  }
+
+  /* Initials in a glass circle. */
+  .avatar {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    border-radius: 999px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--fg);
+    background: var(--knob);
+    box-shadow: var(--edge-sm);
+  }
+  .avatar.is-on {
+    color: var(--accent-ink);
+    background: var(--accent-fill);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.45),
+      0 8px 20px -8px rgba(51, 102, 238, 0.5);
+  }
+
+  /* The dimmed layer behind dialogs and mobile drawers. */
+  .scrim {
+    position: fixed;
+    inset: 0;
+    background: rgba(3, 5, 9, 0.66);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
   }
 }
