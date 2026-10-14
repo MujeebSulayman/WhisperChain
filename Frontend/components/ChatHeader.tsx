@@ -1,6 +1,7 @@
 'use client';
 
-import { Menu, MessagesSquare } from 'lucide-react';
+import { Menu, MessagesSquare, Zap } from 'lucide-react';
+import { isGaslessConfigured } from '@WhisperChain/lib/gasless';
 import { BASE_CHAIN } from '@/lib/deployments';
 
 type ChatHeaderProps = {
@@ -45,8 +46,11 @@ export function ChatHeader({ threadTitle, onMenuClick, showMenu = false, onConve
                 <p className="label flex-1">WhisperChain</p>
             )}
 
-            {!isMobile && threadTitle && (
-                <span className="pill pill-accent h-7! px-3! font-mono text-[11px]">End-to-end on-chain</span>
+            {!isMobile && threadTitle && isGaslessConfigured() && (
+                <span className="pill pill-accent h-7! px-3! text-[12px]">
+                    <Zap size={12} strokeWidth={2} />
+                    Gasless
+                </span>
             )}
 
             {isMobile && onConversationsClick && (
