@@ -1,92 +1,53 @@
 'use client';
 
-import { MessageSquarePlus, Sparkles } from 'lucide-react';
+import { KeyRound, MessageSquarePlus, Send, ShieldCheck } from 'lucide-react';
 
 type EmptyStateProps = {
     onNewConversation: () => void;
+    /** Whether a wallet is connected; changes the copy and the call to action. */
+    connected?: boolean;
 };
 
-export function EmptyState({ onNewConversation }: EmptyStateProps) {
+const STEPS = [
+    { icon: KeyRound, title: 'Sign', description: 'Your wallet signs an EIP-712 request.' },
+    { icon: Send, title: 'Relay', description: 'A relayer submits it. No gas from you.' },
+    { icon: ShieldCheck, title: 'Settle', description: 'WhisperChain records it on Base.' },
+];
+
+export function EmptyState({ onNewConversation, connected = false }: EmptyStateProps) {
     return (
-        <div
-            style={{
-                flex: 1,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                background: 'transparent',
-                padding: '2rem',
-            }}
-        >
-            <div style={{ textAlign: 'center', maxWidth: '26rem' }}>
-                <div
-                    style={{
-                        width: '5.5rem',
-                        height: '5.5rem',
-                        borderRadius: '1.25rem',
-                        background: 'linear-gradient(145deg, rgba(99, 102, 241, 0.14) 0%, rgba(79, 70, 229, 0.08) 100%)',
-                        border: '1px solid rgba(255, 255, 255, 0.06)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        margin: '0 auto 1.75rem',
-                        position: 'relative',
-                        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.25)',
-                    }}
-                >
-                    <MessageSquarePlus style={{ width: '2.5rem', height: '2.5rem', color: 'rgba(167, 139, 250, 0.9)' }} />
-                    <div
-                        style={{
-                            position: 'absolute',
-                            top: '-0.25rem',
-                            right: '-0.25rem',
-                            width: '1.5rem',
-                            height: '1.5rem',
-                            borderRadius: '0.5rem',
-                            background: 'rgba(99, 102, 241, 0.25)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                        }}
-                    >
-                        <Sparkles style={{ width: '0.875rem', height: '0.875rem', color: '#a78bfa' }} />
-                    </div>
-                </div>
-                <h2 style={{ fontSize: '1.375rem', fontWeight: 600, color: 'rgba(255, 255, 255, 0.95)', marginBottom: '0.5rem' }}>
-                    Start a conversation
+        <div className="flex flex-1 items-center justify-center overflow-y-auto p-6 md:p-10">
+            <div className="rise w-full max-w-[560px] text-center">
+                <span className="tile is-on mx-auto h-16 w-16 rounded-[var(--r-card)]">
+                    <MessageSquarePlus size={26} strokeWidth={1.8} />
+                </span>
+                <p className="eyebrow mt-8">{connected ? 'Ready when you are' : 'Wallet not connected'}</p>
+                <h2 className="display mt-3 text-[clamp(28px,3.4vw,40px)]">
+                    {connected ? 'Start a conversation.' : 'Connect to start messaging.'}
                 </h2>
-                <p style={{ fontSize: '0.9375rem', color: 'rgba(255, 255, 255, 0.5)', marginBottom: '2rem', lineHeight: 1.6 }}>
-                    Select a conversation from the sidebar or create a new one to begin messaging on the blockchain.
+                <p className="mx-auto mt-4 max-w-[44ch] text-[15px] leading-relaxed text-dim">
+                    {connected
+                        ? 'Pick a conversation on the right, or open a new one with any registered wallet address.'
+                        : 'Connect your wallet from the menu. Your address is your account, so there is nothing else to sign up for.'}
                 </p>
-                <button
-                    onClick={onNewConversation}
-                    style={{
-                        padding: '0.875rem 1.75rem',
-                        borderRadius: '9999px',
-                        background: 'linear-gradient(135deg, #6366f1 0%, #7c3aed 100%)',
-                        border: 'none',
-                        color: '#ffffff',
-                        fontWeight: 600,
-                        cursor: 'pointer',
-                        fontSize: '0.9375rem',
-                        transition: 'transform 0.2s, box-shadow 0.2s',
-                        boxShadow: '0 4px 14px rgba(99, 102, 241, 0.35), 0 1px 3px rgba(0, 0, 0, 0.2)',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '0.5rem',
-                    }}
-                    onMouseEnter={(e) => {
-                        e.currentTarget.style.transform = 'translateY(-1px)';
-                        e.currentTarget.style.boxShadow = '0 6px 20px rgba(99, 102, 241, 0.4), 0 1px 3px rgba(0, 0, 0, 0.2)';
-                    }}
-                    onMouseLeave={(e) => {
-                        e.currentTarget.style.transform = 'translateY(0)';
-                        e.currentTarget.style.boxShadow = '0 4px 14px rgba(99, 102, 241, 0.35), 0 1px 3px rgba(0, 0, 0, 0.2)';
-                    }}
-                >
-                    <MessageSquarePlus style={{ width: '1.125rem', height: '1.125rem' }} />
-                    New Conversation
+                <button onClick={onNewConversation} className="btn btn-lg btn-white mt-8">
+                    <MessageSquarePlus size={18} strokeWidth={2} />
+                    New conversation
                 </button>
+
+                <ol className="mt-12 grid gap-px overflow-hidden rounded-[var(--r-card)] text-left sm:grid-cols-3">
+                    {STEPS.map(({ icon: Icon, title, description }, i) => (
+                        <li key={title} className="inset-panel flex gap-3 p-4">
+                            <Icon size={18} strokeWidth={1.8} className="mt-0.5 shrink-0 text-accent" />
+                            <div>
+                                <p className="font-mono text-[12px] text-accent">
+                                    0{i + 1} · {title}
+                                </p>
+                                <p className="mt-1 text-[13px] leading-snug text-dim">{description}</p>
+                            </div>
+                        </li>
+                    ))}
+                </ol>
             </div>
         </div>
     );

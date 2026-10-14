@@ -35,54 +35,25 @@ export function ErrorToast({
 
     return (
         <div
-            style={{
-                position: 'absolute',
-                top: '1rem',
-                left: '50%',
-                transform: 'translateX(-50%)',
-                zIndex: 50,
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.75rem',
-                padding: '0.875rem 1.25rem',
-                borderRadius: '0.5rem',
-                background: isCancel ? 'rgba(255, 255, 255, 0.08)' : 'rgba(239, 68, 68, 0.1)',
-                border: isCancel ? '1px solid rgba(255, 255, 255, 0.12)' : '1px solid rgba(239, 68, 68, 0.2)',
-                backdropFilter: 'blur(10px)',
-                minWidth: isCancel ? 'auto' : '20rem',
-                maxWidth: '90vw',
-            }}
-            className="animate-slide-up"
+            role="alert"
+            className="lgx rise absolute left-1/2 top-4 z-50 flex max-w-[90%] -translate-x-1/2 items-center gap-3 rounded-full py-2 pl-4 pr-2"
         >
             {isCancel ? (
-                <Info style={{ width: '1.25rem', height: '1.25rem', color: 'rgba(255, 255, 255, 0.6)', flexShrink: 0 }} />
+                <Info size={18} strokeWidth={1.8} className="shrink-0 text-dim" />
             ) : (
-                <AlertCircle style={{ width: '1.25rem', height: '1.25rem', color: '#f87171', flexShrink: 0 }} />
+                <AlertCircle size={18} strokeWidth={1.8} className="shrink-0 text-bad" />
             )}
-            <p style={{ fontSize: '0.875rem', color: isCancel ? 'rgba(255, 255, 255, 0.85)' : '#fca5a5', flex: 1 }}>{message}</p>
+            <p className={`flex-1 text-[14px] ${isCancel ? 'text-dim' : 'text-fg'}`}>{message}</p>
             {onDismiss && (
                 <button
                     onClick={() => {
                         setIsVisible(false);
                         setTimeout(() => onDismiss(), 300);
                     }}
-                    style={{
-                        padding: '0.25rem',
-                        borderRadius: '0.25rem',
-                        background: 'transparent',
-                        border: 'none',
-                        color: isCancel ? 'rgba(255, 255, 255, 0.6)' : '#fca5a5',
-                        cursor: 'pointer',
-                        transition: 'all 0.2s',
-                    }}
-                    onMouseEnter={(e) => {
-                        e.currentTarget.style.background = isCancel ? 'rgba(255, 255, 255, 0.05)' : 'rgba(239, 68, 68, 0.1)';
-                    }}
-                    onMouseLeave={(e) => {
-                        e.currentTarget.style.background = 'transparent';
-                    }}
+                    className="icon-btn h-8! w-8!"
+                    aria-label="Dismiss"
                 >
-                    <X style={{ width: '1rem', height: '1rem', color: isCancel ? 'rgba(255, 255, 255, 0.6)' : '#fca5a5' }} />
+                    <X size={15} strokeWidth={2} />
                 </button>
             )}
         </div>
