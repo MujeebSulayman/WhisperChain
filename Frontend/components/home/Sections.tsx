@@ -177,8 +177,8 @@ export function Limits() {
               Sends also run behind <span className="text-fg">ReentrancyGuard</span> and a <span className="text-fg">pause switch</span>{" "}
               from OpenZeppelin.
             </p>
-            <a href={CONTRACTS_SRC_URL} target="_blank" rel="noreferrer" className="btn btn-ghost mt-6">
-              Read the source <Icon name="arrowUpRight" size={16} />
+            <a href={explorerAddress(WHISPERCHAIN_ADDRESS)} target="_blank" rel="noreferrer" className="btn btn-ghost mt-6">
+              View the contract <Icon name="arrowUpRight" size={16} />
             </a>
           </Reveal>
         </div>
