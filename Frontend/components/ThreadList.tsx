@@ -38,7 +38,7 @@ export function ThreadList({
     }
 
     return (
-        <ul className="grid gap-1">
+        <ul className="grid grid-cols-1 gap-1">
             {threads.map((thread, index) => {
                 const isActive = thread.id === activeThreadId;
                 const hasUnread = (thread.unreadCount ?? 0) > 0;

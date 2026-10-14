@@ -29,7 +29,7 @@ function AppWindow() {
           {/* Inbox */}
           <aside className="hidden border-r border-line p-3 md:block">
             <div className="input !py-2.5 text-[13px] text-mute">Search conversations</div>
-            <ul className="mt-3 grid gap-1">
+            <ul className="mt-3 grid grid-cols-1 gap-1">
               {THREADS.map((t) => (
                 <li key={t.name} className={`row !cursor-default !py-2 ${t.on ? "is-on" : ""}`}>
                   <span className={`avatar h-9 w-9 text-[11px] ${t.on ? "is-on" : ""}`}>{t.initials}</span>
@@ -83,11 +83,11 @@ function AppWindow() {
       </div>
 
       {/* Floating notes on the window's edges */}
-      <span className="pill pill-accent absolute -left-4 top-24 hidden shadow-[var(--shadow)] lg:inline-flex">
+      <span className="pill pill-accent absolute -left-6 -top-4 hidden shadow-[var(--shadow)] lg:inline-flex">
         <Icon name="bolt" size={13} stroke={2} />
         Sent gasless
       </span>
-      <span className="pill absolute -right-5 bottom-28 hidden bg-[var(--surface)] shadow-[var(--shadow)] lg:inline-flex">
+      <span className="pill absolute -right-5 bottom-[78px] hidden bg-[var(--surface)] shadow-[var(--shadow)] lg:inline-flex">
         <Icon name="file" size={13} />
         3 photos · on IPFS
       </span>
