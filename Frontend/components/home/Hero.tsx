@@ -1,87 +1,164 @@
-"use client";
-
 import Link from "next/link";
-import { useEffect, useState } from "react";
 import { APP_URL } from "@/lib/links";
 import { Icon, type IconName } from "../site/Icons";
-import { ChatDemo, DEMO_MODES, type DemoMode } from "./ChatDemo";
 
-const PROMISES: { icon: IconName; text: string }[] = [
-  { icon: "chat", text: "Direct and group chats" },
-  { icon: "file", text: "Photos, video and files" },
-  { icon: "bolt", text: "No gas to send" },
+const THREADS = [
+  { initials: "MA", name: "maya", line: "These are great. Sending the video next.", time: "now", on: true },
+  { initials: "DC", name: "Design crew", line: "leo: Are we shipping Friday?", time: "2m" },
+  { initials: "7D", name: "0x7d2e…b41c", line: "Meetup moved to 7pm.", time: "1h" },
+  { initials: "SO", name: "sol", line: "Thanks for dinner!", time: "3h" },
 ];
 
-/**
- * Split hero: the pitch on the left; on the right a live conversation in the app,
- * with a switch between a direct chat, a group and a batch send (it cycles until you pick one).
- */
-export function Hero() {
-  const [loop, setLoop] = useState(0);
-  const [picked, setPicked] = useState<DemoMode | null>(null);
-  const [replay, setReplay] = useState(0);
-
-  useEffect(() => {
-    const t = window.setInterval(() => setLoop((n) => n + 1), 9000);
-    return () => window.clearInterval(t);
-  }, []);
-
-  const mode = picked ?? DEMO_MODES[loop % DEMO_MODES.length].id;
-  const pick = (id: DemoMode) => {
-    setPicked(id);
-    setReplay((n) => n + 1);
-  };
-
+/** A still of the app: the inbox on the left, an open conversation on the right. */
+function AppWindow() {
   return (
-    <section className="relative mx-auto grid w-full max-w-[1200px] items-center gap-12 px-4 pt-4 sm:px-6 md:pt-10 lg:min-h-[calc(100vh-100px)] lg:grid-cols-[1.1fr_1fr] lg:gap-8 lg:pt-0">
-      <div className="min-w-0">
-        <h1 className="display rise text-[clamp(44px,6.6vw,92px)]" style={{ animationDelay: "80ms" }}>
-          Your wallet
-          <br />
-          is <span className="text-gradient">your inbox.</span>
-        </h1>
-
-        <p className="rise mt-7 max-w-[46ch] text-[clamp(16px,1.5vw,19px)] leading-relaxed text-dim" style={{ animationDelay: "160ms" }}>
-          WhisperChain is a messaging app built on Base. Chat one-to-one or in groups, share photos, video, audio and documents,
-          message up to ten people at once, and send a payment right in the thread.
-        </p>
-
-        <div className="rise mt-9 flex flex-wrap gap-3" style={{ animationDelay: "240ms" }}>
-          <Link href={APP_URL} className="btn btn-lg btn-white">
-            Open the app
-            <Icon name="arrowRight" size={18} stroke={2.2} />
-          </Link>
-          <Link href="/#features" className="btn btn-lg btn-ghost">
-            <Icon name="sparkles" size={18} />
-            See the features
-          </Link>
+    <figure
+      className="relative mx-auto mt-16 w-full max-w-[1080px] text-left lg:mt-20"
+      aria-label="The WhisperChain app: an inbox of conversations and an open chat with a photo, messages and a payment."
+    >
+      <div className="sheet rise overflow-hidden !rounded-[24px]" style={{ animationDelay: "320ms" }}>
+        {/* Window chrome */}
+        <div className="flex items-center gap-2 border-b border-line px-4 py-3">
+          {[0, 1, 2].map((i) => (
+            <span key={i} className="h-2.5 w-2.5 rounded-full bg-fg/15" />
+          ))}
+          <span className="mx-auto rounded-full bg-fg/[.05] px-4 py-1 font-mono text-[11px] text-mute">whisperchain / app</span>
         </div>
 
-        <ul className="rise mt-10 grid gap-2.5 text-[14px] text-dim sm:flex sm:flex-wrap sm:gap-x-6" style={{ animationDelay: "320ms" }}>
-          {PROMISES.map((p) => (
-            <li key={p.text} className="flex items-center gap-2">
-              <span className="grid h-7 w-7 place-items-center rounded-[10px] bg-accent/12 text-accent">
-                <Icon name={p.icon} size={15} />
-              </span>
-              {p.text}
-            </li>
-          ))}
-        </ul>
-      </div>
+        <div className="grid md:grid-cols-[280px_1fr]">
+          {/* Inbox */}
+          <aside className="hidden border-r border-line p-3 md:block">
+            <div className="input !py-2.5 text-[13px] text-mute">Search conversations</div>
+            <ul className="mt-3 grid gap-1">
+              {THREADS.map((t) => (
+                <li key={t.name} className={`row !cursor-default !py-2 ${t.on ? "is-on" : ""}`}>
+                  <span className={`avatar h-9 w-9 text-[11px] ${t.on ? "is-on" : ""}`}>{t.initials}</span>
+                  <span className="min-w-0 flex-1">
+                    <span className="flex items-center gap-2">
+                      <span className="truncate text-[13.5px] font-semibold text-fg">{t.name}</span>
+                      <span className="ml-auto font-mono text-[10px] text-mute">{t.time}</span>
+                    </span>
+                    <span className="block truncate text-[12.5px] text-dim">{t.line}</span>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </aside>
 
-      <div className="rise flex flex-col items-center" style={{ animationDelay: "200ms" }}>
-        <ChatDemo mode={mode} replay={replay} />
-        <div className="mt-7 flex w-full flex-col items-center">
-          <p className="label mb-3">See it in a</p>
-          <div className="seg" role="group" aria-label="Conversation type">
-            {DEMO_MODES.map((m) => (
-              <button key={m.id} type="button" aria-pressed={mode === m.id} onClick={() => pick(m.id)}>
-                {m.label}
-              </button>
-            ))}
+          {/* Conversation */}
+          <div className="flex min-h-[380px] flex-col">
+            <div className="flex items-center gap-3 border-b border-line px-5 py-3">
+              <span className="avatar is-on h-9 w-9 text-[11px]">MA</span>
+              <div>
+                <p className="text-[14px] font-semibold">maya</p>
+                <p className="font-mono text-[10.5px] text-mute">0xa11c…19e4</p>
+              </div>
+            </div>
+            <div className="grid flex-1 content-start gap-2.5 p-5">
+              <p className="card w-fit max-w-[75%] !rounded-[18px] !rounded-bl-[6px] px-3.5 py-2 text-[14px]">Did you get the photos from Saturday?</p>
+              <div className="ml-auto grid w-[55%] max-w-[280px] grid-cols-3 gap-1.5 overflow-hidden rounded-[18px] rounded-br-[6px]">
+                {["from-accent/60 to-warm/40", "from-warm/50 to-fg/10", "from-good/40 to-accent/30"].map((g) => (
+                  <span key={g} className={`aspect-square bg-linear-to-br ${g}`} />
+                ))}
+              </div>
+              <p className="ml-auto w-fit max-w-[75%] rounded-[18px] rounded-br-[6px] bg-[var(--btn-white-bg)] px-3.5 py-2 text-[14px] text-[var(--btn-white-fg)]">
+                Here they are. The last one is my favourite.
+              </p>
+              <div className="card flex w-fit items-center gap-3 !rounded-[18px] !rounded-bl-[6px] px-3.5 py-2.5">
+                <Icon name="coin" size={16} className="text-accent" />
+                <span className="text-[14px]">Coffee is on me</span>
+                <span className="font-mono text-[13px] font-semibold">0.002 ETH</span>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 border-t border-line px-4 py-3">
+              <Icon name="file" size={16} className="text-mute" />
+              <span className="flex-1 text-[13.5px] text-mute">Write a message…</span>
+              <span className="btn btn-sm btn-accent pointer-events-none">
+                <Icon name="send" size={14} />
+                Send
+              </span>
+            </div>
           </div>
         </div>
       </div>
-    </section>
+
+      {/* Floating notes on the window's edges */}
+      <span className="pill pill-accent absolute -left-4 top-24 hidden shadow-[var(--shadow)] lg:inline-flex">
+        <Icon name="bolt" size={13} stroke={2} />
+        Sent gasless
+      </span>
+      <span className="pill absolute -right-5 bottom-28 hidden bg-[var(--surface)] shadow-[var(--shadow)] lg:inline-flex">
+        <Icon name="file" size={13} />
+        3 photos · on IPFS
+      </span>
+    </figure>
+  );
+}
+
+const TICKER: { icon: IconName; label: string }[] = [
+  { icon: "chat", label: "Direct messages" },
+  { icon: "user", label: "Group chats" },
+  { icon: "file", label: "Photos and video" },
+  { icon: "book", label: "Documents" },
+  { icon: "send", label: "Batch send to 10" },
+  { icon: "coin", label: "Payments in chat" },
+  { icon: "bolt", label: "No gas to send" },
+  { icon: "key", label: "Wallet sign-in" },
+];
+
+function Ticker() {
+  const items = (
+    <div aria-hidden>
+      {TICKER.map((t) => (
+        <span key={t.label} className="flex shrink-0 items-center gap-2.5 whitespace-nowrap text-[15px] text-dim">
+          <Icon name={t.icon} size={16} className="text-accent" />
+          {t.label}
+        </span>
+      ))}
+    </div>
+  );
+  return (
+    <div className="ticker mt-20 border-y border-line py-5">
+      {items}
+      {items}
+    </div>
+  );
+}
+
+export function Hero() {
+  return (
+    <>
+      <section className="relative mx-auto w-full max-w-[1200px] px-4 pt-16 text-center sm:px-6 lg:pt-24">
+        <span className="kicker rise">
+          <i />
+          Wallet-to-wallet messaging
+        </span>
+
+        <h1 className="display rise mx-auto mt-6 max-w-[13ch] text-[clamp(46px,7.6vw,108px)]" style={{ animationDelay: "80ms" }}>
+          Chat from <span className="text-gradient">your wallet.</span>
+        </h1>
+
+        <p className="rise mx-auto mt-6 max-w-[54ch] text-[clamp(16px,1.5vw,19px)] leading-relaxed text-dim" style={{ animationDelay: "160ms" }}>
+          WhisperChain is a messaging app where your wallet is your account. Talk one-to-one or in groups, share photos, video and
+          files, and send a payment right in the conversation.
+        </p>
+
+        <div className="rise mt-9 flex flex-wrap justify-center gap-3" style={{ animationDelay: "240ms" }}>
+          <Link href={APP_URL} className="btn btn-lg btn-accent">
+            Start chatting
+            <Icon name="arrowRight" size={18} stroke={2.2} />
+          </Link>
+          <Link href="/#features" className="btn btn-lg btn-ghost">
+            Explore features
+          </Link>
+        </div>
+        <p className="rise mt-5 font-mono text-[12px] text-mute" style={{ animationDelay: "280ms" }}>
+          No email. No password. No gas.
+        </p>
+
+        <AppWindow />
+      </section>
+      <Ticker />
+    </>
   );
 }

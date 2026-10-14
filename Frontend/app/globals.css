@@ -87,7 +87,7 @@ html {
   --r-card: 28px;
   --r-inset: 16px;
 
-  --nav-h: 60px;
+  --bar-h: 64px;
   color-scheme: dark;
 }
 
@@ -338,7 +338,7 @@ html.gl.scrolling [data-lg="surface"] {
     box-shadow: var(--field-in);
   }
 
-  /* Glass with a lit rim: the top nav, the phone top bar and the tab bar. */
+  /* Glass with a lit rim (toasts and small floating chrome). */
   .lgx {
     position: relative;
     background: var(--steel);
@@ -347,166 +347,79 @@ html.gl.scrolling [data-lg="surface"] {
     box-shadow:
       inset 0 1px 0 var(--rim),
       inset 0 -1px 0 rgba(255, 255, 255, 0.04),
-      inset 0 14px 22px -16px var(--glass-hi),
-      inset 0 -14px 22px -16px rgba(0, 0, 0, 0.35),
       0 24px 50px -24px rgba(0, 0, 0, 0.6);
   }
-  .lgx::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    pointer-events: none;
-    background: radial-gradient(260px 60px at var(--mx, 30%) -20%, var(--glass-hi), transparent 70%);
-  }
-  html.svgref .nav.lgx {
-    -webkit-backdrop-filter: url(#lgnav) saturate(1.5);
-    backdrop-filter: url(#lgnav) saturate(1.5);
-  }
-  html.svgref1 .tabbar.lgx {
-    -webkit-backdrop-filter: url(#lgnav1) saturate(1.5);
-    backdrop-filter: url(#lgnav1) saturate(1.5);
-  }
 
-  /* Desktop: a floating glass bar across the top, with a spring-driven highlight ("drop"). */
-  .topnav {
-    position: fixed;
+  /* The site bar: full width, sticky, a hairline under it. */
+  .sitebar {
+    position: sticky;
+    top: 0;
     z-index: 50;
-    top: 16px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: min(1200px, calc(100% - 32px));
-    height: var(--nav-h);
-    display: none;
-    align-items: center;
-    gap: 16px;
-    padding: 6px 6px 6px 20px;
-    border-radius: 999px;
+    height: var(--bar-h);
+    background: color-mix(in srgb, var(--bg) 72%, transparent);
+    -webkit-backdrop-filter: blur(18px) saturate(150%);
+    backdrop-filter: blur(18px) saturate(150%);
+    border-bottom: 1px solid var(--line);
   }
-  @media (min-width: 1024px) {
-    .topnav {
-      display: flex;
-    }
-  }
-  .nav-links {
+  .sitebar-links a {
     position: relative;
-    display: flex;
-    align-items: center;
-    gap: 2px;
-    margin: 0 auto;
-    height: 100%;
-  }
-  .nav-links a {
-    position: relative;
-    z-index: 1;
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    height: 44px;
-    padding: 0 14px;
-    border-radius: 999px;
-    font-size: 13.5px;
+    font-size: 14px;
     font-weight: 500;
     color: var(--mute);
     transition: color 0.3s;
   }
-  .nav-links a:hover,
-  .nav-links a[aria-current="page"] {
+  .sitebar-links a:hover,
+  .sitebar-links a[aria-current="page"] {
     color: var(--fg);
   }
-  .nav-links .drop {
-    top: 50%;
-    height: 44px;
-    margin-top: -22px;
-  }
-  .drop {
+  /* The current page gets a short accent underline. */
+  .sitebar-links a[aria-current="page"]::after {
+    content: "";
     position: absolute;
     left: 0;
-    border-radius: 999px;
-    pointer-events: none;
-    z-index: 0;
-    background: var(--knob);
-    will-change: transform, width, height;
-    box-shadow:
-      var(--edge-sm),
-      0 6px 14px -8px rgba(0, 0, 0, 0.5);
+    right: 0;
+    bottom: -21px;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--accent);
   }
 
-  /* Phones and tablets: a slim top bar and a floating tab bar. */
-  .topbar {
-    position: fixed;
-    z-index: 50;
-    top: calc(env(safe-area-inset-top, 0px) + 12px);
-    left: 12px;
-    right: 12px;
-    display: flex;
+  /* A small outlined label above a heading. */
+  .kicker {
+    display: inline-flex;
     align-items: center;
     gap: 8px;
-    padding: 6px 6px 6px 16px;
-    min-height: 54px;
+    height: 28px;
+    padding: 0 12px;
     border-radius: 999px;
-  }
-  @media (min-width: 1024px) {
-    .topbar {
-      display: none;
-    }
-  }
-  .tabbar {
-    position: fixed;
-    z-index: 50;
-    left: 12px;
-    right: 12px;
-    bottom: calc(env(safe-area-inset-bottom, 0px) + 12px);
-    max-width: 520px;
-    margin: 0 auto;
-    display: flex;
-    align-items: center;
-    padding: 6px;
-    border-radius: 28px;
-    isolation: isolate;
-  }
-  .tabbar > a {
-    position: relative;
-    z-index: 1;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 3px;
-    padding: 7px 0;
-    border-radius: 22px;
+    border: 1px solid var(--line2);
+    font-family: var(--font-mono);
     font-size: 11px;
-    color: var(--mute);
-    transition: color 0.3s;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--dim);
   }
-  .tabbar > a[aria-current="page"] {
-    color: var(--fg);
-  }
-  .tabbar .drop {
-    top: 6px;
-    bottom: 6px;
-    border-radius: 22px;
-  }
-  @media (min-width: 1024px) {
-    .tabbar {
-      display: none;
-    }
+  .kicker > i {
+    width: 6px;
+    height: 6px;
+    border-radius: 2px;
+    background: var(--accent);
   }
 
-  /* Room for the bars: below the top bar and above the tab bar on phones, below the top nav on desktop. */
-  .shell {
-    padding-top: calc(env(safe-area-inset-top, 0px) + 84px);
+  /* An endless horizontal ticker; the content is rendered twice. */
+  .ticker {
+    display: flex;
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
   }
-  .pb-tabbar {
-    padding-bottom: calc(104px + env(safe-area-inset-bottom));
-  }
-  @media (min-width: 1024px) {
-    .shell {
-      padding-top: calc(var(--nav-h) + 40px);
-    }
-    .pb-tabbar {
-      padding-bottom: 0;
-    }
+  .ticker > div {
+    display: flex;
+    flex-shrink: 0;
+    gap: 40px;
+    padding-right: 40px;
+    animation: ticker 36s linear infinite;
   }
 
   /* Buttons: glass pebbles; the primary one is bright ink. */
@@ -933,6 +846,11 @@ html.gl.scrolling [data-lg="surface"] {
   animation: blink 1s steps(1) infinite;
 }
 
+@keyframes ticker {
+  to {
+    transform: translateX(-100%);
+  }
+}
 @keyframes rise {
   0% {
     opacity: 0;

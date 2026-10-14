@@ -571,7 +571,7 @@ export function ChatContainer() {
 
 	if (needsRegistration && connectedAddress) {
 		return (
-			<div className='page-shell grid min-h-[calc(100svh-84px-104px)] place-items-center pb-6 lg:min-h-[calc(100svh-116px)]'>
+			<div className='grid min-h-[calc(100svh-var(--bar-h))] place-items-center p-4'>
 				<div className='w-full max-w-[30rem]'>
 					<UserRegistration
 						address={connectedAddress}
@@ -587,8 +587,8 @@ export function ChatContainer() {
 	}
 
 	return (
-		// Fills the viewport between the bars: top bar + tab bar on phones, below the top nav on desktop.
-		<div className='page-shell !max-w-[1440px] h-[calc(100svh-84px-104px)] pb-3 lg:h-[calc(100svh-116px)] lg:pb-4'>
+		// Fills the viewport below the site bar.
+		<div className='mx-auto h-[calc(100svh-var(--bar-h))] w-full max-w-[1480px] p-3 lg:p-4'>
 			<div className='relative flex h-full gap-4'>
 				{drawerOpen && <div className='scrim z-[55]' aria-hidden onClick={closeDrawers} />}
 

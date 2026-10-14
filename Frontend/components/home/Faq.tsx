@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { TELEGRAM_URL } from "@/lib/links";
 import { Icon } from "../site/Icons";
 
 const FAQS: [string, string][] = [
@@ -42,37 +43,53 @@ export function Faq() {
   const [open, setOpen] = useState<number | null>(0);
 
   return (
-    <div className="grid gap-3 lg:grid-cols-2 lg:items-start">
-      {FAQS.map(([q, a], i) => {
-        const on = open === i;
-        return (
-          <div key={q} className={`card overflow-hidden transition-colors duration-500 ${on ? "!bg-fg/[.07]" : ""}`}>
-            <button
-              type="button"
-              className="flex w-full items-center gap-4 px-5 py-4 text-left sm:px-6 sm:py-5"
-              onClick={() => setOpen(on ? null : i)}
-              aria-expanded={on}
-            >
-              <span className={`font-mono text-[12px] transition-colors ${on ? "text-accent" : "text-mute"}`}>
-                {String(i + 1).padStart(2, "0")}
-              </span>
-              <span className="flex-1 text-[16px] font-semibold tracking-[-0.015em]">{q}</span>
-              <span
-                className={`grid h-8 w-8 shrink-0 place-items-center rounded-[12px] transition-all duration-500 [transition-timing-function:var(--ease-spring)] ${
-                  on ? "rotate-180 bg-accent text-[var(--accent-ink)]" : "bg-fg/8"
-                }`}
-              >
-                <Icon name="chevronDown" size={16} stroke={2.2} />
-              </span>
-            </button>
-            <div className="grid transition-[grid-template-rows] duration-300 ease-out" style={{ gridTemplateRows: on ? "1fr" : "0fr" }}>
-              <div className="overflow-hidden">
-                <p className="pb-5 pl-[52px] pr-5 text-[15px] leading-relaxed text-dim sm:pr-6">{a}</p>
+    <section id="faq" className="mx-auto w-full max-w-[1200px] scroll-mt-24 px-4 pt-28 sm:px-6 lg:pt-36">
+      <div className="grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16">
+        <div className="lg:sticky lg:top-28 lg:self-start">
+          <span className="kicker">
+            <i />
+            FAQ
+          </span>
+          <h2 className="h2 mt-5">Questions, answered.</h2>
+          <p className="mt-4 max-w-[36ch] text-[16px] leading-relaxed text-dim">
+            Still curious? Ask the team on{" "}
+            <a href={TELEGRAM_URL} target="_blank" rel="noreferrer" className="text-accent underline-offset-4 hover:underline">
+              Telegram
+            </a>
+            .
+          </p>
+        </div>
+
+        <div className="border-t border-line">
+          {FAQS.map(([q, a], i) => {
+            const on = open === i;
+            return (
+              <div key={q} className="border-b border-line">
+                <button
+                  type="button"
+                  className="flex w-full items-center gap-4 py-5 text-left"
+                  onClick={() => setOpen(on ? null : i)}
+                  aria-expanded={on}
+                >
+                  <span className={`flex-1 text-[17px] font-semibold tracking-[-0.015em] transition-colors ${on ? "text-fg" : "text-dim"}`}>{q}</span>
+                  <span
+                    className={`grid h-8 w-8 shrink-0 place-items-center rounded-full transition-all duration-500 [transition-timing-function:var(--ease-spring)] ${
+                      on ? "rotate-45 bg-accent text-[var(--accent-ink)]" : "bg-fg/8 text-fg"
+                    }`}
+                  >
+                    <Icon name="plus" size={16} stroke={2.2} />
+                  </span>
+                </button>
+                <div className="grid transition-[grid-template-rows] duration-300 ease-out" style={{ gridTemplateRows: on ? "1fr" : "0fr" }}>
+                  <div className="overflow-hidden">
+                    <p className="max-w-[62ch] pb-6 pr-12 text-[15.5px] leading-relaxed text-dim">{a}</p>
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
-        );
-      })}
-    </div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
   );
 }

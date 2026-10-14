@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import { GlassBoot } from "@/components/site/GlassBoot";
-import { Header, TabBar } from "@/components/site/Header";
+import { Header } from "@/components/site/Header";
 import { LiquidGlassDefs } from "@/components/site/LiquidGlass";
 import { ThemeProvider, themeInitScript } from "@/components/site/ThemeProvider";
 import "./globals.css";
@@ -48,10 +48,7 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
         <ThemeProvider>
           <GlassBoot />
           <Header />
-          <div className="shell flex min-h-screen flex-col">
-            <main className="flex-1">{children}</main>
-            <TabBar />
-          </div>
+          <main>{children}</main>
         </ThemeProvider>
       </body>
     </html>

@@ -1,5 +1,3 @@
-import type { ReactNode } from "react";
-
 /** Shared SVG gradients and filters referenced by url(#lg…) across the site. Render once. */
 export function LiquidGlassDefs() {
   return (
@@ -86,36 +84,3 @@ export function LiquidGlassDefs() {
   );
 }
 
-type BlobProps = { cx: number; cy: number; rx?: number; ry?: number; warm?: boolean };
-
-/** A glassy ellipse drawn inside an existing <svg>. */
-export function GlassBlob({ cx, cy, rx = 46, ry = 46, warm = false }: BlobProps) {
-  const fill = warm ? "url(#lgWarm)" : "url(#lgCrystal)";
-  return (
-    <g filter="url(#lgMorphSoft)">
-      <ellipse cx={cx} cy={cy} rx={rx + 10} ry={ry + 10} fill="url(#lgGlow)" filter="url(#lgAmbient)" />
-      <ellipse cx={cx} cy={cy} rx={rx} ry={ry} fill={fill} />
-      <ellipse cx={cx} cy={cy} rx={rx} ry={ry} fill="none" stroke="url(#lgRim)" strokeWidth="1.6" opacity="0.6" />
-      <ellipse
-        cx={cx - rx * 0.24}
-        cy={cy - ry * 0.42}
-        rx={rx * 0.42}
-        ry={ry * 0.2}
-        fill="url(#lgSpec)"
-        opacity="0.85"
-        transform={`rotate(-24 ${cx} ${cy})`}
-      />
-    </g>
-  );
-}
-
-export function GlassPanel({ children, className = "" }: { children: ReactNode; className?: string }) {
-  return (
-    <div className={`relative ${className}`}>
-      <div className="glass-panel relative overflow-hidden rounded-[2.25rem] border-white/[0.08]">
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/[0.03] to-transparent" />
-        <div className="relative">{children}</div>
-      </div>
-    </div>
-  );
-}

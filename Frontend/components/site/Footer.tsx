@@ -1,88 +1,44 @@
 import Link from "next/link";
-import { BASE_CHAIN } from "@/lib/deployments";
 import { APP_URL, TELEGRAM_URL, X_URL } from "@/lib/links";
-import { ContractAddress } from "./ContractAddress";
 import { Logo } from "./Icons";
-import { SOCIALS } from "./Socials";
+import { TelegramIcon, XIcon } from "./Socials";
 
-const COLUMNS: { title: string; links: { href: string; label: string; external?: boolean }[] }[] = [
-  {
-    title: "Product",
-    links: [
-      { href: APP_URL, label: "Open the app" },
-      { href: "/#features", label: "Features" },
-      { href: "/#how", label: "How it works" },
-      { href: "/#stack", label: "Contracts" },
-      { href: "/#faq", label: "FAQ" },
-    ],
-  },
-  {
-    title: "Community",
-    links: [
-      { href: X_URL, label: "X", external: true },
-      { href: TELEGRAM_URL, label: "Telegram", external: true },
-    ],
-  },
+const LINKS = [
+  { href: APP_URL, label: "Open the app" },
+  { href: "/#features", label: "Features" },
+  { href: "/#how", label: "How it works" },
+  { href: "/#contracts", label: "Contracts" },
+  { href: "/#faq", label: "FAQ" },
 ];
 
 export function Footer() {
   return (
-    <footer className="mx-auto mt-24 w-full max-w-[1240px] px-4 pb-tabbar sm:px-6 lg:mt-32 lg:pb-8">
-      <div className="card overflow-hidden px-6 pt-10 sm:px-10">
-        <div className="grid gap-10 md:grid-cols-[1.4fr_1fr_1fr]">
-          <div>
-            <Logo size={36} />
-            <p className="mt-5 max-w-[32ch] text-[20px] font-semibold leading-snug tracking-[-0.03em]">
-              Chat wallet to wallet: direct messages, groups, files and payments, on {BASE_CHAIN.name}.
-            </p>
-            <div className="mt-5 flex items-center gap-4">
-              {SOCIALS.map(({ label, Icon }) => (
-                <a
-                  key={label}
-                  href={label === "X" ? X_URL : TELEGRAM_URL}
-                  target="_blank"
-                  rel="noreferrer"
-                  aria-label={label}
-                  className="text-mute transition-colors duration-300 hover:text-fg"
-                >
-                  <Icon className="h-5 w-5" />
-                </a>
-              ))}
-            </div>
-          </div>
-          {COLUMNS.map((c) => (
-            <nav key={c.title} aria-label={c.title}>
-              <p className="label">{c.title}</p>
-              <ul className="mt-4 grid gap-2.5">
-                {c.links.map((l) => (
-                  <li key={l.label}>
-                    {l.external ? (
-                      <a href={l.href} target="_blank" rel="noreferrer" className="text-[14.5px] text-dim transition-colors hover:text-fg">
-                        {l.label} ↗
-                      </a>
-                    ) : (
-                      <Link href={l.href} className="text-[14.5px] text-dim transition-colors hover:text-fg">
-                        {l.label}
-                      </Link>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </nav>
+    <footer className="mt-28 border-t border-line lg:mt-36">
+      <div className="mx-auto flex w-full max-w-[1200px] flex-col gap-10 px-4 py-12 sm:px-6 md:flex-row md:items-start md:justify-between">
+        <div className="max-w-[34ch]">
+          <Logo size={30} />
+          <p className="mt-4 text-[15px] leading-relaxed text-dim">Messages, groups, files and payments, sent from your wallet.</p>
+        </div>
+
+        <nav aria-label="Footer" className="grid grid-cols-2 gap-x-10 gap-y-3 sm:grid-cols-3">
+          {LINKS.map((l) => (
+            <Link key={l.label} href={l.href} className="text-[14.5px] text-dim transition-colors hover:text-fg">
+              {l.label}
+            </Link>
           ))}
-        </div>
+        </nav>
 
-        <div className="mt-10 flex flex-col gap-4 border-t border-line pt-6 md:flex-row md:items-center md:justify-between">
-          <ContractAddress />
-          <p className="text-[13px] text-mute">© {new Date().getFullYear()} WhisperChain</p>
+        <div className="flex items-center gap-2">
+          <a href={X_URL} target="_blank" rel="noreferrer" aria-label="X" className="grid h-10 w-10 place-items-center rounded-full bg-[var(--steel)] text-dim transition-colors hover:text-fg">
+            <XIcon className="h-4 w-4" />
+          </a>
+          <a href={TELEGRAM_URL} target="_blank" rel="noreferrer" aria-label="Telegram" className="grid h-10 w-10 place-items-center rounded-full bg-[var(--steel)] text-dim transition-colors hover:text-fg">
+            <TelegramIcon className="h-[18px] w-[18px]" />
+          </a>
         </div>
-
-        <p
-          aria-hidden
-          className="pointer-events-none mt-6 -mb-[0.12em] select-none text-center font-display text-[clamp(44px,11vw,150px)] leading-[0.8] tracking-[0.04em] text-fg/[.05]"
-        >
-          whisperchain
-        </p>
+      </div>
+      <div className="border-t border-line">
+        <p className="mx-auto w-full max-w-[1200px] px-4 py-5 text-[13px] text-mute sm:px-6">© {new Date().getFullYear()} WhisperChain</p>
       </div>
     </footer>
   );

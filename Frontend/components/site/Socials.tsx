@@ -16,7 +16,3 @@ export function TelegramIcon({ className }: GlyphProps) {
   );
 }
 
-export const SOCIALS = [
-  { label: "X", Icon: XIcon },
-  { label: "Telegram", Icon: TelegramIcon },
-] as const;
