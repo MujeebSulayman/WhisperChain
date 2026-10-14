@@ -68,19 +68,40 @@ export function Spinner({ size = 18, className = "" }: { size?: number; classNam
   );
 }
 
-/** The Scarf mark (two chat bubbles linked like a chain), optionally with the wordmark in the display face. */
+/**
+ * The Scarf mark: a scarf looped into a speech bubble, two fringed ends hanging from the knot.
+ * Inline SVG, so it is crisp at any size and takes its colours from the theme (--logo-* in globals.css).
+ */
+export function ScarfMark({ size = 32, className = "" }: { size?: number; className?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="36 52 440 440" fill="none" className={`shrink-0 ${className}`} aria-hidden>
+      <path style={{ fill: "var(--logo-shade)", stroke: "var(--logo-shade)" }} d="M262 300L336 296L340 404L270 410Z" strokeWidth="10" strokeLinejoin="round" />
+      <path d="M284.0 408.8l1 32" style={{ stroke: "var(--logo-shade)" }} strokeWidth="11" strokeLinecap="round" />
+      <path d="M305.0 407.0l1 32" style={{ stroke: "var(--logo-shade)" }} strokeWidth="11" strokeLinecap="round" />
+      <path d="M326.0 405.2l1 32" style={{ stroke: "var(--logo-shade)" }} strokeWidth="11" strokeLinecap="round" />
+      <path d="M196 82H316A104 104 0 0 1 420 186V210A104 104 0 0 1 316 314H196A104 104 0 0 1 92 210V186A104 104 0 0 1 196 82Z" fill="none" style={{ stroke: "var(--logo-scarf)" }} strokeWidth="52" />
+      <path style={{ fill: "var(--logo-scarf)", stroke: "var(--logo-scarf)" }} d="M176.76 281.12L270.68 303.08L236.0 452.0L138.0 428.0Z" strokeWidth="10" strokeLinejoin="round" />
+      <path d="M166.0 275.0L278.0 297.0" style={{ stroke: "var(--bg)" }} strokeWidth="9" strokeLinecap="round" />
+      <path d="M151.72 364.64L253.96 387.76" style={{ stroke: "var(--logo-stripe)" }} strokeWidth="14" />
+      <path d="M144.88 390.56L247.84 414.03" style={{ stroke: "var(--logo-stripe)" }} strokeWidth="14" />
+      <path d="M151.7 431.4l-9.7 36.7" style={{ stroke: "var(--logo-scarf)" }} strokeWidth="12" strokeLinecap="round" />
+      <path d="M175.2 437.1l-9.7 36.7" style={{ stroke: "var(--logo-scarf)" }} strokeWidth="12" strokeLinecap="round" />
+      <path d="M198.8 442.9l-9.7 36.7" style={{ stroke: "var(--logo-scarf)" }} strokeWidth="12" strokeLinecap="round" />
+      <path d="M222.3 448.6l-9.7 36.7" style={{ stroke: "var(--logo-scarf)" }} strokeWidth="12" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+/** The Scarf logo: the mark, optionally with the wordmark in the display face. */
 export function Logo({ size = 32, wordmark = true, className = "" }: { size?: number; wordmark?: boolean; className?: string }) {
   return (
-    <span className={`inline-flex items-center ${className}`} style={{ gap: size * 0.38 }}>
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src="/brand-mark.svg"
-        alt={wordmark ? "" : "Scarf"}
-        aria-hidden={wordmark || undefined}
-        width={size}
-        height={size}
-        className="brand-mark shrink-0 object-contain"
-      />
+    <span
+      className={`inline-flex items-center ${className}`}
+      style={{ gap: size * 0.38 }}
+      role={wordmark ? undefined : "img"}
+      aria-label={wordmark ? undefined : "Scarf"}
+    >
+      <ScarfMark size={size} className="brand-mark" />
       {wordmark ? (
         <span className="font-display leading-none tracking-[0.08em]" style={{ fontSize: size * 0.72 }}>
           scarf

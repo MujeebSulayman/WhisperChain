@@ -82,6 +82,10 @@ html {
   --warn: #f5c26b;
   /* An opaque panel colour, for dialogs and drawers that sit over content. */
   --surface: #10141c;
+  /* The Scarf mark (components/site/Icons.tsx): scarf, its back end, and the stripes. */
+  --logo-scarf: #4da3ff;
+  --logo-shade: #2f7fe6;
+  --logo-stripe: #0a0d14;
   /* Three radii; everything else derives from these. */
   --r-panel: 32px;
   --r-card: 28px;
@@ -131,6 +135,9 @@ html[data-theme="light"] {
   --accent-fill: #1d5fd1;
   --warn: #9a6a12;
   --surface: #f4f7fc;
+  --logo-scarf: #1d5fd1;
+  --logo-shade: #154aa8;
+  --logo-stripe: #e9eef6;
   color-scheme: light;
 }
 
