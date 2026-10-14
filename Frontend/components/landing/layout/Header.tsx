@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { Logo } from "@/components/landing/icons";
+import { LogoMark } from "@/components/landing/icons";
 import { Icon } from "@/components/landing/ui/Icon";
 import { ScrollLink } from "@/components/landing/ui/ScrollLink";
 import { springTo } from "@/lib/glass";
@@ -102,7 +102,7 @@ export function Header() {
             className="logo block shrink-0 transition-transform duration-700 [transition-timing-function:var(--ease-spring)] hover:scale-105"
             onClick={closeOnMobile}
           >
-            <Logo size={22} />
+            <LogoMark size={38} alt="WhisperChain" />
           </ScrollLink>
 
           <nav className="nav-links" aria-label="Main" ref={navRef} onPointerLeave={dropLeave}>

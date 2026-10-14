@@ -1,7 +1,7 @@
 "use client";
 
 /*
- * Liquid glass: a WebGL backdrop (a cobalt ribbon over a drifting key lattice) with every
+ * Liquid glass: a WebGL backdrop (soft cobalt glows over a drifting key lattice) with every
  * element marked `data-lg` drawn as real refracting glass on top. Falls back to plain CSS
  * glass when WebGL is unavailable or too slow.
  */
@@ -90,21 +90,8 @@ vec3 scene(vec2 p, float soft){
   col = mix(col, vec3(.07, .17, .52), .30 * blob(q, vec2(ar * .78 + .08 * cos(t * .8), .02 + .06 * sin(t * .9)), .62));
   col = mix(col, vec3(.02, .035, .10), .45 * blob(q, vec2(ar * .22 + .06 * sin(t * .7), .60 + .08 * cos(t * .8)), .58));
 
-  // The ribbon: a lit band of light sweeping across the hero.
+  // Page-anchored glow lower down (it scrolls with the content).
   vec2 qc = p / uRes.y; qc.y += uScroll / uRes.y * 0.88;
-  float cx = qc.x / ar;
-  float cy = .6 + .95 * pow(cx - .32 + .04 * sin(t * .8), 2.) + .03 * sin(cx * 6. + t * 1.4);
-  float slope = (2. * .95 * (cx - .32) + .18 * cos(cx * 6. + t * 1.4)) / ar;
-  float dd = (qc.y - cy) / sqrt(1. + slope * slope);
-  float w = .085;
-  float body = exp(-pow(dd / w, 2.));
-  float edge = exp(-pow((dd + w * .55) / (w * .16), 2.));
-  float haze = exp(-pow(dd / (w * 4.), 2.));
-  float along = .5 + .5 * sin(cx * 2.6 + t * 1.2);
-  vec3 bodyC = mix(vec3(.04, .10, .42), vec3(.22, .40, .93), along);
-  bodyC = mix(bodyC, vec3(.42, .58, .97), smoothstep(.55, 1., cx) * .6);
-  vec3 edgeC = mix(vec3(.78, .86, 1.0), vec3(.92, .95, 1.0), along);
-  col += bodyC * body * .62 + edgeC * edge * .95 + bodyC * haze * .10;
   col += vec3(.09, .19, .60) * .22 * blob(qc, vec2(ar * .5, 3.35 + .05 * sin(t)), .55);
 
   // The key lattice: square cells that flip on and off.

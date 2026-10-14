@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { useId } from "react";
 
 /*
@@ -41,20 +42,18 @@ function ArtDefs({ p }: { p: string }) {
 
 /* ── Brand ────────────────────────────────────────────────────── */
 
-const ACCENT = "var(--accent-fill, #3366EE)";
-const INK = "var(--accent-ink, #FFFFFF)";
-
-/** A speech bubble holding two linked plates: a message, chained. For icon-only places. */
-export function LogoMark({ size = 28, className }: { size?: number; className?: string }) {
+/** Two chat bubbles linked like a chain, on a cobalt tile (public/logo.png, also the favicon). */
+export function LogoMark({ size = 28, className = "", alt = "" }: { size?: number; className?: string; alt?: string }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 64 64" fill="none" className={className} aria-hidden>
-      <rect width="64" height="64" rx="15" style={{ fill: ACCENT }} />
-      <g style={{ stroke: INK }} strokeWidth="4" strokeLinejoin="round">
-        <path d="M17 15h30a6 6 0 0 1 6 6v16a6 6 0 0 1-6 6H31l-10 8v-8h-4a6 6 0 0 1-6-6V21a6 6 0 0 1 6-6Z" />
-        <rect x="19.5" y="25" width="15" height="8" rx="4" />
-        <rect x="29.5" y="25" width="15" height="8" rx="4" />
-      </g>
-    </svg>
+    <Image
+      src="/logo.png"
+      alt={alt}
+      width={size}
+      height={size}
+      className={`shrink-0 rounded-[24%] ${className}`}
+      priority
+      aria-hidden={alt ? undefined : true}
+    />
   );
 }
 
