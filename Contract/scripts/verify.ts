@@ -80,7 +80,7 @@ async function main() {
 
 	console.log('Verifying WhisperChainPaymaster...');
 	try {
-		await verifyContract(paymaster, [forwarder]);
+		await verifyContract(paymaster, [forwarder, whisperChain]);
 		console.log('WhisperChainPaymaster verified.');
 	} catch (e: unknown) {
 		console.log('WhisperChainPaymaster verify:', e instanceof Error ? e.message : e);

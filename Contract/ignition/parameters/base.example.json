@@ -1,0 +1,5 @@
+{
+  "WhisperChainModule": {
+    "relayer": "0xYOUR_RELAYER_ADDRESS"
+  }
+}

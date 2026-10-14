@@ -237,9 +237,11 @@ contract WhisperChain is
             )
         );
 
+        uint256 ethDue = paymentToken == address(0) ? paymentAmount : 0;
+        require(msg.value == ethDue, "ETH value must equal ETH payment");
+
         if (paymentAmount > 0) {
             if (paymentToken == address(0)) {
-                require(msg.value >= paymentAmount, "Insufficient ETH payment");
                 (bool success, ) = recipient.call{value: paymentAmount}("");
                 require(success, "ETH transfer failed");
             } else {
@@ -341,6 +343,7 @@ contract WhisperChain is
         require(recipients.length <= 10, "Too many messages in batch");
 
         bytes32[] memory messageIds = new bytes32[](recipients.length);
+        uint256 totalEth;
 
         for (uint256 i = 0; i < recipients.length; i++) {
             require(recipients[i] != address(0), "Invalid recipient");
@@ -392,10 +395,8 @@ contract WhisperChain is
 
             if (paymentAmounts[i] > 0) {
                 if (paymentTokens[i] == address(0)) {
-                    require(
-                        msg.value >= paymentAmounts[i],
-                        "Insufficient ETH payment"
-                    );
+                    totalEth += paymentAmounts[i];
+                    require(totalEth <= msg.value, "Insufficient ETH payment");
                     (bool success, ) = recipients[i].call{
                         value: paymentAmounts[i]
                     }("");
@@ -446,6 +447,8 @@ contract WhisperChain is
         }
 
         userMessageCount[_msgSender()] += recipients.length;
+
+        require(totalEth == msg.value, "ETH value must equal ETH payments");
 
         emit BatchMessageSent(messageIds, _msgSender());
     }
