@@ -140,10 +140,7 @@ export function Hero() {
   return (
     <>
       <section className="relative mx-auto w-full max-w-[1200px] px-4 pt-16 text-center sm:px-6 lg:pt-24">
-        <span className="kicker rise">
-          <i />
-          Wallet-to-wallet messaging
-        </span>
+     
 
         <h1 className="display rise mx-auto mt-6 max-w-[13ch] text-[clamp(46px,7.6vw,108px)]" style={{ animationDelay: "80ms" }}>
           Chat from <span className="text-gradient">your wallet.</span>
