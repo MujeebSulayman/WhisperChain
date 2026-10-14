@@ -161,7 +161,7 @@ export function TabBar() {
         aria-label="Chat"
         aria-current={path.startsWith(APP_URL) ? "page" : undefined}
         className="mx-1 !grid h-[52px] w-[52px] !flex-none place-items-center !rounded-[20px] !p-0 !text-[var(--accent-ink)]"
-        style={{ background: "var(--g-accent)", boxShadow: "inset 0 1px 0 rgba(255,255,255,.5), 0 10px 24px -10px rgba(51,102,238,.6)" }}
+        style={{ background: "var(--g-accent)", boxShadow: "inset 0 1px 0 rgba(255,255,255,.5), 0 10px 24px -10px rgba(150,200,40,.6)" }}
       >
         <Icon name="chat" size={22} stroke={2} />
       </Link>

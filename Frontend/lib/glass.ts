@@ -1,7 +1,7 @@
 "use client";
 
 /*
- * Liquid glass: a WebGL backdrop (cobalt glows over a drifting block lattice) with every
+ * Liquid glass: a WebGL backdrop (soft glows over a drifting block lattice) with every
  * element marked `data-lg` drawn as real refracting glass on top. Falls back to plain CSS
  * glass when WebGL is unavailable or too slow. Follows the site theme (light / dark).
  */
@@ -87,15 +87,15 @@ vec3 scene(vec2 p, float soft){
   vec2 q = p / uRes.y;
   q.y += uScroll / uRes.y * 0.18;
   float ar = uRes.x / uRes.y, t = uTime * 0.035;
-  // Soft cobalt glows on a near-black (dark) or cool paper (light) field. No ribbon.
-  vec3 col = th(vec3(.008, .010, .018), vec3(.937, .945, .957));
-  col = mix(col, th(vec3(.32, .47, .95), vec3(.72, .79, .97)), th(vec3(.16), vec3(.55)).x * blob(q, vec2(ar * .12 + .05 * sin(t * 1.1), -.05 + .05 * cos(t)), .55));
-  col = mix(col, th(vec3(.07, .17, .52), vec3(.62, .71, .93)), th(vec3(.30), vec3(.45)).x * blob(q, vec2(ar * .78 + .08 * cos(t * .8), .02 + .06 * sin(t * .9)), .62));
-  col = mix(col, th(vec3(.02, .035, .10), vec3(.86, .87, .90)), .45 * blob(q, vec2(ar * .22 + .06 * sin(t * .7), .60 + .08 * cos(t * .8)), .58));
+  // Soft glows on a near-black (dark) or cream (light) field, as in PRINET. No ribbon.
+  vec3 col = th(vec3(.010, .016, .022), vec3(.953, .937, .902));
+  col = mix(col, th(vec3(.49, .84, 1.0), vec3(.70, .90, .97)), th(vec3(.16), vec3(.55)).x * blob(q, vec2(ar * .12 + .05 * sin(t * 1.1), -.05 + .05 * cos(t)), .55));
+  col = mix(col, th(vec3(.05, .42, .58), vec3(.55, .80, .86)), th(vec3(.30), vec3(.45)).x * blob(q, vec2(ar * .78 + .08 * cos(t * .8), .02 + .06 * sin(t * .9)), .62));
+  col = mix(col, th(vec3(.02, .09, .14), vec3(.90, .86, .78)), .45 * blob(q, vec2(ar * .22 + .06 * sin(t * .7), .60 + .08 * cos(t * .8)), .58));
 
   // Page-anchored glow lower down (it scrolls with the content).
   vec2 qc = p / uRes.y; qc.y += uScroll / uRes.y * 0.88;
-  col += th(vec3(.09, .19, .60), vec3(0.)) * .22 * blob(qc, vec2(ar * .5, 3.35 + .05 * sin(t)), .55);
+  col += th(vec3(.10, .45, .62), vec3(0.)) * .22 * blob(qc, vec2(ar * .5, 3.35 + .05 * sin(t)), .55);
 
   // The block lattice: square cells that flip on and off like a slow Game of Life.
   float m = blob(qc, vec2(ar * .12, 1.18), .42) * (1. - soft);
@@ -104,7 +104,7 @@ vec3 scene(vec2 p, float soft){
   vec2 g = mod(p, cell) - cell * .5;
   float alive = step(.62, hash(id + floor(uTime * .45 + hash(id) * 3.)));
   float sq = 1. - smoothstep(cell * .36 - .8, cell * .36 + .8, max(abs(g.x), abs(g.y)));
-  col = mix(col, th(vec3(.32, .47, .95), vec3(.10, .18, .45)), sq * alive * m * th(vec3(.16), vec3(.10)).x);
+  col = mix(col, th(vec3(.49, .84, 1.0), vec3(.05, .05, .05)), sq * alive * m * th(vec3(.16), vec3(.10)).x);
 
   vec2 v = q / vec2(ar, 1.) - .5;
   col *= 1. - th(vec3(.35), vec3(.10)).x * dot(v, v);
@@ -182,7 +182,7 @@ const TINTS: Record<"dark" | "light", Record<string, number[]>> = {
     surface: [0.016, 0.024, 0.032, 0.34],
     card: [0.016, 0.024, 0.032, 0.42],
     knob: [0.016, 0.024, 0.032, 0.58],
-    steel: [0.78, 0.84, 0.98, 0.1],
+    steel: [0.72, 0.88, 0.95, 0.1],
   },
   light: {
     surface: [0.99, 0.98, 0.96, 0.34],

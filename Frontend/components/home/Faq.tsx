@@ -59,7 +59,7 @@ export function Faq() {
               <span className="flex-1 text-[16px] font-semibold tracking-[-0.015em]">{q}</span>
               <span
                 className={`grid h-8 w-8 shrink-0 place-items-center rounded-[12px] transition-all duration-500 [transition-timing-function:var(--ease-spring)] ${
-                  on ? "rotate-180 bg-accent-fill text-[var(--accent-ink)]" : "bg-fg/8"
+                  on ? "rotate-180 bg-accent text-[var(--accent-ink)]" : "bg-fg/8"
                 }`}
               >
                 <Icon name="chevronDown" size={16} stroke={2.2} />

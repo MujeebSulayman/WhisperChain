@@ -12,27 +12,27 @@ export function LiquidGlassDefs() {
     >
       <defs>
         <linearGradient id="lgChrome" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#EEF2FB" />
-          <stop offset="15%" stopColor="#C2C8D6" />
-          <stop offset="33%" stopColor="#353B4A" />
+          <stop offset="0%" stopColor="#F2F5E6" />
+          <stop offset="15%" stopColor="#C4C8B8" />
+          <stop offset="33%" stopColor="#3E4238" />
           <stop offset="50%" stopColor="#0B0C0E" />
-          <stop offset="64%" stopColor="#434A5C" />
-          <stop offset="79%" stopColor="#CFD5E3" />
-          <stop offset="90%" stopColor="#8FA8F0" />
-          <stop offset="100%" stopColor="#C9D6FA" />
+          <stop offset="64%" stopColor="#4A4E42" />
+          <stop offset="79%" stopColor="#D4D8C6" />
+          <stop offset="90%" stopColor="#B5CF7A" />
+          <stop offset="100%" stopColor="#E3F2B0" />
         </linearGradient>
         <linearGradient id="lgCrystal" x1="0.15" y1="0" x2="0.6" y2="1">
-          <stop offset="0%" stopColor="#F5F7FC" />
-          <stop offset="26%" stopColor="#D6DCE8" />
-          <stop offset="48%" stopColor="#7F889C" />
-          <stop offset="62%" stopColor="#262B38" />
-          <stop offset="82%" stopColor="#8EA9F2" />
-          <stop offset="100%" stopColor="#DCE5FD" />
+          <stop offset="0%" stopColor="#F7F8F0" />
+          <stop offset="26%" stopColor="#DADDCC" />
+          <stop offset="48%" stopColor="#8A8F80" />
+          <stop offset="62%" stopColor="#2E3129" />
+          <stop offset="82%" stopColor="#B9D27E" />
+          <stop offset="100%" stopColor="#EEF6D2" />
         </linearGradient>
         <linearGradient id="lgRim" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#E3EAFF" stopOpacity="0.9" />
-          <stop offset="40%" stopColor="#5B86FF" stopOpacity="0.55" />
-          <stop offset="70%" stopColor="#C9D6FA" stopOpacity="0.4" />
+          <stop offset="0%" stopColor="#EEF9CF" stopOpacity="0.9" />
+          <stop offset="40%" stopColor="#C5F24A" stopOpacity="0.55" />
+          <stop offset="70%" stopColor="#E3F2B0" stopOpacity="0.4" />
           <stop offset="100%" stopColor="#FFF2D5" stopOpacity="0.35" />
         </linearGradient>
         <linearGradient id="lgWarm" x1="0" y1="0" x2="0" y2="1">
@@ -49,8 +49,8 @@ export function LiquidGlassDefs() {
           <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
         </radialGradient>
         <radialGradient id="lgGlow" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="#5B86FF" stopOpacity="0.18" />
-          <stop offset="55%" stopColor="#3366EE" stopOpacity="0.05" />
+          <stop offset="0%" stopColor="#C5F24A" stopOpacity="0.18" />
+          <stop offset="55%" stopColor="#9BC832" stopOpacity="0.05" />
           <stop offset="100%" stopColor="#000000" stopOpacity="0" />
         </radialGradient>
         <filter id="lgMorph" x="-35%" y="-35%" width="170%" height="170%">

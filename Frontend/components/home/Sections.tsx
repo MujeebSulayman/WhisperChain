@@ -214,7 +214,7 @@ export function Limits() {
 /* ── 04 The contracts ─────────────────────────────────────────── */
 
 const RIM = "url(#lgRim)";
-const DOT = "#E3EAFF";
+const DOT = "#EEF9CF";
 
 function ChatGlyph() {
   return (
