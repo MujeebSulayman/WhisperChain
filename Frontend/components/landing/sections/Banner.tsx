@@ -1,71 +1,109 @@
 import Link from "next/link";
-import { Icon } from "@/components/landing/ui/Icon";
+import { Icon, type IconName } from "@/components/landing/ui/Icon";
 import { ScrollLink } from "@/components/landing/ui/ScrollLink";
 import { BASE_CHAIN } from "@/lib/deployments";
 import { APP_URL } from "@/lib/links";
 
-const CONTRACT_CALLS = [
-  { contract: "Forwarder", result: "verify EIP-712 · nonce 7" },
-  { contract: "WhisperChain", result: "sendMessage(0xa11c…e4, 5 USDC)" },
-  { contract: "Paymaster", result: "relayer reimbursed" },
+/** The standards the product is built on, shown as a spec strip under the call to action. */
+const SPECS: { label: string; value: string }[] = [
+  { label: "Signing", value: "EIP-712" },
+  { label: "Gasless relay", value: "ERC-2771" },
+  { label: "Media", value: "IPFS" },
+  { label: "Settlement", value: "Base L2" },
 ];
 
-/** A still of one gasless message: what you wrote, the contracts it passes through, and the signature that starts it. */
-function ExecutionPreview() {
+const STATUS: { label: string; icon: IconName }[] = [
+  { label: "Signed", icon: "key" },
+  { label: "Relayed", icon: "send" },
+  { label: "Confirmed", icon: "check" },
+];
+
+/** A still of the app: one conversation carrying a message, a file and a payment, each confirmed on-chain. */
+function ConversationPreview() {
   return (
     <figure
-      className="glass rise mt-16 grid w-full max-w-[1040px] gap-px overflow-hidden rounded-[var(--r-panel)] text-left md:grid-cols-[1fr_1.1fr_0.95fr] lg:mt-20"
-      style={{ animationDelay: "320ms" }}
-      data-lg="surface"
-      data-lg-r="32"
-      data-lg-tint="card"
-      aria-label="Example: you send a message with 5 USDC attached; your wallet signs a forward request and a relayer submits it, gas paid by the paymaster."
+      className="relative w-full max-w-[520px] justify-self-center lg:justify-self-end"
+      aria-label="Example conversation: a message, an IPFS file and a 5 USDC payment, each signed, relayed and confirmed on Base."
     >
-      {/* 1. The message */}
-      <div className="flex flex-col gap-3 p-5 md:p-6">
-        <p className="label">Message</p>
-        <p className="self-end rounded-[var(--r-inset)] rounded-br-md bg-fg/[.07] px-4 py-2.5 text-[14px]">
-          Invoice attached. Here&apos;s the 5 USDC for the design.
-        </p>
-        <p className="flex items-center gap-2 self-end font-mono text-[12px] text-dim">
-          <Icon name="file" size={14} className="text-accent" />
-          invoice.pdf · ipfs://bafy…k4q
-        </p>
-      </div>
-
-      {/* 2. What the contracts did */}
-      <div className="hidden flex-col gap-3 border-line p-5 md:flex md:border-x md:p-6">
-        <p className="label">Contract calls</p>
-        <ol className="grid gap-2 font-mono text-[12px]">
-          {CONTRACT_CALLS.map(({ contract, result }) => (
-            <li key={contract} className="inset-panel flex flex-col gap-1 rounded-[var(--r-inset)] px-3.5 py-2.5">
-              <span className="text-accent">{contract}</span>
-              <span className="text-dim">{result}</span>
-            </li>
-          ))}
-        </ol>
-      </div>
-
-      {/* 3. Where it starts: your signature */}
-      <div className="flex flex-col gap-3 border-t border-line p-5 md:border-t-0 md:p-6">
-        <p className="label">Your wallet</p>
-        <div className="card flex flex-1 flex-col p-4">
-          <p className="text-[15px] font-semibold">Signature request</p>
-          <dl className="mt-3 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 text-[13px]">
-            <dt className="text-mute">Type</dt>
-            <dd className="text-right font-mono">ForwardRequest</dd>
-            <dt className="text-mute">To</dt>
-            <dd className="text-right font-mono">WhisperChain</dd>
-            <dt className="text-mute">Gas</dt>
-            <dd className="text-right">Paid by paymaster</dd>
-            <dt className="text-mute">Network</dt>
-            <dd className="text-right">{BASE_CHAIN.name}</dd>
-          </dl>
-          <div className="mt-auto grid grid-cols-2 gap-2 pt-4">
-            <span className="btn btn-sm btn-ghost pointer-events-none">Reject</span>
-            <span className="btn btn-sm btn-accent pointer-events-none">Sign</span>
+      <div
+        className="glass rise overflow-hidden rounded-[var(--r-panel)]"
+        style={{ animationDelay: "280ms" }}
+        data-lg="surface"
+        data-lg-r="32"
+        data-lg-tint="card"
+      >
+        {/* Conversation header */}
+        <div className="flex items-center gap-3 border-b border-line px-5 py-4">
+          <span className="tile h-10 w-10 rounded-full font-mono text-[12px] text-fg">0x</span>
+          <div className="min-w-0 flex-1">
+            <p className="text-[15px] font-semibold">Studio Northwind</p>
+            <p className="font-mono text-[12px] text-mute">0xa11c…19e4</p>
           </div>
+          <span className="pill h-7! px-3! text-[12px] text-dim">
+            <span className="h-1.5 w-1.5 rounded-full bg-good" />
+            {BASE_CHAIN.name}
+          </span>
         </div>
+
+        {/* Thread */}
+        <div className="grid gap-3 px-5 py-5">
+          <p className="max-w-[80%] rounded-[var(--r-inset)] rounded-bl-md bg-fg/[.05] px-4 py-2.5 text-[14px] text-dim">
+            Could you send over the signed invoice for the brand work?
+          </p>
+
+          <div className="inset-panel ml-auto flex w-[80%] items-center gap-3 rounded-[var(--r-inset)] rounded-br-md px-4 py-3">
+            <span className="tile h-9 w-9 rounded-[10px]">
+              <Icon name="file" size={18} />
+            </span>
+            <div className="min-w-0">
+              <p className="truncate text-[14px] font-medium">invoice-0142.pdf</p>
+              <p className="truncate font-mono text-[11px] text-mute">248 KB · ipfs://bafy…k4q</p>
+            </div>
+          </div>
+
+          <div className="ml-auto w-[80%] rounded-[var(--r-inset)] rounded-br-md bg-accent-fill px-4 py-3 text-white">
+            <p className="text-[12px] opacity-80">Payment attached</p>
+            <p className="mt-0.5 text-[22px] font-semibold tracking-[-0.02em]">5.00 USDC</p>
+            <p className="mt-1 text-[13px] opacity-90">Here you go. Thanks for the quick turnaround.</p>
+          </div>
+
+          <ul className="ml-auto flex items-center gap-3 font-mono text-[11px] text-mute">
+            {STATUS.map(({ label, icon }) => (
+              <li key={label} className="flex items-center gap-1">
+                <Icon name={icon} size={12} className="text-good" />
+                {label}
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* Composer */}
+        <div className="flex items-center gap-2 border-t border-line px-4 py-3">
+          <span className="flex-1 px-1 text-[14px] text-mute">Write a message…</span>
+          <span className="pill pill-accent h-7! px-3! text-[12px]">
+            <Icon name="bolt" size={12} />
+            Gasless
+          </span>
+          <span className="tile h-9 w-9 rounded-full is-on">
+            <Icon name="send" size={16} />
+          </span>
+        </div>
+      </div>
+
+      {/* Receipt that floats over the corner */}
+      <div
+        className="card rise absolute -bottom-6 -left-4 hidden w-[230px] p-4 shadow-[var(--shadow)] sm:block lg:-left-10"
+        style={{ animationDelay: "420ms" }}
+      >
+        <p className="label">Transaction</p>
+        <dl className="mt-2.5 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-[12px]">
+          <dt className="text-mute">Status</dt>
+          <dd className="text-right text-good">Confirmed</dd>
+          <dt className="text-mute">Method</dt>
+          <dd className="text-right font-mono">sendMessage</dd>
+          <dt className="text-mute">Gas</dt>
+          <dd className="text-right">Paymaster</dd>
+        </dl>
       </div>
     </figure>
   );
@@ -75,32 +113,51 @@ export function Banner() {
   return (
     <section
       id="banner"
-      className="relative mx-auto flex w-full max-w-[1200px] flex-col items-center px-4 pb-20 pt-36 text-center md:px-6 md:pt-44 lg:pb-24"
+      className="relative mx-auto grid w-full max-w-[1200px] items-center gap-16 px-4 pb-24 pt-36 md:px-6 md:pt-44 lg:grid-cols-[1.05fr_1fr] lg:gap-12 lg:pb-32"
     >
-      <h1 className="display rise max-w-[16ch] text-[clamp(42px,7vw,96px)]" style={{ animationDelay: "80ms" }}>
-        You sign the message. <span className="text-accent">Someone else pays the gas.</span>
-      </h1>
+      <div>
+        <p className="pill rise" style={{ animationDelay: "40ms" }}>
+          <span className="h-1.5 w-1.5 rounded-full bg-good" />
+          Live on {BASE_CHAIN.name}
+        </p>
 
-      <p
-        className="rise mt-8 max-w-[56ch] text-[clamp(16px,1.5vw,19px)] leading-relaxed text-dim"
-        style={{ animationDelay: "160ms" }}
-      >
-        WhisperChain is wallet-to-wallet messaging on {BASE_CHAIN.name}. Every message, file and payment is a contract call
-        that you authorize with one signature. A relayer submits it, and the paymaster covers the gas.
-      </p>
+        <h1 className="display rise mt-7 max-w-[14ch] text-[clamp(40px,5.6vw,76px)]" style={{ animationDelay: "100ms" }}>
+          Wallet-native messaging, <span className="text-accent">settled on-chain.</span>
+        </h1>
 
-      <div className="rise mt-10 flex flex-wrap justify-center gap-3" style={{ animationDelay: "240ms" }}>
-        <Link href={APP_URL} className="btn btn-lg btn-white">
-          <Icon name="send" size={18} stroke={2} />
-          Launch the app
-        </Link>
-        <ScrollLink to="contracts" className="btn btn-lg btn-ghost">
-          <Icon name="code" size={18} />
-          See the contracts
-        </ScrollLink>
+        <p
+          className="rise mt-7 max-w-[50ch] text-[clamp(16px,1.4vw,18px)] leading-relaxed text-dim"
+          style={{ animationDelay: "160ms" }}
+        >
+          Send messages, files and payments between wallets. Each one is authorized by your signature, relayed without gas
+          and recorded permanently on Base.
+        </p>
+
+        <div className="rise mt-10 flex flex-wrap gap-3" style={{ animationDelay: "220ms" }}>
+          <Link href={APP_URL} className="btn btn-lg btn-white">
+            Launch the app
+            <Icon name="arrowRight" size={18} stroke={2.2} />
+          </Link>
+          <ScrollLink to="contracts" className="btn btn-lg btn-ghost">
+            <Icon name="code" size={18} />
+            Explore the contracts
+          </ScrollLink>
+        </div>
+
+        <dl
+          className="rise mt-14 grid max-w-[520px] grid-cols-2 gap-y-6 border-t border-line pt-7 md:grid-cols-4"
+          style={{ animationDelay: "300ms" }}
+        >
+          {SPECS.map(({ label, value }) => (
+            <div key={label}>
+              <dt className="label text-[11px]!">{label}</dt>
+              <dd className="mt-1.5 font-mono text-[15px] text-fg">{value}</dd>
+            </div>
+          ))}
+        </dl>
       </div>
 
-      <ExecutionPreview />
+      <ConversationPreview />
     </section>
   );
 }
