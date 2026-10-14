@@ -1,12 +1,11 @@
 'use client';
 
-import { CheckCheck, Image, Video, Music, FileText, ExternalLink, Coins, CheckCircle2 } from 'lucide-react';
+import { CheckCheck, Image, Video, Music, FileText, ExternalLink, Coins } from 'lucide-react';
 import { format } from 'date-fns';
 import { useState, useEffect } from 'react';
 import { getIPFSUrl, getMediaTypeName } from '@WhisperChain/lib/ipfs';
 import { formatTokenAmount } from '@WhisperChain/lib/token';
 import { ZeroAddress } from 'ethers';
-import { useIsMobile } from '../hooks/useMediaQuery';
 import { useTokenInfo } from '../hooks/useTokenInfo';
 
 type Message = {
@@ -35,8 +34,32 @@ type MessageBubbleProps = {
     isGrouped?: boolean;
 };
 
+const mediaIconProps = { size: 20, strokeWidth: 1.8 } as const;
+
+function MediaIcon({ type }: { type?: number }) {
+    switch (type) {
+        case 1:
+            return <Image {...mediaIconProps} />;
+        case 2:
+            return <Video {...mediaIconProps} />;
+        case 3:
+            return <Music {...mediaIconProps} />;
+        case 4:
+            return <FileText {...mediaIconProps} />;
+        default:
+            return null;
+    }
+}
+
+const formatFileSize = (bytes?: bigint) => {
+    if (!bytes) return '';
+    const num = Number(bytes);
+    if (num < 1024) return `${num} B`;
+    if (num < 1024 * 1024) return `${(num / 1024).toFixed(2)} KB`;
+    return `${(num / 1024 / 1024).toFixed(2)} MB`;
+};
+
 export function MessageBubble({ message, index = 0, showAvatar = true, isGrouped = false }: MessageBubbleProps) {
-    const isMobile = useIsMobile();
     const [isVisible, setIsVisible] = useState(false);
     const isSelf = message.isSelf;
 
@@ -51,435 +74,116 @@ export function MessageBubble({ message, index = 0, showAvatar = true, isGrouped
     const showReadStatus = isSelf && message.status === 'read';
     const hasMedia = Boolean(message.ipfsHash && (message.mediaType ?? 0) > 0);
     const isImage = message.mediaType === 1;
+    const imageOnly = isImage && Boolean(message.ipfsHash);
+    const hasPayment = message.paymentAmount != null && message.paymentAmount > BigInt(0);
     const paymentTokenInfo = useTokenInfo(message.paymentToken ?? ZeroAddress);
     const paymentLabel = message.paymentToken === ZeroAddress ? 'Base ETH' : paymentTokenInfo.symbol;
     const paymentAmountStr = message.paymentAmount != null
         ? formatTokenAmount(BigInt(message.paymentAmount), paymentTokenInfo.decimals)
         : '';
 
-    const getMediaIcon = (type?: number) => {
-        switch (type) {
-            case 1:
-                return <Image style={{ width: '0.875rem', height: '0.875rem' }} />;
-            case 2:
-                return <Video style={{ width: '0.875rem', height: '0.875rem' }} />;
-            case 3:
-                return <Music style={{ width: '0.875rem', height: '0.875rem' }} />;
-            case 4:
-                return <FileText style={{ width: '0.875rem', height: '0.875rem' }} />;
-            default:
-                return null;
-        }
-    };
+    const who = message.sender ?? message.author ?? '';
+    const initials = (who.startsWith('0x') ? who.slice(2, 4) : who.slice(0, 2)).toUpperCase() || 'U';
 
-    const formatFileSize = (bytes?: bigint) => {
-        if (!bytes) return '';
-        const num = Number(bytes);
-        if (num < 1024) return `${num} B`;
-        if (num < 1024 * 1024) return `${(num / 1024).toFixed(2)} KB`;
-        return `${(num / 1024 / 1024).toFixed(2)} MB`;
-    };
-
-    const getAvatarInitial = () => {
-        if (isSelf) return 'You'[0];
-        return message.author?.[0]?.toUpperCase() || 'U';
-    };
-
-    const getAvatarColor = () => {
-        if (isSelf) return '#6366f1';
-        const hash = message.sender?.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) || 0;
-        const colors = ['#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4'];
-        return colors[hash % colors.length];
-    };
+    // Your messages are solid cobalt, like the landing hero; theirs are dark glass.
+    const bubble = isSelf
+        ? 'bg-accent-fill text-white rounded-[18px] rounded-br-md shadow-[0_14px_30px_-16px_rgba(51,102,238,0.6)]'
+        : 'card text-fg rounded-[18px]! rounded-bl-md!';
+    const attachment = isSelf ? 'bg-white/12 hover:bg-white/18' : 'inset-panel hover:brightness-125';
+    const subtle = isSelf ? 'text-white/70' : 'text-mute';
 
     return (
         <div
-            style={{
-                marginBottom: isGrouped ? (isMobile ? '0.25rem' : '0.375rem') : (isMobile ? '0.75rem' : '1rem'),
-                display: 'flex',
-                flexDirection: 'row',
-                gap: isMobile ? '0.5rem' : '0.625rem',
-                alignItems: 'flex-end',
-                justifyContent: isSelf ? 'flex-end' : 'flex-start',
-                opacity: isVisible ? 1 : 0,
-                transition: 'opacity 0.2s ease-out',
-                paddingLeft: isSelf ? (isMobile ? '1rem' : '2rem') : '0',
-                paddingRight: isSelf ? '0' : (isMobile ? '1rem' : '2rem'),
-            }}
-            className="animate-slide-up"
+            className={`animate-slide-up flex items-end gap-2.5 transition-opacity duration-200 ${isSelf ? 'justify-end pl-8 md:pl-16' : 'justify-start pr-8 md:pr-16'} ${isGrouped ? 'mb-1' : 'mb-4'}`}
+            style={{ opacity: isVisible ? 1 : 0 }}
         >
-            {!isSelf && showAvatar && !isGrouped && (
-                <div
-                    style={{
-                        width: isMobile ? '2rem' : '2.25rem',
-                        height: isMobile ? '2rem' : '2.25rem',
-                        borderRadius: '50%',
-                        background: getAvatarColor(),
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        color: '#ffffff',
-                        fontWeight: 600,
-                        fontSize: isMobile ? '0.6875rem' : '0.75rem',
-                        flexShrink: 0,
-                    }}
-                >
-                    {getAvatarInitial()}
-                </div>
-            )}
-            {!isSelf && showAvatar && isGrouped && (
-                <div style={{ width: isMobile ? '2rem' : '2.25rem', flexShrink: 0 }} />
-            )}
+            {!isSelf && (showAvatar && !isGrouped
+                ? <span className="avatar h-8 w-8 text-[11px]">{initials}</span>
+                : <span className="w-8 shrink-0" />)}
 
-            <div
-                style={{
-                    maxWidth: isMobile ? '85%' : '75%',
-                    minWidth: isMobile ? '4rem' : '6rem',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '0.375rem',
-                }}
-            >
-                {!isSelf && !isGrouped && (
-                    <div
-                        style={{
-                            marginBottom: '0.375rem',
-                            paddingLeft: '0.625rem',
-                        }}
-                    >
-                        <span
-                            style={{
-                                fontSize: '0.8125rem',
-                                fontWeight: 500,
-                                color: 'rgba(255, 255, 255, 0.8)',
-                            }}
-                        >
-                            {message.author}
-                        </span>
-                    </div>
-                )}
+            <div className="flex min-w-[6rem] max-w-[85%] flex-col gap-1.5 md:max-w-[75%]">
+                {!isSelf && !isGrouped && <span className="pl-1 font-mono text-[11px] text-mute">{message.author}</span>}
 
-                <div
-                    style={{
-                        borderRadius: isSelf
-                            ? (isGrouped ? '1.25rem 0.5rem 1.25rem 1.25rem' : '1.25rem 0.5rem 1.25rem 1.25rem')
-                            : (isGrouped ? '0.5rem 1.25rem 1.25rem 1.25rem' : '0.5rem 1.25rem 1.25rem 1.25rem'),
-                        padding: isImage && message.ipfsHash ? '0' : '0.8125rem 1.125rem',
-                        background: isSelf
-                            ? 'linear-gradient(145deg, rgba(99, 102, 241, 0.22) 0%, rgba(79, 70, 229, 0.12) 100%)'
-                            : 'linear-gradient(145deg, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0.04) 100%)',
-                        border: `1px solid ${isSelf ? 'rgba(99, 102, 241, 0.2)' : 'rgba(255, 255, 255, 0.08)'}`,
-                        boxShadow: isSelf
-                            ? '0 2px 12px rgba(99, 102, 241, 0.08), 0 1px 2px rgba(0, 0, 0, 0.1)'
-                            : '0 1px 4px rgba(0, 0, 0, 0.06)',
-                        position: 'relative',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: message.body && isImage && message.ipfsHash ? '0.5rem' : '0',
-                        backdropFilter: 'blur(12px)',
-                        transition: 'border-color 0.2s, box-shadow 0.2s, background 0.2s',
-                    }}
-                    onMouseEnter={(e) => {
-                        if (!isSelf) {
-                            e.currentTarget.style.background = 'linear-gradient(145deg, rgba(255, 255, 255, 0.09) 0%, rgba(255, 255, 255, 0.05) 100%)';
-                            e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.12)';
-                        }
-                    }}
-                    onMouseLeave={(e) => {
-                        if (!isSelf) {
-                            e.currentTarget.style.background = 'linear-gradient(145deg, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0.04) 100%)';
-                            e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.08)';
-                        }
-                    }}
-                >
+                <div className={`flex flex-col overflow-hidden ${bubble} ${imageOnly ? '' : 'px-4 py-3'}`}>
                     {message.body && (
-                        <p
-                            style={{
-                                fontSize: '0.9375rem',
-                                lineHeight: '1.5',
-                                whiteSpace: 'pre-wrap',
-                                wordBreak: 'break-word',
-                                color: '#ffffff',
-                                margin: 0,
-                                padding: isImage && message.ipfsHash ? '0.75rem 0.875rem 0 0.875rem' : '0',
-                            }}
-                        >
+                        <p className={`whitespace-pre-wrap break-words text-[15px] leading-relaxed ${imageOnly ? 'px-4 pt-3' : ''}`}>
                             {message.body}
                         </p>
                     )}
 
-                    {message.ipfsHash && (message.mediaType ?? 0) > 0 && (
-                        <div
-                            style={{
-                                marginTop: message.body ? '0.875rem' : '0',
-                                paddingTop: message.body ? '0.875rem' : '0',
-                                borderTop: message.body ? `1px solid ${isSelf ? 'rgba(99, 102, 241, 0.2)' : 'rgba(255, 255, 255, 0.1)'}` : 'none',
-                                display: 'flex',
-                                flexDirection: 'column',
-                                gap: '0.625rem',
-                            }}
-                        >
-                            {message.mediaType === 1 && (
+                    {hasMedia && message.ipfsHash && (
+                        <div className={`flex flex-col gap-2.5 ${message.body ? 'mt-3' : ''}`}>
+                            {isImage ? (
                                 <div
-                                    style={{
-                                        borderRadius: message.body ? '0.5rem' : isSelf ? '1.125rem 0.25rem 0 0' : '0.25rem 1.125rem 0 0',
-                                        overflow: 'hidden',
-                                        maxWidth: '100%',
-                                        maxHeight: '20rem',
-                                        background: 'rgba(0, 0, 0, 0.2)',
-                                        position: 'relative',
-                                        cursor: 'pointer',
-                                    }}
+                                    className="relative max-h-80 cursor-pointer overflow-hidden bg-black/20"
                                     onClick={() => window.open(getIPFSUrl(message.ipfsHash!), '_blank')}
                                 >
                                     <img
-                                        src={getIPFSUrl(message.ipfsHash!)}
+                                        src={getIPFSUrl(message.ipfsHash)}
                                         alt="Shared image"
-                                        style={{
-                                            width: '100%',
-                                            height: 'auto',
-                                            maxHeight: '20rem',
-                                            objectFit: 'contain',
-                                            display: 'block',
-                                        }}
+                                        className="block h-auto max-h-80 w-full object-contain"
                                         onError={(e) => {
                                             e.currentTarget.style.display = 'none';
                                             const parent = e.currentTarget.parentElement;
                                             if (parent) {
                                                 parent.innerHTML = `
-                                                    <div style="padding: 2rem; text-align: center; color: rgba(255, 255, 255, 0.5);">
+                                                    <div style="padding: 2rem; text-align: center; color: var(--mute);">
                                                         <p>Image preview unavailable</p>
-                                                        <a href="${getIPFSUrl(message.ipfsHash!)}" target="_blank" style="color: #6366f1; text-decoration: none;">Open in new tab</a>
+                                                        <a href="${getIPFSUrl(message.ipfsHash!)}" target="_blank" style="color: var(--accent);">Open in new tab</a>
                                                     </div>
                                                 `;
                                             }
                                         }}
                                     />
                                 </div>
-                            )}
-
-                            {message.mediaType === 4 && (
+                            ) : (
                                 <a
-                                    href={getIPFSUrl(message.ipfsHash!)}
+                                    href={getIPFSUrl(message.ipfsHash)}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    style={{
-                                        textDecoration: 'none',
-                                        display: 'block',
-                                    }}
+                                    className={`flex items-center gap-3 rounded-[var(--r-inset)] p-3 transition ${attachment}`}
                                 >
-                                    <div
-                                        style={{
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: '0.75rem',
-                                            padding: '0.875rem',
-                                            borderRadius: '0.75rem',
-                                            background: isSelf ? 'rgba(99, 102, 241, 0.1)' : 'rgba(255, 255, 255, 0.05)',
-                                            border: `1px solid ${isSelf ? 'rgba(99, 102, 241, 0.2)' : 'rgba(255, 255, 255, 0.1)'}`,
-                                            transition: 'all 0.2s',
-                                            cursor: 'pointer',
-                                        }}
-                                        onMouseEnter={(e) => {
-                                            e.currentTarget.style.background = isSelf ? 'rgba(99, 102, 241, 0.15)' : 'rgba(255, 255, 255, 0.08)';
-                                            e.currentTarget.style.borderColor = isSelf ? 'rgba(99, 102, 241, 0.3)' : 'rgba(255, 255, 255, 0.15)';
-                                        }}
-                                        onMouseLeave={(e) => {
-                                            e.currentTarget.style.background = isSelf ? 'rgba(99, 102, 241, 0.1)' : 'rgba(255, 255, 255, 0.05)';
-                                            e.currentTarget.style.borderColor = isSelf ? 'rgba(99, 102, 241, 0.2)' : 'rgba(255, 255, 255, 0.1)';
-                                        }}
-                                    >
-                                        <div
-                                            style={{
-                                                width: '3rem',
-                                                height: '3rem',
-                                                borderRadius: '0.5rem',
-                                                background: isSelf ? 'rgba(99, 102, 241, 0.2)' : 'rgba(255, 255, 255, 0.1)',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                justifyContent: 'center',
-                                                flexShrink: 0,
-                                            }}
-                                        >
-                                            <FileText style={{ width: '1.5rem', height: '1.5rem', color: isSelf ? '#a5b4fc' : 'rgba(255, 255, 255, 0.7)' }} />
-                                        </div>
-                                        <div style={{ flex: 1, minWidth: 0 }}>
-                                            <div
-                                                style={{
-                                                    fontSize: '0.875rem',
-                                                    fontWeight: 500,
-                                                    color: '#ffffff',
-                                                    marginBottom: '0.25rem',
-                                                    overflow: 'hidden',
-                                                    textOverflow: 'ellipsis',
-                                                    whiteSpace: 'nowrap',
-                                                }}
-                                            >
-                                                Document
-                                            </div>
-                                            <div
-                                                style={{
-                                                    fontSize: '0.75rem',
-                                                    color: 'rgba(255, 255, 255, 0.6)',
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    gap: '0.5rem',
-                                                }}
-                                            >
-                                                {message.fileSize && (
-                                                    <span>{formatFileSize(message.fileSize)}</span>
-                                                )}
-                                                <span>•</span>
-                                                <span style={{ fontFamily: 'monospace', fontSize: '0.6875rem' }}>
-                                                    {message.ipfsHash.slice(0, 8)}...{message.ipfsHash.slice(-6)}
-                                                </span>
-                                            </div>
-                                        </div>
-                                        <ExternalLink style={{ width: '1rem', height: '1rem', color: 'rgba(255, 255, 255, 0.5)', flexShrink: 0 }} />
-                                    </div>
-                                </a>
-                            )}
-
-                            {(message.mediaType === 2 || message.mediaType === 3) && (
-                                <a
-                                    href={getIPFSUrl(message.ipfsHash!)}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    style={{
-                                        textDecoration: 'none',
-                                        display: 'block',
-                                    }}
-                                >
-                                    <div
-                                        style={{
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: '0.75rem',
-                                            padding: '0.875rem',
-                                            borderRadius: '0.75rem',
-                                            background: isSelf ? 'rgba(99, 102, 241, 0.1)' : 'rgba(255, 255, 255, 0.05)',
-                                            border: `1px solid ${isSelf ? 'rgba(99, 102, 241, 0.2)' : 'rgba(255, 255, 255, 0.1)'}`,
-                                            transition: 'all 0.2s',
-                                            cursor: 'pointer',
-                                        }}
-                                        onMouseEnter={(e) => {
-                                            e.currentTarget.style.background = isSelf ? 'rgba(99, 102, 241, 0.15)' : 'rgba(255, 255, 255, 0.08)';
-                                        }}
-                                        onMouseLeave={(e) => {
-                                            e.currentTarget.style.background = isSelf ? 'rgba(99, 102, 241, 0.1)' : 'rgba(255, 255, 255, 0.05)';
-                                        }}
-                                    >
-                                        <div
-                                            style={{
-                                                width: '3rem',
-                                                height: '3rem',
-                                                borderRadius: '0.5rem',
-                                                background: isSelf ? 'rgba(99, 102, 241, 0.2)' : 'rgba(255, 255, 255, 0.1)',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                justifyContent: 'center',
-                                                flexShrink: 0,
-                                            }}
-                                        >
-                                            {getMediaIcon(message.mediaType)}
-                                        </div>
-                                        <div style={{ flex: 1, minWidth: 0 }}>
-                                            <div
-                                                style={{
-                                                    fontSize: '0.875rem',
-                                                    fontWeight: 500,
-                                                    color: '#ffffff',
-                                                    marginBottom: '0.25rem',
-                                                }}
-                                            >
-                                                {getMediaTypeName(message.mediaType)}
-                                            </div>
-                                            {message.fileSize && (
-                                                <div
-                                                    style={{
-                                                        fontSize: '0.75rem',
-                                                        color: 'rgba(255, 255, 255, 0.6)',
-                                                    }}
-                                                >
-                                                    {formatFileSize(message.fileSize)}
-                                                </div>
-                                            )}
-                                        </div>
-                                        <ExternalLink style={{ width: '1rem', height: '1rem', color: 'rgba(255, 255, 255, 0.5)', flexShrink: 0 }} />
-                                    </div>
+                                    <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-[12px] ${isSelf ? 'bg-white/15' : 'tile'}`}>
+                                        <MediaIcon type={message.mediaType} />
+                                    </span>
+                                    <span className="min-w-0 flex-1">
+                                        <span className="block truncate text-[14px] font-medium">
+                                            {message.mediaType === 4 ? 'Document' : getMediaTypeName(message.mediaType ?? 0)}
+                                        </span>
+                                        <span className={`flex items-center gap-1.5 font-mono text-[11px] ${subtle}`}>
+                                            {message.fileSize ? <span>{formatFileSize(message.fileSize)} ·</span> : null}
+                                            <span className="truncate">
+                                                ipfs://{message.ipfsHash.slice(0, 8)}…{message.ipfsHash.slice(-4)}
+                                            </span>
+                                        </span>
+                                    </span>
+                                    <ExternalLink size={15} strokeWidth={1.8} className={`shrink-0 ${subtle}`} />
                                 </a>
                             )}
                         </div>
                     )}
 
-                    {message.paymentAmount !== undefined && message.paymentAmount !== null && message.paymentAmount > BigInt(0) && (
+                    {hasPayment && (
                         <div
-                            style={{
-                                marginTop: (message.body || hasMedia) ? '0.875rem' : '0',
-                                paddingTop: (message.body || hasMedia) ? '0.875rem' : '0',
-                                borderTop: (message.body || hasMedia)
-                                    ? `1px solid ${isSelf ? 'rgba(255, 255, 255, 0.2)' : 'rgba(255, 255, 255, 0.1)'}`
-                                    : 'none',
-                                padding: '0.75rem 1rem',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '0.5rem',
-                                background: message.paymentSettled
-                                    ? 'rgba(16, 185, 129, 0.1)'
-                                    : isSelf
-                                        ? 'rgba(99, 102, 241, 0.1)'
-                                        : 'rgba(245, 158, 11, 0.1)',
-                                borderRadius: '0.5rem',
-                                border: `1px solid ${message.paymentSettled
-                                    ? 'rgba(16, 185, 129, 0.2)'
-                                    : isSelf
-                                        ? 'rgba(99, 102, 241, 0.2)'
-                                        : 'rgba(245, 158, 11, 0.2)'
-                                    }`,
-                            }}
+                            className={`flex items-center gap-2.5 rounded-[var(--r-inset)] px-3 py-2.5 ${message.body || hasMedia ? 'mt-3' : ''} ${imageOnly ? 'mx-3' : ''} ${isSelf ? 'bg-white/12' : 'inset-panel'}`}
                         >
-                            <Coins style={{
-                                width: '1rem',
-                                height: '1rem',
-                                color: message.paymentSettled
-                                    ? '#34d399'
-                                    : isSelf
-                                        ? '#a5b4fc'
-                                        : '#fbbf24',
-                            }} />
-                            <span style={{ fontSize: '0.8125rem', fontWeight: 500, color: '#ffffff' }}>
-                                {isSelf ? 'Sent' : 'Received'} {paymentTokenInfo.loading ? '...' : paymentAmountStr} {paymentLabel}
+                            <Coins size={16} strokeWidth={1.8} className={message.paymentSettled ? 'text-good' : isSelf ? 'text-white' : 'text-accent'} />
+                            <span className="min-w-0">
+                                <span className={`block text-[11px] ${subtle}`}>{isSelf ? 'Payment sent' : 'Payment received'}</span>
+                                <span className="block text-[15px] font-semibold tracking-[-0.02em]">
+                                    {paymentTokenInfo.loading ? '…' : paymentAmountStr} {paymentLabel}
+                                </span>
                             </span>
-                            {message.paymentSettled && (
-                                <CheckCheck style={{ width: '0.75rem', height: '0.75rem', color: '#34d399', flexShrink: 0 }} />
-                            )}
+                            {message.paymentSettled && <CheckCheck size={14} className="ml-auto shrink-0 text-good" />}
                         </div>
                     )}
 
-                    <div
-                        style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'flex-end',
-                            gap: '0.375rem',
-                            padding: isImage && message.ipfsHash
-                                ? '0.5rem 1rem 0.75rem'
-                                : message.paymentAmount && message.paymentAmount > BigInt(0)
-                                    ? '0.5rem 0.875rem 0.75rem'
-                                    : '0.25rem 0 0 0',
-                            fontSize: '0.6875rem',
-                            color: 'rgba(255, 255, 255, 0.4)',
-                        }}
-                    >
-                        <span>
-                            {exactTime}
-                        </span>
-                        {showReadStatus && (
-                            <CheckCheck style={{ width: '0.75rem', height: '0.75rem', color: '#10b981', flexShrink: 0 }} />
-                        )}
+                    <div className={`flex items-center justify-end gap-1.5 font-mono text-[10px] ${subtle} ${imageOnly ? 'px-4 pb-3 pt-2' : 'pt-1.5'}`}>
+                        {isSelf && message.status === 'pending' && <span>Sending ·</span>}
+                        <span>{exactTime}</span>
+                        {showReadStatus && <CheckCheck size={12} className="shrink-0 text-good" />}
                     </div>
                 </div>
-
             </div>
         </div>
     );

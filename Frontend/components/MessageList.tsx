@@ -37,86 +37,28 @@ export function MessageList({
     onMessageUpdate,
     connectedAddress,
 }: MessageListProps) {
-    const isMobile = useIsMobile();
     return (
-        <div
-            style={{
-                flex: 1,
-                overflowY: 'auto',
-                overflowX: 'hidden',
-                padding: isMobile ? '1.25rem 0.875rem' : '1.5rem 1.25rem',
-                background: 'transparent',
-                minHeight: '100%',
-                position: 'relative',
-            }}
-            className="chat-message-list"
-        >
+        <div className="relative min-h-full px-3 py-6 md:px-6">
             {isLoading && messages.length === 0 ? (
-                <div
-                    style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        height: '100%',
-                        minHeight: '12rem',
-                    }}
-                >
-                    <div style={{ textAlign: 'center' }}>
-                        <div
-                            style={{
-                                width: '2.25rem',
-                                height: '2.25rem',
-                                border: '2px solid rgba(99, 102, 241, 0.15)',
-                                borderTopColor: 'rgba(139, 92, 246, 0.9)',
-                                borderRadius: '50%',
-                                margin: '0 auto 1.25rem',
-                                animation: 'spin 0.8s linear infinite',
-                            }}
-                        />
-                        <p style={{ color: 'rgba(255, 255, 255, 0.45)', fontSize: '0.8125rem', fontWeight: 500 }}>
-                            Loading messages...
-                        </p>
+                <div className="flex h-full min-h-[12rem] items-center justify-center">
+                    <div className="text-center">
+                        <span className="mx-auto mb-5 block h-9 w-9 animate-spin rounded-full border-2 border-accent/20 border-t-accent" />
+                        <p className="label">Reading from Base</p>
                     </div>
                 </div>
             ) : messages.length === 0 ? (
-                <div
-                    style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        height: '100%',
-                        minHeight: '14rem',
-                    }}
-                >
-                    <div style={{ textAlign: 'center', maxWidth: '20rem' }}>
-                        <div
-                            style={{
-                                width: '4.5rem',
-                                height: '4.5rem',
-                                borderRadius: '1rem',
-                                background: 'linear-gradient(145deg, rgba(99, 102, 241, 0.12) 0%, rgba(139, 92, 246, 0.08) 100%)',
-                                border: '1px solid rgba(255, 255, 255, 0.06)',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                margin: '0 auto 1.5rem',
-                                boxShadow: '0 4px 24px rgba(0, 0, 0, 0.2)',
-                            }}
-                        >
-                            <MessageSquare style={{ width: '2rem', height: '2rem', color: 'rgba(167, 139, 250, 0.8)' }} />
-                        </div>
-                        <h3 style={{ fontSize: '1.125rem', fontWeight: 600, color: 'rgba(255, 255, 255, 0.95)', marginBottom: '0.5rem' }}>
-                            No messages yet
-                        </h3>
-                        <p style={{ color: 'rgba(255, 255, 255, 0.45)', fontSize: '0.875rem', lineHeight: 1.55 }}>
-                            {emptyMessage}
-                        </p>
+                <div className="flex h-full min-h-[14rem] items-center justify-center">
+                    <div className="max-w-[22rem] text-center">
+                        <span className="tile mx-auto h-14 w-14 rounded-[var(--r-inset)]">
+                            <MessageSquare size={24} strokeWidth={1.8} />
+                        </span>
+                        <h3 className="h3 mt-5">No messages yet</h3>
+                        <p className="mt-2 text-[14px] leading-relaxed text-dim">{emptyMessage}</p>
                     </div>
                 </div>
             ) : (
-                <div style={{ maxWidth: isMobile ? '100%' : '48rem', margin: '0 auto', paddingBottom: isMobile ? '1rem' : '1.5rem' }}>
+                <div className="mx-auto max-w-[48rem] pb-4">
                     {messages.map((message, index) => {
-                       
                         const prevMessage = index > 0 ? messages[index - 1] : null;
                         const isGrouped = prevMessage !== null &&
                             prevMessage.isSelf === message.isSelf &&

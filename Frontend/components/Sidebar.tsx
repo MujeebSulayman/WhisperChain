@@ -1,11 +1,11 @@
 'use client';
 
-import { MessageSquarePlus, Settings, Send, Menu, X, Hash, User, Coins } from 'lucide-react';
+import Link from 'next/link';
+import { MessageSquarePlus, Settings, Send, PanelLeftClose, PanelLeftOpen, Coins } from 'lucide-react';
 import { WalletConnect } from './WalletConnect';
 import { UserStats } from './UserStats';
 import { StorageManagement } from './StorageManagement';
-import { UserProfile } from './UserProfile';
-import type { AddressLike } from 'ethers';
+import { Logo, LogoMark } from './landing/icons';
 
 type SidebarProps = {
     isOpen: boolean;
@@ -38,498 +38,98 @@ export function Sidebar({
     onPaymentHistory,
     isMobile = false,
 }: SidebarProps) {
-    return (
-        <aside
-            style={{
-                width: isMobile ? (isOpen ? '18rem' : '0') : (isOpen ? '18rem' : '4rem'),
-                minWidth: isMobile ? (isOpen ? '18rem' : '0') : (isOpen ? '18rem' : '4rem'),
-                transition: 'width 0.3s ease-out, min-width 0.3s ease-out',
-                background: '#1a1a1a',
-                borderRight: '1px solid rgba(255, 255, 255, 0.08)',
-                display: isMobile && !isOpen ? 'none' : 'flex',
-                flexDirection: 'column',
-                overflow: 'hidden',
-                position: isMobile ? 'fixed' : 'relative',
-                left: isMobile ? 0 : 'auto',
-                top: isMobile ? 0 : 'auto',
-                zIndex: isMobile ? 50 : 'auto',
-                flexShrink: 0,
-                height: '100vh',
-                boxShadow: isMobile && isOpen ? '4px 0 24px rgba(0, 0, 0, 0.5)' : 'none',
-            }}
-        >
-            <div
-                style={{
-                    padding: isOpen ? '1rem' : '0.75rem',
-                    borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: isOpen ? '1rem' : '0.5rem',
-                    flexShrink: 0,
-                }}
-            >
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: isOpen ? 'space-between' : 'center', gap: '0.5rem' }}>
-                    {isOpen && (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
-                            <div
-                                style={{
-                                    width: '2.25rem',
-                                    height: '2.25rem',
-                                    borderRadius: '0.5rem',
-                                    background: '#ffffff',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                }}
-                            >
-                                <Hash style={{ width: '1.25rem', height: '1.25rem', color: '#0f0f0f' }} />
-                            </div>
-                            <h1
-                                style={{
-                                    fontSize: '1.125rem',
-                                    fontWeight: 600,
-                                    color: '#ffffff',
-                                }}
-                            >
-                                WhisperChain
-                            </h1>
-                        </div>
-                    )}
-                    {!isOpen && (
-                        <div
-                            style={{
-                                width: '2rem',
-                                height: '2rem',
-                                borderRadius: '0.5rem',
-                                background: '#ffffff',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                            }}
-                        >
-                            <Hash style={{ width: '1rem', height: '1rem', color: '#0f0f0f' }} />
-                        </div>
-                    )}
-                    <button
-                        onClick={onToggle}
-                        style={{
-                            padding: isMobile ? '0.625rem' : '0.375rem',
-                            borderRadius: '0.5rem',
-                            background: 'transparent',
-                            border: '1px solid rgba(255, 255, 255, 0.08)',
-                            color: 'rgba(255, 255, 255, 0.7)',
-                            cursor: 'pointer',
-                            transition: 'all 0.2s',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            touchAction: 'manipulation',
-                            minWidth: isMobile ? '2.75rem' : 'auto',
-                            minHeight: isMobile ? '2.75rem' : 'auto',
-                        }}
-                        onMouseEnter={(e) => {
-                            if (!isMobile) {
-                                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
-                                e.currentTarget.style.color = '#ffffff';
-                            }
-                        }}
-                        onMouseLeave={(e) => {
-                            if (!isMobile) {
-                                e.currentTarget.style.background = 'transparent';
-                                e.currentTarget.style.color = 'rgba(255, 255, 255, 0.7)';
-                            }
-                        }}
-                        onTouchStart={(e) => {
-                            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
-                        }}
-                        onTouchEnd={(e) => {
-                            e.currentTarget.style.background = 'transparent';
-                        }}
-                    >
-                        {isOpen ? <X style={{ width: '1rem', height: '1rem' }} /> : <Menu style={{ width: '1rem', height: '1rem' }} />}
-                    </button>
-                </div>
+    if (isMobile && !isOpen) return null;
 
-                {isOpen && (
-                    <WalletConnect
-                        connectedAddress={connectedAddress}
-                        onConnect={onConnect}
-                        onDisconnect={onDisconnect}
-                    />
+    const initial = profile?.username?.[0]?.toUpperCase() || 'U';
+    const shortAddress = connectedAddress ? `${connectedAddress.slice(0, 6)}…${connectedAddress.slice(-4)}` : '';
+
+    const frame = isMobile
+        ? 'fixed inset-y-2 left-2 z-50 w-[18rem] max-w-[calc(100vw-1rem)] rise'
+        : `relative shrink-0 transition-[width] duration-300 [transition-timing-function:var(--ease-out)] ${isOpen ? 'w-[18rem]' : 'w-[4.5rem]'}`;
+
+    if (!isOpen) {
+        // Collapsed rail (desktop only): the mark and one pebble per action.
+        return (
+            <aside className={`glass flex flex-col items-center gap-2 rounded-[var(--r-card)] py-4 ${frame}`}>
+                <Link href="/" aria-label="WhisperChain home">
+                    <LogoMark size={36} />
+                </Link>
+                <button onClick={onToggle} className="icon-btn mt-2" aria-label="Expand menu" title="Expand menu">
+                    <PanelLeftOpen size={18} strokeWidth={1.8} />
+                </button>
+                <span className="my-2 h-px w-8 bg-line" />
+                <button onClick={onNewChat} className="tile is-on h-10 w-10 rounded-full" title="New conversation" aria-label="New conversation">
+                    <MessageSquarePlus size={18} strokeWidth={1.8} />
+                </button>
+                <button onClick={onBatchSend} className="icon-btn" title="Batch send" aria-label="Batch send">
+                    <Send size={18} strokeWidth={1.8} />
+                </button>
+                <button onClick={onPaymentHistory} className="icon-btn" title="Payment history" aria-label="Payment history">
+                    <Coins size={18} strokeWidth={1.8} />
+                </button>
+                {profile && connectedAddress && (
+                    <div className="mt-auto flex flex-col items-center gap-2">
+                        <button onClick={onSettings} className="icon-btn" title="Settings" aria-label="Settings">
+                            <Settings size={18} strokeWidth={1.8} />
+                        </button>
+                        <button onClick={onToggle} className="avatar is-on h-10 w-10" title={profile.username || 'Profile'}>
+                            {initial}
+                        </button>
+                    </div>
                 )}
+            </aside>
+        );
+    }
+
+    return (
+        <aside className={`glass flex flex-col overflow-hidden rounded-[var(--r-card)] ${frame}`}>
+            {/* Brand and collapse */}
+            <div className="flex items-center justify-between gap-2 px-4 pb-3 pt-4">
+                <Link href="/" aria-label="WhisperChain home">
+                    <Logo size={18} />
+                </Link>
+                <button onClick={onToggle} className="icon-btn" aria-label={isMobile ? 'Close menu' : 'Collapse menu'}>
+                    <PanelLeftClose size={18} strokeWidth={1.8} />
+                </button>
             </div>
 
-            <div
-                style={{
-                    flex: 1,
-                    overflowY: 'auto',
-                    overflowX: 'hidden',
-                    display: 'flex',
-                    flexDirection: 'column',
-                }}
-            >
+            <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto px-3 pb-4">
+                <WalletConnect connectedAddress={connectedAddress} onConnect={onConnect} onDisconnect={onDisconnect} />
+
                 {profile && connectedAddress && (
-                    <div
-                        style={{
-                            padding: isOpen ? '1rem' : '0.5rem',
-                            borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
-                            display: 'flex',
-                            flexDirection: isOpen ? 'column' : 'column',
-                            alignItems: isOpen ? 'stretch' : 'center',
-                            gap: isOpen ? '0.75rem' : '0.5rem',
-                        }}
-                    >
-                        {isOpen ? (
-                            <>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                                    <div
-                                        style={{
-                                            width: '2.5rem',
-                                            height: '2.5rem',
-                                            borderRadius: '50%',
-                                            background: '#ffffff',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            color: '#0f0f0f',
-                                            fontWeight: 600,
-                                            fontSize: '0.875rem',
-                                        }}
-                                    >
-                                        {profile.username?.[0]?.toUpperCase() || 'U'}
-                                    </div>
-                                    <div style={{ flex: 1, minWidth: 0 }}>
-                                        <p
-                                            style={{
-                                                fontWeight: 500,
-                                                fontSize: '0.875rem',
-                                                color: '#ffffff',
-                                                overflow: 'hidden',
-                                                textOverflow: 'ellipsis',
-                                                whiteSpace: 'nowrap',
-                                            }}
-                                        >
-                                            {profile.username || 'User'}
-                                        </p>
-                                        <p
-                                            style={{
-                                                fontSize: '0.75rem',
-                                                color: 'rgba(255, 255, 255, 0.5)',
-                                                fontFamily: 'monospace',
-                                                overflow: 'hidden',
-                                                textOverflow: 'ellipsis',
-                                                whiteSpace: 'nowrap',
-                                            }}
-                                        >
-                                            {connectedAddress.slice(0, 6)}...{connectedAddress.slice(-4)}
-                                        </p>
-                                    </div>
-                                </div>
-                                <button
-                                    onClick={onSettings}
-                                    style={{
-                                        width: '100%',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '0.5rem',
-                                        padding: isMobile ? '0.75rem' : '0.5rem 0.75rem',
-                                        borderRadius: '0.5rem',
-                                        background: 'transparent',
-                                        border: '1px solid rgba(255, 255, 255, 0.08)',
-                                        color: 'rgba(255, 255, 255, 0.7)',
-                                        cursor: 'pointer',
-                                        fontSize: '0.875rem',
-                                        transition: 'all 0.2s',
-                                        touchAction: 'manipulation',
-                                    }}
-                                    onMouseEnter={(e) => {
-                                        if (!isMobile) {
-                                            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
-                                            e.currentTarget.style.color = '#ffffff';
-                                        }
-                                    }}
-                                    onMouseLeave={(e) => {
-                                        if (!isMobile) {
-                                            e.currentTarget.style.background = 'transparent';
-                                            e.currentTarget.style.color = 'rgba(255, 255, 255, 0.7)';
-                                        }
-                                    }}
-                                    onTouchStart={(e) => {
-                                        e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
-                                    }}
-                                    onTouchEnd={(e) => {
-                                        e.currentTarget.style.background = 'transparent';
-                                    }}
-                                >
-                                    <Settings style={{ width: '1rem', height: '1rem' }} />
-                                    Settings
-                                </button>
-                            </>
-                        ) : (
-                            <>
-                                <button
-                                    onClick={onToggle}
-                                    style={{
-                                        width: '2.5rem',
-                                        height: '2.5rem',
-                                        borderRadius: '50%',
-                                        background: '#ffffff',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        color: '#0f0f0f',
-                                        fontWeight: 600,
-                                        fontSize: '0.875rem',
-                                        border: 'none',
-                                        cursor: 'pointer',
-                                        transition: 'opacity 0.2s',
-                                    }}
-                                    onMouseEnter={(e) => {
-                                        e.currentTarget.style.opacity = '0.9';
-                                    }}
-                                    onMouseLeave={(e) => {
-                                        e.currentTarget.style.opacity = '1';
-                                    }}
-                                >
-                                    {profile.username?.[0]?.toUpperCase() || 'U'}
-                                </button>
-                                <button
-                                    onClick={onSettings}
-                                    style={{
-                                        width: '2.5rem',
-                                        height: '2.5rem',
-                                        padding: '0.5rem',
-                                        borderRadius: '0.5rem',
-                                        background: 'transparent',
-                                        border: '1px solid rgba(255, 255, 255, 0.08)',
-                                        color: 'rgba(255, 255, 255, 0.7)',
-                                        cursor: 'pointer',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        transition: 'all 0.2s',
-                                    }}
-                                    onMouseEnter={(e) => {
-                                        e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
-                                        e.currentTarget.style.color = '#ffffff';
-                                    }}
-                                    onMouseLeave={(e) => {
-                                        e.currentTarget.style.background = 'transparent';
-                                        e.currentTarget.style.color = 'rgba(255, 255, 255, 0.7)';
-                                    }}
-                                >
-                                    <Settings style={{ width: '1rem', height: '1rem' }} />
-                                </button>
-                            </>
-                        )}
+                    <div className="card flex items-center gap-3 p-3">
+                        <span className="avatar is-on h-10 w-10 text-[14px]">{initial}</span>
+                        <div className="min-w-0 flex-1">
+                            <p className="truncate text-[14px] font-semibold">{profile.username || 'User'}</p>
+                            <p className="truncate font-mono text-[11px] text-mute">{shortAddress}</p>
+                        </div>
+                        <button onClick={onSettings} className="icon-btn h-9! w-9!" title="Settings" aria-label="Settings">
+                            <Settings size={16} strokeWidth={1.8} />
+                        </button>
                     </div>
                 )}
 
-                <div
-                    style={{
-                        padding: isOpen ? '1rem' : '0.5rem',
-                        borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '0.5rem',
-                        alignItems: isOpen ? 'stretch' : 'center',
-                    }}
-                >
-                    {isOpen ? (
-                        <>
-                            <button
-                                onClick={onNewChat}
-                                style={{
-                                    width: '100%',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    gap: '0.5rem',
-                                    padding: '0.75rem 1rem',
-                                    borderRadius: '0.5rem',
-                                    background: '#ffffff',
-                                    border: 'none',
-                                    color: '#0f0f0f',
-                                    fontWeight: 600,
-                                    cursor: 'pointer',
-                                    fontSize: '0.875rem',
-                                    transition: 'opacity 0.2s',
-                                }}
-                                onMouseEnter={(e) => {
-                                    e.currentTarget.style.opacity = '0.9';
-                                }}
-                                onMouseLeave={(e) => {
-                                    e.currentTarget.style.opacity = '1';
-                                }}
-                            >
-                                <MessageSquarePlus style={{ width: '1rem', height: '1rem' }} />
-                                New Chat
-                            </button>
-                            <button
-                                onClick={onBatchSend}
-                                style={{
-                                    width: '100%',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    gap: '0.5rem',
-                                    padding: '0.75rem 1rem',
-                                    borderRadius: '0.5rem',
-                                    background: 'transparent',
-                                    border: '1px solid rgba(255, 255, 255, 0.08)',
-                                    color: 'rgba(255, 255, 255, 0.7)',
-                                    cursor: 'pointer',
-                                    fontSize: '0.875rem',
-                                    transition: 'all 0.2s',
-                                }}
-                                onMouseEnter={(e) => {
-                                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
-                                    e.currentTarget.style.color = '#ffffff';
-                                }}
-                                onMouseLeave={(e) => {
-                                    e.currentTarget.style.background = 'transparent';
-                                    e.currentTarget.style.color = 'rgba(255, 255, 255, 0.7)';
-                                }}
-                            >
-                                <Send style={{ width: '1rem', height: '1rem' }} />
-                                Batch Send
-                            </button>
-                            <button
-                                onClick={onPaymentHistory}
-                                style={{
-                                    width: '100%',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    gap: '0.5rem',
-                                    padding: '0.75rem 1rem',
-                                    borderRadius: '0.5rem',
-                                    background: 'transparent',
-                                    border: '1px solid rgba(245, 158, 11, 0.2)',
-                                    color: 'rgba(245, 158, 11, 0.8)',
-                                    cursor: 'pointer',
-                                    fontSize: '0.875rem',
-                                    transition: 'all 0.2s',
-                                }}
-                                onMouseEnter={(e) => {
-                                    e.currentTarget.style.background = 'rgba(245, 158, 11, 0.1)';
-                                    e.currentTarget.style.color = '#fbbf24';
-                                }}
-                                onMouseLeave={(e) => {
-                                    e.currentTarget.style.background = 'transparent';
-                                    e.currentTarget.style.color = 'rgba(245, 158, 11, 0.8)';
-                                }}
-                            >
-                                <Coins style={{ width: '1rem', height: '1rem' }} />
-                                Payment History
-                            </button>
-                        </>
-                    ) : (
-                        <>
-                            <button
-                                onClick={onNewChat}
-                                style={{
-                                    width: '2.5rem',
-                                    height: '2.5rem',
-                                    padding: '0.5rem',
-                                    borderRadius: '0.5rem',
-                                    background: '#ffffff',
-                                    border: 'none',
-                                    color: '#0f0f0f',
-                                    cursor: 'pointer',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    transition: 'opacity 0.2s',
-                                }}
-                                onMouseEnter={(e) => {
-                                    e.currentTarget.style.opacity = '0.9';
-                                }}
-                                onMouseLeave={(e) => {
-                                    e.currentTarget.style.opacity = '1';
-                                }}
-                                title="New Chat"
-                            >
-                                <MessageSquarePlus style={{ width: '1rem', height: '1rem' }} />
-                            </button>
-                            <button
-                                onClick={onBatchSend}
-                                style={{
-                                    width: '2.5rem',
-                                    height: '2.5rem',
-                                    padding: '0.5rem',
-                                    borderRadius: '0.5rem',
-                                    background: 'transparent',
-                                    border: '1px solid rgba(255, 255, 255, 0.08)',
-                                    color: 'rgba(255, 255, 255, 0.7)',
-                                    cursor: 'pointer',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    transition: 'all 0.2s',
-                                }}
-                                onMouseEnter={(e) => {
-                                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
-                                    e.currentTarget.style.color = '#ffffff';
-                                }}
-                                onMouseLeave={(e) => {
-                                    e.currentTarget.style.background = 'transparent';
-                                    e.currentTarget.style.color = 'rgba(255, 255, 255, 0.7)';
-                                }}
-                                title="Batch Send"
-                            >
-                                <Send style={{ width: '1rem', height: '1rem' }} />
-                            </button>
-                            <button
-                                onClick={onPaymentHistory}
-                                style={{
-                                    width: '2.5rem',
-                                    height: '2.5rem',
-                                    padding: '0.5rem',
-                                    borderRadius: '0.5rem',
-                                    background: 'transparent',
-                                    border: '1px solid rgba(245, 158, 11, 0.2)',
-                                    color: 'rgba(245, 158, 11, 0.8)',
-                                    cursor: 'pointer',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    transition: 'all 0.2s',
-                                }}
-                                onMouseEnter={(e) => {
-                                    e.currentTarget.style.background = 'rgba(245, 158, 11, 0.1)';
-                                    e.currentTarget.style.color = '#fbbf24';
-                                }}
-                                onMouseLeave={(e) => {
-                                    e.currentTarget.style.background = 'transparent';
-                                    e.currentTarget.style.color = 'rgba(245, 158, 11, 0.8)';
-                                }}
-                                title="Payment History"
-                            >
-                                <Coins style={{ width: '1rem', height: '1rem' }} />
-                            </button>
-                        </>
-                    )}
-                </div>
+                <nav aria-label="Actions" className="grid gap-1">
+                    <button onClick={onNewChat} className="btn btn-white mb-2 w-full">
+                        <MessageSquarePlus size={17} strokeWidth={2} />
+                        New conversation
+                    </button>
+                    <button onClick={onBatchSend} className="row">
+                        <Send size={17} strokeWidth={1.8} className="text-accent" />
+                        <span className="text-[14px] font-medium">Batch send</span>
+                    </button>
+                    <button onClick={onPaymentHistory} className="row">
+                        <Coins size={17} strokeWidth={1.8} className="text-accent" />
+                        <span className="text-[14px] font-medium">Payment history</span>
+                    </button>
+                </nav>
 
-                {connectedAddress && isOpen && (
-                    <div style={{ padding: '1rem', borderBottom: '1px solid rgba(255, 255, 255, 0.08)' }}>
+                {connectedAddress && (
+                    <section className="grid gap-3">
+                        <p className="label px-1">Activity</p>
                         <UserStats userAddress={connectedAddress} />
-                    </div>
-                )}
-
-                {connectedAddress && isOpen && (
-                    <div
-                        style={{
-                            padding: '1rem',
-                            borderTop: '1px solid rgba(255, 255, 255, 0.08)',
-                        }}
-                    >
-                        <StorageManagement
-                            userAddress={connectedAddress}
-                            onUpdate={() => { }}
-                        />
-                    </div>
+                        <StorageManagement userAddress={connectedAddress} onUpdate={() => { }} />
+                    </section>
                 )}
             </div>
         </aside>

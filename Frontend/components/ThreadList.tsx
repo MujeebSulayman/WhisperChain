@@ -1,6 +1,6 @@
 'use client';
 
-import { MessageSquare } from 'lucide-react';
+import { MessagesSquare } from 'lucide-react';
 
 type Thread = {
     id: string;
@@ -18,142 +18,50 @@ type ThreadListProps = {
     onSelectThread: (threadId: string) => void;
 };
 
+const initials = (title: string) => (title.startsWith('0x') ? title.slice(2, 4) : title.slice(0, 2)).toUpperCase();
+
 export function ThreadList({
     threads,
     activeThreadId,
     onSelectThread,
 }: ThreadListProps) {
-    return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-            {threads.length === 0 ? (
-                <div style={{ textAlign: 'center', padding: '2rem 0' }}>
-                    <MessageSquare
-                        style={{
-                            width: '2.5rem',
-                            height: '2.5rem',
-                            margin: '0 auto 0.5rem',
-                            color: 'rgba(255, 255, 255, 0.2)',
-                        }}
-                    />
-                    <p
-                        style={{
-                            fontSize: '0.875rem',
-                            color: 'rgba(255, 255, 255, 0.4)',
-                        }}
-                    >
-                        No conversations
-                    </p>
-                </div>
-            ) : (
-                threads.map((thread, index) => {
-                    const isActive = thread.id === activeThreadId;
-                    const hasUnread = (thread.unreadCount ?? 0) > 0;
+    if (threads.length === 0) {
+        return (
+            <div className="px-3 py-10 text-center">
+                <span className="tile mx-auto h-12 w-12 rounded-full">
+                    <MessagesSquare size={20} strokeWidth={1.8} />
+                </span>
+                <p className="mt-4 text-[14px] font-medium">No conversations yet</p>
+                <p className="mt-1 text-[13px] text-mute">Start one from the menu on the left.</p>
+            </div>
+        );
+    }
 
-                    return (
+    return (
+        <ul className="grid gap-1">
+            {threads.map((thread, index) => {
+                const isActive = thread.id === activeThreadId;
+                const hasUnread = (thread.unreadCount ?? 0) > 0;
+
+                return (
+                    <li key={thread.id} style={{ animation: `slideIn 0.3s ease-out ${index * 0.04}s both` }}>
                         <button
-                            key={thread.id}
                             onClick={() => onSelectThread(thread.id)}
-                            style={{
-                                width: '100%',
-                                textAlign: 'left',
-                                padding: '0.75rem',
-                                borderRadius: '0.5rem',
-                                background: isActive ? 'rgba(255, 255, 255, 0.05)' : 'transparent',
-                                border: `1px solid ${isActive ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.05)'}`,
-                                color: isActive ? '#ffffff' : 'rgba(255, 255, 255, 0.7)',
-                                cursor: 'pointer',
-                                transition: 'all 0.2s',
-                                animation: `slideIn 0.3s ease-out ${index * 0.05}s both`,
-                            }}
-                            onMouseEnter={(e) => {
-                                if (!isActive) {
-                                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)';
-                                    e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.08)';
-                                }
-                            }}
-                            onMouseLeave={(e) => {
-                                if (!isActive) {
-                                    e.currentTarget.style.background = 'transparent';
-                                    e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.05)';
-                                }
-                            }}
+                            className={`row items-start! ${isActive ? 'is-on' : ''}`}
                         >
-                            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
-                                <div
-                                    style={{
-                                        width: '2.5rem',
-                                        height: '2.5rem',
-                                        borderRadius: '0.5rem',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        flexShrink: 0,
-                                        background: isActive ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.03)',
-                                        border: `1px solid ${isActive ? 'rgba(255, 255, 255, 0.15)' : 'rgba(255, 255, 255, 0.05)'}`,
-                                    }}
-                                >
-                                    <MessageSquare style={{ width: '1.25rem', height: '1.25rem' }} />
-                                </div>
-                                <div style={{ flex: 1, minWidth: 0 }}>
-                                    <div
-                                        style={{
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: '0.5rem',
-                                            marginBottom: '0.25rem',
-                                        }}
-                                    >
-                                        <h3
-                                            style={{
-                                                fontSize: '0.875rem',
-                                                fontWeight: 500,
-                                                overflow: 'hidden',
-                                                textOverflow: 'ellipsis',
-                                                whiteSpace: 'nowrap',
-                                                color: 'inherit',
-                                            }}
-                                        >
-                                            {thread.title}
-                                        </h3>
-                                        {hasUnread && (
-                                            <span
-                                                style={{
-                                                    flexShrink: 0,
-                                                    width: '0.5rem',
-                                                    height: '0.5rem',
-                                                    borderRadius: '50%',
-                                                    background: '#6366f1',
-                                                }}
-                                            />
-                                        )}
-                                    </div>
-                                    <p
-                                        style={{
-                                            fontSize: '0.75rem',
-                                            color: 'rgba(255, 255, 255, 0.5)',
-                                            overflow: 'hidden',
-                                            textOverflow: 'ellipsis',
-                                            whiteSpace: 'nowrap',
-                                            marginBottom: '0.25rem',
-                                        }}
-                                    >
-                                        {thread.lastMessage}
-                                    </p>
-                                    <p
-                                        style={{
-                                            fontSize: '0.625rem',
-                                            color: 'rgba(255, 255, 255, 0.4)',
-                                            fontFamily: 'monospace',
-                                        }}
-                                    >
-                                        {thread.timestamp}
-                                    </p>
-                                </div>
-                            </div>
+                            <span className={`avatar h-10 w-10 ${isActive ? 'is-on' : ''}`}>{initials(thread.title)}</span>
+                            <span className="min-w-0 flex-1">
+                                <span className="flex items-center gap-2">
+                                    <span className="truncate text-[14px] font-semibold tracking-[-0.01em] text-fg">{thread.title}</span>
+                                    {hasUnread && <span className="h-2 w-2 shrink-0 rounded-full bg-accent" />}
+                                    <span className="ml-auto shrink-0 font-mono text-[10px] text-mute">{thread.timestamp}</span>
+                                </span>
+                                <span className="mt-0.5 block truncate text-[13px] text-dim">{thread.lastMessage}</span>
+                            </span>
                         </button>
-                    );
-                })
-            )}
-        </div>
+                    </li>
+                );
+            })}
+        </ul>
     );
 }
