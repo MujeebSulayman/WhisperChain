@@ -84,14 +84,14 @@ export function ProfileSettings({ onUpdate, onClose }: ProfileSettingsProps) {
             <div
                 style={{
                     borderRadius: '0.875rem',
-                    border: '1px solid rgba(16, 185, 129, 0.3)',
-                    background: 'rgba(16, 185, 129, 0.1)',
+                    border: '1px solid color-mix(in srgb, var(--good) 30%, transparent)',
+                    background: 'color-mix(in srgb, var(--good) 10%, transparent)',
                     padding: '2rem',
                     textAlign: 'center',
                 }}
             >
-                <CheckCircle2 style={{ width: '3rem', height: '3rem', margin: '0 auto 1rem', color: '#10b981' }} />
-                <p style={{ fontSize: '1rem', fontWeight: 600, color: '#10b981' }}>Updated Successfully!</p>
+                <CheckCircle2 style={{ width: '3rem', height: '3rem', margin: '0 auto 1rem', color: 'var(--good)' }} />
+                <p style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--good)' }}>Updated Successfully!</p>
             </div>
         );
     }
@@ -100,16 +100,16 @@ export function ProfileSettings({ onUpdate, onClose }: ProfileSettingsProps) {
         <div
             style={{
                 borderRadius: '0.875rem',
-                border: '1px solid rgba(255, 255, 255, 0.08)',
-                background: 'rgba(12, 16, 24, 0.95)',
+                border: '1px solid color-mix(in srgb, var(--fg) 8%, transparent)',
+                background: 'var(--surface)',
                 padding: '1.5rem',
                 backdropFilter: 'blur(10px)',
             }}
         >
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <User style={{ width: '1.25rem', height: '1.25rem', color: 'rgba(255, 255, 255, 0.7)' }} />
-                    <h3 style={{ fontSize: '1.125rem', fontWeight: 600, color: '#ffffff' }}>Profile Settings</h3>
+                    <User style={{ width: '1.25rem', height: '1.25rem', color: 'color-mix(in srgb, var(--fg) 70%, transparent)' }} />
+                    <h3 style={{ fontSize: '1.125rem', fontWeight: 600, color: 'var(--fg)' }}>Profile Settings</h3>
                 </div>
                 <button
                     onClick={onClose}
@@ -118,17 +118,17 @@ export function ProfileSettings({ onUpdate, onClose }: ProfileSettingsProps) {
                         borderRadius: '0.875rem',
                         background: 'transparent',
                         border: 'none',
-                        color: 'rgba(255, 255, 255, 0.7)',
+                        color: 'color-mix(in srgb, var(--fg) 70%, transparent)',
                         cursor: 'pointer',
                         transition: 'all 0.2s',
                     }}
                     onMouseEnter={(e) => {
-                        e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
-                        e.currentTarget.style.color = '#ffffff';
+                        e.currentTarget.style.background = 'color-mix(in srgb, var(--fg) 5%, transparent)';
+                        e.currentTarget.style.color = 'var(--fg)';
                     }}
                     onMouseLeave={(e) => {
                         e.currentTarget.style.background = 'transparent';
-                        e.currentTarget.style.color = 'rgba(255, 255, 255, 0.7)';
+                        e.currentTarget.style.color = 'color-mix(in srgb, var(--fg) 70%, transparent)';
                     }}
                 >
                     <X style={{ width: '1rem', height: '1rem' }} />
@@ -137,7 +137,7 @@ export function ProfileSettings({ onUpdate, onClose }: ProfileSettingsProps) {
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 <div>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', fontWeight: 500, color: 'rgba(255, 255, 255, 0.7)', marginBottom: '0.5rem' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', fontWeight: 500, color: 'color-mix(in srgb, var(--fg) 70%, transparent)', marginBottom: '0.5rem' }}>
                         <Key style={{ width: '1rem', height: '1rem' }} />
                         Update Public Key
                     </label>
@@ -149,20 +149,20 @@ export function ProfileSettings({ onUpdate, onClose }: ProfileSettingsProps) {
                         style={{
                             width: '100%',
                             borderRadius: '0.875rem',
-                            border: '1px solid rgba(255, 255, 255, 0.1)',
-                            background: 'rgba(255, 255, 255, 0.03)',
+                            border: '1px solid color-mix(in srgb, var(--fg) 10%, transparent)',
+                            background: 'color-mix(in srgb, var(--fg) 3%, transparent)',
                             padding: '0.75rem',
                             fontSize: '0.875rem',
-                            color: '#ffffff',
+                            color: 'var(--fg)',
                             fontFamily: 'var(--font-mono)',
                             outline: 'none',
                             transition: 'all 0.2s',
                         }}
                         onFocus={(e) => {
-                            e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+                            e.currentTarget.style.borderColor = 'color-mix(in srgb, var(--fg) 20%, transparent)';
                         }}
                         onBlur={(e) => {
-                            e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+                            e.currentTarget.style.borderColor = 'color-mix(in srgb, var(--fg) 10%, transparent)';
                         }}
                     />
                     <button
@@ -172,12 +172,12 @@ export function ProfileSettings({ onUpdate, onClose }: ProfileSettingsProps) {
                             marginTop: '0.5rem',
                             width: '100%',
                             borderRadius: '0.875rem',
-                            background: '#ffffff',
+                            background: 'var(--btn-white-bg)',
                             border: 'none',
                             padding: '0.75rem 1rem',
                             fontSize: '0.875rem',
                             fontWeight: 600,
-                            color: '#05070c',
+                            color: 'var(--btn-white-fg)',
                             cursor: isUpdating || !newPublicKey.trim() ? 'not-allowed' : 'pointer',
                             opacity: isUpdating || !newPublicKey.trim() ? 0.6 : 1,
                             transition: 'opacity 0.2s',
@@ -191,7 +191,7 @@ export function ProfileSettings({ onUpdate, onClose }: ProfileSettingsProps) {
                     </button>
                 </div>
 
-                <div style={{ borderTop: '1px solid rgba(255, 255, 255, 0.08)', paddingTop: '1rem' }}>
+                <div style={{ borderTop: '1px solid color-mix(in srgb, var(--fg) 8%, transparent)', paddingTop: '1rem' }}>
                     <button
                         onClick={handleUpdateLastSeen}
                         disabled={isUpdating}
@@ -202,26 +202,26 @@ export function ProfileSettings({ onUpdate, onClose }: ProfileSettingsProps) {
                             justifyContent: 'center',
                             gap: '0.5rem',
                             borderRadius: '0.875rem',
-                            border: '1px solid rgba(255, 255, 255, 0.1)',
-                            background: 'rgba(255, 255, 255, 0.03)',
+                            border: '1px solid color-mix(in srgb, var(--fg) 10%, transparent)',
+                            background: 'color-mix(in srgb, var(--fg) 3%, transparent)',
                             padding: '0.75rem 1rem',
                             fontSize: '0.875rem',
                             fontWeight: 500,
-                            color: 'rgba(255, 255, 255, 0.7)',
+                            color: 'color-mix(in srgb, var(--fg) 70%, transparent)',
                             cursor: isUpdating ? 'not-allowed' : 'pointer',
                             opacity: isUpdating ? 0.5 : 1,
                             transition: 'all 0.2s',
                         }}
                         onMouseEnter={(e) => {
                             if (!isUpdating) {
-                                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
-                                e.currentTarget.style.color = '#ffffff';
+                                e.currentTarget.style.background = 'color-mix(in srgb, var(--fg) 5%, transparent)';
+                                e.currentTarget.style.color = 'var(--fg)';
                             }
                         }}
                         onMouseLeave={(e) => {
                             if (!isUpdating) {
-                                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)';
-                                e.currentTarget.style.color = 'rgba(255, 255, 255, 0.7)';
+                                e.currentTarget.style.background = 'color-mix(in srgb, var(--fg) 3%, transparent)';
+                                e.currentTarget.style.color = 'color-mix(in srgb, var(--fg) 70%, transparent)';
                             }
                         }}
                     >
@@ -240,12 +240,12 @@ export function ProfileSettings({ onUpdate, onClose }: ProfileSettingsProps) {
                     <div
                         style={{
                             borderRadius: '0.875rem',
-                            background: 'rgba(239, 68, 68, 0.1)',
-                            border: '1px solid rgba(239, 68, 68, 0.2)',
+                            background: 'color-mix(in srgb, var(--bad) 10%, transparent)',
+                            border: '1px solid color-mix(in srgb, var(--bad) 20%, transparent)',
                             padding: '0.75rem',
                         }}
                     >
-                        <p style={{ fontSize: '0.75rem', color: '#fca5a5' }}>{error}</p>
+                        <p style={{ fontSize: '0.75rem', color: 'var(--bad)' }}>{error}</p>
                     </div>
                 )}
             </div>

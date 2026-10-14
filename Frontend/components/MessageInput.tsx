@@ -138,7 +138,7 @@ export function MessageInput({
     const chip = 'flex items-center gap-2 rounded-full py-1.5 pl-3 pr-1.5 text-[12px]';
 
     return (
-        <div className="relative z-10 shrink-0 border-t border-line px-3 pb-3 pt-3 md:px-5 md:pb-5">
+        <div className="relative z-10 shrink-0 px-3 pb-3 pt-2 md:px-5 md:pb-4">
             {(showFileUpload || showPayment) && (
                 <div className="mb-3">
                     {showFileUpload && (
@@ -199,7 +199,8 @@ export function MessageInput({
                 </div>
             )}
 
-            <div className="glass flex items-end gap-1 rounded-[26px] p-1.5 pl-2">
+            <div className="mx-auto max-w-3xl">
+            <div className="card flex items-end gap-1 !rounded-[28px] p-2 pl-2.5">
                 <button
                     onClick={() => {
                         setShowFileUpload(!showFileUpload);
@@ -243,14 +244,12 @@ export function MessageInput({
                     </span>
                 )}
 
-                <button
-                    onClick={handleSend}
-                    disabled={!canSend}
-                    className="tile is-on h-10 w-10 rounded-full transition-[opacity,transform] duration-200 hover:scale-105 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:scale-100"
-                    aria-label="Send message"
-                >
-                    {isSending ? <Loader2 size={18} className="animate-spin" /> : <Send size={17} strokeWidth={2} />}
+                <button onClick={handleSend} disabled={!canSend} className="btn btn-accent shrink-0 !h-10 !px-4" aria-label="Send message">
+                    {isSending ? <Loader2 size={17} className="animate-spin" /> : <Send size={16} strokeWidth={2} />}
+                    <span className="hidden sm:inline">{isSending ? 'Sending' : 'Send'}</span>
                 </button>
+            </div>
+            <p className="mt-2.5 text-center text-[11px] text-mute">Enter to send · Shift + Enter for a new line</p>
             </div>
         </div>
     );

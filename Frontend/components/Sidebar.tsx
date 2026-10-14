@@ -1,11 +1,9 @@
 'use client';
 
-import Link from 'next/link';
 import { MessageSquarePlus, Settings, Send, PanelLeftClose, PanelLeftOpen, Coins } from 'lucide-react';
 import { WalletConnect } from './WalletConnect';
 import { UserStats } from './UserStats';
 import { StorageManagement } from './StorageManagement';
-import { Logo, LogoMark } from './landing/icons';
 
 type SidebarProps = {
     isOpen: boolean;
@@ -44,17 +42,14 @@ export function Sidebar({
     const shortAddress = connectedAddress ? `${connectedAddress.slice(0, 6)}…${connectedAddress.slice(-4)}` : '';
 
     const frame = isMobile
-        ? 'fixed inset-y-2 left-2 z-50 w-[18rem] max-w-[calc(100vw-1rem)] rise'
+        ? 'sheet fixed inset-y-3 left-3 z-[60] w-[18rem] max-w-[calc(100vw-1.5rem)] rise'
         : `relative shrink-0 transition-[width] duration-300 [transition-timing-function:var(--ease-out)] ${isOpen ? 'w-[18rem]' : 'w-[4.5rem]'}`;
 
     if (!isOpen) {
         // Collapsed rail (desktop only): the mark and one pebble per action.
         return (
             <aside className={`glass flex flex-col items-center gap-2 rounded-[var(--r-card)] py-4 ${frame}`}>
-                <Link href="/" aria-label="WhisperChain home">
-                    <LogoMark size={36} />
-                </Link>
-                <button onClick={onToggle} className="icon-btn mt-2" aria-label="Expand menu" title="Expand menu">
+                <button onClick={onToggle} className="icon-btn" aria-label="Expand menu" title="Expand menu">
                     <PanelLeftOpen size={18} strokeWidth={1.8} />
                 </button>
                 <span className="my-2 h-px w-8 bg-line" />
@@ -82,12 +77,13 @@ export function Sidebar({
     }
 
     return (
-        <aside className={`glass flex flex-col overflow-hidden rounded-[var(--r-card)] ${frame}`}>
+        <aside className={`${isMobile ? '' : 'glass'} flex flex-col overflow-hidden rounded-[var(--r-card)] ${frame}`}>
             {/* Brand and collapse */}
             <div className="flex items-center justify-between gap-2 px-4 pb-3 pt-4">
-                <Link href="/" aria-label="WhisperChain home">
-                    <Logo size={18} />
-                </Link>
+                <div>
+                    <p className="label">Account</p>
+                    <h2 className="mt-1 font-display text-[22px] font-medium">Your wallet</h2>
+                </div>
                 <button onClick={onToggle} className="icon-btn" aria-label={isMobile ? 'Close menu' : 'Collapse menu'}>
                     <PanelLeftClose size={18} strokeWidth={1.8} />
                 </button>

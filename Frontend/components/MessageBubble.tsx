@@ -85,12 +85,15 @@ export function MessageBubble({ message, index = 0, showAvatar = true, isGrouped
     const who = message.sender ?? message.author ?? '';
     const initials = (who.startsWith('0x') ? who.slice(2, 4) : who.slice(0, 2)).toUpperCase() || 'U';
 
-    // Your messages are solid cobalt, like the landing hero; theirs are dark glass.
+    // Your messages are a solid ink pill (as in the Prinet chat); theirs are glass cards.
     const bubble = isSelf
-        ? 'bg-accent-fill text-white rounded-[18px] rounded-br-md shadow-[0_14px_30px_-16px_rgba(51,102,238,0.6)]'
-        : 'card text-fg rounded-[18px]! rounded-bl-md!';
-    const attachment = isSelf ? 'bg-white/12 hover:bg-white/18' : 'inset-panel hover:brightness-125';
-    const subtle = isSelf ? 'text-white/70' : 'text-mute';
+        ? 'rounded-[22px] rounded-br-[8px] bg-[var(--btn-white-bg)] text-[var(--btn-white-fg)] shadow-[var(--edge-sm)]'
+        : 'card !rounded-[22px] !rounded-bl-[8px] text-fg';
+    const attachment = isSelf
+        ? 'bg-[color-mix(in_srgb,var(--btn-white-fg)_8%,transparent)] hover:bg-[color-mix(in_srgb,var(--btn-white-fg)_12%,transparent)]'
+        : 'inset-panel hover:brightness-110';
+    const inner = isSelf ? 'bg-[color-mix(in_srgb,var(--btn-white-fg)_8%,transparent)]' : 'inset-panel';
+    const subtle = isSelf ? 'opacity-60' : 'text-mute';
 
     return (
         <div
@@ -141,9 +144,9 @@ export function MessageBubble({ message, index = 0, showAvatar = true, isGrouped
                                     href={getIPFSUrl(message.ipfsHash)}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className={`flex items-center gap-3 rounded-[var(--r-inset)] p-3 transition ${attachment}`}
+                                    className={`flex items-center gap-3 rounded-[16px] p-3 transition ${attachment}`}
                                 >
-                                    <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-[12px] ${isSelf ? 'bg-white/15' : 'tile'}`}>
+                                    <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-[12px] ${isSelf ? inner : 'tile'}`}>
                                         <MediaIcon type={message.mediaType} />
                                     </span>
                                     <span className="min-w-0 flex-1">
@@ -165,9 +168,9 @@ export function MessageBubble({ message, index = 0, showAvatar = true, isGrouped
 
                     {hasPayment && (
                         <div
-                            className={`flex items-center gap-2.5 rounded-[var(--r-inset)] px-3 py-2.5 ${message.body || hasMedia ? 'mt-3' : ''} ${imageOnly ? 'mx-3' : ''} ${isSelf ? 'bg-white/12' : 'inset-panel'}`}
+                            className={`flex items-center gap-2.5 rounded-[var(--r-inset)] px-3 py-2.5 ${message.body || hasMedia ? 'mt-3' : ''} ${imageOnly ? 'mx-3' : ''} ${inner}`}
                         >
-                            <Coins size={16} strokeWidth={1.8} className={message.paymentSettled ? 'text-good' : isSelf ? 'text-white' : 'text-accent'} />
+                            <Coins size={16} strokeWidth={1.8} className={message.paymentSettled ? 'text-good' : isSelf ? '' : 'text-accent'} />
                             <span className="min-w-0">
                                 <span className={`block text-[11px] ${subtle}`}>{isSelf ? 'Payment sent' : 'Payment received'}</span>
                                 <span className="block text-[15px] font-semibold tracking-[-0.02em]">

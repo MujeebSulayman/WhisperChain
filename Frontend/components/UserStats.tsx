@@ -77,7 +77,7 @@ export function UserStats({ userAddress }: UserStatsProps) {
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <h3 style={{ fontSize: '0.875rem', fontWeight: 600, color: '#ffffff' }}>Statistics</h3>
+                <h3 style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--fg)' }}>Statistics</h3>
                 <button
                     onClick={loadStats}
                     disabled={isLoading}
@@ -86,21 +86,21 @@ export function UserStats({ userAddress }: UserStatsProps) {
                         borderRadius: '0.875rem',
                         background: 'transparent',
                         border: 'none',
-                        color: 'rgba(255, 255, 255, 0.5)',
+                        color: 'color-mix(in srgb, var(--fg) 50%, transparent)',
                         cursor: isLoading ? 'not-allowed' : 'pointer',
                         opacity: isLoading ? 0.5 : 1,
                         transition: 'all 0.2s',
                     }}
                     onMouseEnter={(e) => {
                         if (!isLoading) {
-                            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
-                            e.currentTarget.style.color = '#ffffff';
+                            e.currentTarget.style.background = 'color-mix(in srgb, var(--fg) 5%, transparent)';
+                            e.currentTarget.style.color = 'var(--fg)';
                         }
                     }}
                     onMouseLeave={(e) => {
                         if (!isLoading) {
                             e.currentTarget.style.background = 'transparent';
-                            e.currentTarget.style.color = 'rgba(255, 255, 255, 0.5)';
+                            e.currentTarget.style.color = 'color-mix(in srgb, var(--fg) 50%, transparent)';
                         }
                     }}
                 >
@@ -116,17 +116,17 @@ export function UserStats({ userAddress }: UserStatsProps) {
                 <div
                     style={{
                         borderRadius: '0.875rem',
-                        border: '1px solid rgba(255, 255, 255, 0.08)',
-                        background: 'rgba(255, 255, 255, 0.03)',
+                        border: '1px solid color-mix(in srgb, var(--fg) 8%, transparent)',
+                        background: 'color-mix(in srgb, var(--fg) 3%, transparent)',
                         padding: '0.75rem',
                     }}
                 >
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                        <Wallet style={{ width: '1rem', height: '1rem', color: 'rgba(255, 255, 255, 0.7)' }} />
-                        <span style={{ fontSize: '0.75rem', fontWeight: 500, color: 'rgba(255, 255, 255, 0.7)' }}>Your Balance</span>
+                        <Wallet style={{ width: '1rem', height: '1rem', color: 'color-mix(in srgb, var(--fg) 70%, transparent)' }} />
+                        <span style={{ fontSize: '0.75rem', fontWeight: 500, color: 'color-mix(in srgb, var(--fg) 70%, transparent)' }}>Your Balance</span>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
-                        <p style={{ fontSize: '1.5rem', fontWeight: 700, color: '#ffffff' }}>
+                        <p style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--fg)' }}>
                             {(Number(userBalance) / 1e18).toFixed(6)} ETH
                         </p>
                     </div>
@@ -137,24 +137,24 @@ export function UserStats({ userAddress }: UserStatsProps) {
                 <div
                     style={{
                         borderRadius: '0.875rem',
-                        border: `1px solid ${isMessageNearLimit ? 'rgba(239, 68, 68, 0.3)' : 'rgba(255, 255, 255, 0.08)'}`,
-                        background: 'rgba(255, 255, 255, 0.03)',
+                        border: `1px solid ${isMessageNearLimit ? 'color-mix(in srgb, var(--bad) 30%, transparent)' : 'color-mix(in srgb, var(--fg) 8%, transparent)'}`,
+                        background: 'color-mix(in srgb, var(--fg) 3%, transparent)',
                         padding: '0.75rem',
                     }}
                 >
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                        <MessageSquare style={{ width: '1rem', height: '1rem', color: 'rgba(255, 255, 255, 0.7)' }} />
-                        <span style={{ fontSize: '0.75rem', fontWeight: 500, color: 'rgba(255, 255, 255, 0.7)' }}>Messages</span>
+                        <MessageSquare style={{ width: '1rem', height: '1rem', color: 'color-mix(in srgb, var(--fg) 70%, transparent)' }} />
+                        <span style={{ fontSize: '0.75rem', fontWeight: 500, color: 'color-mix(in srgb, var(--fg) 70%, transparent)' }}>Messages</span>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                        <p style={{ fontSize: '1.5rem', fontWeight: 700, color: '#ffffff' }}>{messageCount.toString()}</p>
-                        <p style={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.5)' }}>/ {MAX_MESSAGES_PER_USER.toLocaleString()}</p>
+                        <p style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--fg)' }}>{messageCount.toString()}</p>
+                        <p style={{ fontSize: '0.75rem', color: 'color-mix(in srgb, var(--fg) 50%, transparent)' }}>/ {MAX_MESSAGES_PER_USER.toLocaleString()}</p>
                     </div>
-                    <div style={{ height: '0.25rem', borderRadius: '0.125rem', background: 'rgba(255, 255, 255, 0.1)', overflow: 'hidden' }}>
+                    <div style={{ height: '0.25rem', borderRadius: '0.125rem', background: 'color-mix(in srgb, var(--fg) 10%, transparent)', overflow: 'hidden' }}>
                         <div
                             style={{
                                 height: '100%',
-                                background: isMessageNearLimit ? '#ef4444' : '#3366ee',
+                                background: isMessageNearLimit ? 'var(--bad)' : 'var(--accent)',
                                 transition: 'width 0.3s',
                                 width: `${Math.min(messagePercent, 100)}%`,
                             }}
@@ -162,8 +162,8 @@ export function UserStats({ userAddress }: UserStatsProps) {
                     </div>
                     {isMessageNearLimit && (
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', marginTop: '0.5rem' }}>
-                            <AlertCircle style={{ width: '0.75rem', height: '0.75rem', color: '#ef4444' }} />
-                            <p style={{ fontSize: '0.625rem', color: '#ef4444' }}>Approaching limit</p>
+                            <AlertCircle style={{ width: '0.75rem', height: '0.75rem', color: 'var(--bad)' }} />
+                            <p style={{ fontSize: '0.625rem', color: 'var(--bad)' }}>Approaching limit</p>
                         </div>
                     )}
                 </div>
@@ -173,26 +173,26 @@ export function UserStats({ userAddress }: UserStatsProps) {
                 <div
                     style={{
                         borderRadius: '0.875rem',
-                        border: `1px solid ${isStorageNearLimit ? 'rgba(239, 68, 68, 0.3)' : 'rgba(255, 255, 255, 0.08)'}`,
-                        background: 'rgba(255, 255, 255, 0.03)',
+                        border: `1px solid ${isStorageNearLimit ? 'color-mix(in srgb, var(--bad) 30%, transparent)' : 'color-mix(in srgb, var(--fg) 8%, transparent)'}`,
+                        background: 'color-mix(in srgb, var(--fg) 3%, transparent)',
                         padding: '0.75rem',
                     }}
                 >
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                        <HardDrive style={{ width: '1rem', height: '1rem', color: 'rgba(255, 255, 255, 0.7)' }} />
-                        <span style={{ fontSize: '0.75rem', fontWeight: 500, color: 'rgba(255, 255, 255, 0.7)' }}>Storage</span>
+                        <HardDrive style={{ width: '1rem', height: '1rem', color: 'color-mix(in srgb, var(--fg) 70%, transparent)' }} />
+                        <span style={{ fontSize: '0.75rem', fontWeight: 500, color: 'color-mix(in srgb, var(--fg) 70%, transparent)' }}>Storage</span>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                        <span style={{ fontSize: '0.875rem', color: '#ffffff' }}>
+                        <span style={{ fontSize: '0.875rem', color: 'var(--fg)' }}>
                             {formatBytes(storage.used)} / {formatBytes(BigInt(MAX_STORAGE_PER_USER))}
                         </span>
-                        <span style={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.5)' }}>{storagePercent.toFixed(1)}%</span>
+                        <span style={{ fontSize: '0.75rem', color: 'color-mix(in srgb, var(--fg) 50%, transparent)' }}>{storagePercent.toFixed(1)}%</span>
                     </div>
-                    <div style={{ height: '0.25rem', borderRadius: '0.125rem', background: 'rgba(255, 255, 255, 0.1)', overflow: 'hidden' }}>
+                    <div style={{ height: '0.25rem', borderRadius: '0.125rem', background: 'color-mix(in srgb, var(--fg) 10%, transparent)', overflow: 'hidden' }}>
                         <div
                             style={{
                                 height: '100%',
-                                background: isStorageNearLimit ? '#ef4444' : '#10b981',
+                                background: isStorageNearLimit ? 'var(--bad)' : 'var(--good)',
                                 transition: 'width 0.3s',
                                 width: `${Math.min(storagePercent, 100)}%`,
                             }}
@@ -200,8 +200,8 @@ export function UserStats({ userAddress }: UserStatsProps) {
                     </div>
                     {isStorageNearLimit && (
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', marginTop: '0.5rem' }}>
-                            <AlertCircle style={{ width: '0.75rem', height: '0.75rem', color: '#ef4444' }} />
-                            <p style={{ fontSize: '0.625rem', color: '#ef4444' }}>Storage limit warning</p>
+                            <AlertCircle style={{ width: '0.75rem', height: '0.75rem', color: 'var(--bad)' }} />
+                            <p style={{ fontSize: '0.625rem', color: 'var(--bad)' }}>Storage limit warning</p>
                         </div>
                     )}
                 </div>
@@ -211,24 +211,24 @@ export function UserStats({ userAddress }: UserStatsProps) {
                 <div
                     style={{
                         borderRadius: '0.875rem',
-                        border: '1px solid rgba(255, 255, 255, 0.08)',
-                        background: 'rgba(255, 255, 255, 0.03)',
+                        border: '1px solid color-mix(in srgb, var(--fg) 8%, transparent)',
+                        background: 'color-mix(in srgb, var(--fg) 3%, transparent)',
                         padding: '0.75rem',
                     }}
                 >
                     <div style={{ marginBottom: '0.5rem' }}>
-                        <span style={{ fontSize: '0.75rem', fontWeight: 500, color: 'rgba(255, 255, 255, 0.7)' }}>Contract</span>
+                        <span style={{ fontSize: '0.75rem', fontWeight: 500, color: 'color-mix(in srgb, var(--fg) 70%, transparent)' }}>Contract</span>
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', fontSize: '0.75rem' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                            <span style={{ color: 'rgba(255, 255, 255, 0.5)' }}>Treasury</span>
-                            <span style={{ color: '#ffffff', fontFamily: 'var(--font-mono)' }}>
+                            <span style={{ color: 'color-mix(in srgb, var(--fg) 50%, transparent)' }}>Treasury</span>
+                            <span style={{ color: 'var(--fg)', fontFamily: 'var(--font-mono)' }}>
                                 {(Number(contractStats.treasuryBalance) / 1e18).toFixed(4)} ETH
                             </span>
                         </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: '0.5rem', borderTop: '1px solid rgba(255, 255, 255, 0.08)' }}>
-                            <span style={{ color: 'rgba(255, 255, 255, 0.5)' }}>Max File Size</span>
-                            <span style={{ color: '#ffffff', fontFamily: 'var(--font-mono)' }}>{(MAX_FILE_SIZE / 1024 / 1024).toFixed(0)} MB</span>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: '0.5rem', borderTop: '1px solid color-mix(in srgb, var(--fg) 8%, transparent)' }}>
+                            <span style={{ color: 'color-mix(in srgb, var(--fg) 50%, transparent)' }}>Max File Size</span>
+                            <span style={{ color: 'var(--fg)', fontFamily: 'var(--font-mono)' }}>{(MAX_FILE_SIZE / 1024 / 1024).toFixed(0)} MB</span>
                         </div>
                     </div>
                 </div>

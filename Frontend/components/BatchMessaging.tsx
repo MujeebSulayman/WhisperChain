@@ -115,8 +115,8 @@ export function BatchMessaging({ onComplete, onCancel }: BatchMessagingProps) {
         <div
             style={{
                 borderRadius: '0.875rem',
-                border: '1px solid rgba(255, 255, 255, 0.08)',
-                background: 'rgba(12, 16, 24, 0.95)',
+                border: '1px solid color-mix(in srgb, var(--fg) 8%, transparent)',
+                background: 'var(--surface)',
                 padding: '1.5rem',
                 backdropFilter: 'blur(10px)',
                 maxHeight: '80vh',
@@ -125,8 +125,8 @@ export function BatchMessaging({ onComplete, onCancel }: BatchMessagingProps) {
         >
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <Send style={{ width: '1.25rem', height: '1.25rem', color: 'rgba(255, 255, 255, 0.7)' }} />
-                    <h3 style={{ fontSize: '1.125rem', fontWeight: 600, color: '#ffffff' }}>Batch Messaging</h3>
+                    <Send style={{ width: '1.25rem', height: '1.25rem', color: 'color-mix(in srgb, var(--fg) 70%, transparent)' }} />
+                    <h3 style={{ fontSize: '1.125rem', fontWeight: 600, color: 'var(--fg)' }}>Batch Messaging</h3>
                 </div>
                 <button
                     onClick={onCancel}
@@ -135,25 +135,25 @@ export function BatchMessaging({ onComplete, onCancel }: BatchMessagingProps) {
                         borderRadius: '0.875rem',
                         background: 'transparent',
                         border: 'none',
-                        color: 'rgba(255, 255, 255, 0.7)',
+                        color: 'color-mix(in srgb, var(--fg) 70%, transparent)',
                         cursor: 'pointer',
                         transition: 'all 0.2s',
                     }}
                     onMouseEnter={(e) => {
-                        e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
-                        e.currentTarget.style.color = '#ffffff';
+                        e.currentTarget.style.background = 'color-mix(in srgb, var(--fg) 5%, transparent)';
+                        e.currentTarget.style.color = 'var(--fg)';
                     }}
                     onMouseLeave={(e) => {
                         e.currentTarget.style.background = 'transparent';
-                        e.currentTarget.style.color = 'rgba(255, 255, 255, 0.7)';
+                        e.currentTarget.style.color = 'color-mix(in srgb, var(--fg) 70%, transparent)';
                     }}
                 >
                     <X style={{ width: '1.25rem', height: '1.25rem' }} />
                 </button>
             </div>
 
-            <div style={{ marginBottom: '1rem', padding: '0.75rem', borderRadius: '0.875rem', background: 'rgba(255, 255, 255, 0.02)', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
-                <p style={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.6)' }}>
+            <div style={{ marginBottom: '1rem', padding: '0.75rem', borderRadius: '0.875rem', background: 'color-mix(in srgb, var(--fg) 2%, transparent)', border: '1px solid color-mix(in srgb, var(--fg) 5%, transparent)' }}>
+                <p style={{ fontSize: '0.75rem', color: 'color-mix(in srgb, var(--fg) 60%, transparent)' }}>
                     Maximum {MAX_BATCH_MESSAGES} messages per batch (contract limit)
                 </p>
             </div>
@@ -164,13 +164,13 @@ export function BatchMessaging({ onComplete, onCancel }: BatchMessagingProps) {
                         key={index}
                         style={{
                             borderRadius: '0.875rem',
-                            border: '1px solid rgba(255, 255, 255, 0.08)',
-                            background: 'rgba(255, 255, 255, 0.03)',
+                            border: '1px solid color-mix(in srgb, var(--fg) 8%, transparent)',
+                            background: 'color-mix(in srgb, var(--fg) 3%, transparent)',
                             padding: '1rem',
                         }}
                     >
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
-                            <span style={{ fontSize: '0.75rem', fontWeight: 500, color: 'rgba(255, 255, 255, 0.7)' }}>Message {index + 1}</span>
+                            <span style={{ fontSize: '0.75rem', fontWeight: 500, color: 'color-mix(in srgb, var(--fg) 70%, transparent)' }}>Message {index + 1}</span>
                             {recipients.length > 1 && (
                                 <button
                                     onClick={() => removeRecipient(index)}
@@ -179,15 +179,15 @@ export function BatchMessaging({ onComplete, onCancel }: BatchMessagingProps) {
                                         padding: '0.25rem',
                                         background: 'transparent',
                                         border: 'none',
-                                        color: 'rgba(255, 255, 255, 0.5)',
+                                        color: 'color-mix(in srgb, var(--fg) 50%, transparent)',
                                         cursor: 'pointer',
                                         transition: 'all 0.2s',
                                     }}
                                     onMouseEnter={(e) => {
-                                        e.currentTarget.style.color = '#ef4444';
+                                        e.currentTarget.style.color = 'var(--bad)';
                                     }}
                                     onMouseLeave={(e) => {
-                                        e.currentTarget.style.color = 'rgba(255, 255, 255, 0.5)';
+                                        e.currentTarget.style.color = 'color-mix(in srgb, var(--fg) 50%, transparent)';
                                     }}
                                 >
                                     <X style={{ width: '1rem', height: '1rem' }} />
@@ -203,20 +203,20 @@ export function BatchMessaging({ onComplete, onCancel }: BatchMessagingProps) {
                                 width: '100%',
                                 marginBottom: '0.5rem',
                                 borderRadius: '0.875rem',
-                                border: '1px solid rgba(255, 255, 255, 0.1)',
-                                background: 'rgba(255, 255, 255, 0.03)',
+                                border: '1px solid color-mix(in srgb, var(--fg) 10%, transparent)',
+                                background: 'color-mix(in srgb, var(--fg) 3%, transparent)',
                                 padding: '0.625rem 0.75rem',
                                 fontSize: '0.875rem',
-                                color: '#ffffff',
+                                color: 'var(--fg)',
                                 fontFamily: 'var(--font-mono)',
                                 outline: 'none',
                                 transition: 'all 0.2s',
                             }}
                             onFocus={(e) => {
-                                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+                                e.currentTarget.style.borderColor = 'color-mix(in srgb, var(--fg) 20%, transparent)';
                             }}
                             onBlur={(e) => {
-                                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+                                e.currentTarget.style.borderColor = 'color-mix(in srgb, var(--fg) 10%, transparent)';
                             }}
                         />
                         <textarea
@@ -227,20 +227,20 @@ export function BatchMessaging({ onComplete, onCancel }: BatchMessagingProps) {
                             style={{
                                 width: '100%',
                                 borderRadius: '0.875rem',
-                                border: '1px solid rgba(255, 255, 255, 0.1)',
-                                background: 'rgba(255, 255, 255, 0.03)',
+                                border: '1px solid color-mix(in srgb, var(--fg) 10%, transparent)',
+                                background: 'color-mix(in srgb, var(--fg) 3%, transparent)',
                                 padding: '0.625rem 0.75rem',
                                 fontSize: '0.875rem',
-                                color: '#ffffff',
+                                color: 'var(--fg)',
                                 outline: 'none',
                                 resize: 'none',
                                 transition: 'all 0.2s',
                             }}
                             onFocus={(e) => {
-                                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+                                e.currentTarget.style.borderColor = 'color-mix(in srgb, var(--fg) 20%, transparent)';
                             }}
                             onBlur={(e) => {
-                                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+                                e.currentTarget.style.borderColor = 'color-mix(in srgb, var(--fg) 10%, transparent)';
                             }}
                         />
                     </div>
@@ -256,24 +256,24 @@ export function BatchMessaging({ onComplete, onCancel }: BatchMessagingProps) {
                             justifyContent: 'center',
                             gap: '0.5rem',
                             borderRadius: '0.875rem',
-                            border: '2px dashed rgba(255, 255, 255, 0.1)',
-                            background: 'rgba(255, 255, 255, 0.02)',
+                            border: '2px dashed color-mix(in srgb, var(--fg) 10%, transparent)',
+                            background: 'color-mix(in srgb, var(--fg) 2%, transparent)',
                             padding: '0.75rem 1rem',
                             fontSize: '0.875rem',
                             fontWeight: 500,
-                            color: 'rgba(255, 255, 255, 0.7)',
+                            color: 'color-mix(in srgb, var(--fg) 70%, transparent)',
                             cursor: 'pointer',
                             transition: 'all 0.2s',
                         }}
                         onMouseEnter={(e) => {
-                            e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.2)';
-                            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
-                            e.currentTarget.style.color = '#ffffff';
+                            e.currentTarget.style.borderColor = 'color-mix(in srgb, var(--fg) 20%, transparent)';
+                            e.currentTarget.style.background = 'color-mix(in srgb, var(--fg) 5%, transparent)';
+                            e.currentTarget.style.color = 'var(--fg)';
                         }}
                         onMouseLeave={(e) => {
-                            e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)';
-                            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.02)';
-                            e.currentTarget.style.color = 'rgba(255, 255, 255, 0.7)';
+                            e.currentTarget.style.borderColor = 'color-mix(in srgb, var(--fg) 10%, transparent)';
+                            e.currentTarget.style.background = 'color-mix(in srgb, var(--fg) 2%, transparent)';
+                            e.currentTarget.style.color = 'color-mix(in srgb, var(--fg) 70%, transparent)';
                         }}
                     >
                         <Plus style={{ width: '1rem', height: '1rem' }} />
@@ -288,13 +288,13 @@ export function BatchMessaging({ onComplete, onCancel }: BatchMessagingProps) {
                             alignItems: 'center',
                             gap: '0.5rem',
                             borderRadius: '0.875rem',
-                            background: 'rgba(239, 68, 68, 0.1)',
-                            border: '1px solid rgba(239, 68, 68, 0.2)',
+                            background: 'color-mix(in srgb, var(--bad) 10%, transparent)',
+                            border: '1px solid color-mix(in srgb, var(--bad) 20%, transparent)',
                             padding: '0.75rem',
                         }}
                     >
-                        <AlertCircle style={{ width: '1rem', height: '1rem', color: '#f87171', flexShrink: 0 }} />
-                        <p style={{ fontSize: '0.75rem', color: '#fca5a5' }}>{error}</p>
+                        <AlertCircle style={{ width: '1rem', height: '1rem', color: 'var(--bad)', flexShrink: 0 }} />
+                        <p style={{ fontSize: '0.75rem', color: 'var(--bad)' }}>{error}</p>
                     </div>
                 )}
 
@@ -304,12 +304,12 @@ export function BatchMessaging({ onComplete, onCancel }: BatchMessagingProps) {
                     style={{
                         width: '100%',
                         borderRadius: '0.875rem',
-                        background: '#ffffff',
+                        background: 'var(--btn-white-bg)',
                         border: 'none',
                         padding: '0.75rem 1rem',
                         fontSize: '0.875rem',
                         fontWeight: 600,
-                        color: '#05070c',
+                        color: 'var(--btn-white-fg)',
                         cursor: isSending || recipients.length === 0 ? 'not-allowed' : 'pointer',
                         opacity: isSending || recipients.length === 0 ? 0.6 : 1,
                         transition: 'opacity 0.2s',

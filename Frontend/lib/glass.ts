@@ -1,14 +1,14 @@
 "use client";
 
 /*
- * Liquid glass: a WebGL backdrop (soft cobalt glows over a drifting key lattice) with every
+ * Liquid glass: a WebGL backdrop (cobalt glows over a drifting block lattice) with every
  * element marked `data-lg` drawn as real refracting glass on top. Falls back to plain CSS
- * glass when WebGL is unavailable or too slow.
+ * glass when WebGL is unavailable or too slow. Follows the site theme (light / dark).
  */
 
 const reduced = () => typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-/** A highlight sliding along x (a row of links) or y (a column). `x`/`w` are position and size on that axis. */
+/** A highlight sliding along x (a row of links) or y (a column of links). `x`/`w` are position and size on that axis. */
 type Spring = { el: HTMLElement; x: number; v: number; w: number; wv: number; tx: number; tw: number; axis: "x" | "y" };
 
 const springs = new Map<unknown, Spring>();
@@ -73,38 +73,41 @@ function stepSprings(dt: number) {
 
 const MAXS = 14;
 
+// uL blends the dark scene (0) into the light one (1).
 const FS = `
 precision highp float;
 uniform vec2 uRes; uniform float uScale; uniform float uTime; uniform vec2 uMouse; uniform float uScroll; uniform int uN;
-uniform vec4 uRect[${MAXS}]; uniform vec4 uMeta[${MAXS}]; uniform vec4 uTint[${MAXS}];
+uniform vec4 uRect[${MAXS}]; uniform vec4 uMeta[${MAXS}]; uniform vec4 uTint[${MAXS}]; uniform float uL;
 
 float blob(vec2 p, vec2 c, float r){ vec2 d = (p - c) / r; return exp(-dot(d, d)); }
 float hash(vec2 p){ return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
+vec3 th(vec3 dark, vec3 light){ return mix(dark, light, uL); }
 
 vec3 scene(vec2 p, float soft){
   vec2 q = p / uRes.y;
   q.y += uScroll / uRes.y * 0.18;
   float ar = uRes.x / uRes.y, t = uTime * 0.035;
-  vec3 col = vec3(.006, .009, .018);
-  col = mix(col, vec3(.32, .47, .95), .16 * blob(q, vec2(ar * .12 + .05 * sin(t * 1.1), -.05 + .05 * cos(t)), .55));
-  col = mix(col, vec3(.07, .17, .52), .30 * blob(q, vec2(ar * .78 + .08 * cos(t * .8), .02 + .06 * sin(t * .9)), .62));
-  col = mix(col, vec3(.02, .035, .10), .45 * blob(q, vec2(ar * .22 + .06 * sin(t * .7), .60 + .08 * cos(t * .8)), .58));
+  // Soft cobalt glows on a near-black (dark) or cool paper (light) field. No ribbon.
+  vec3 col = th(vec3(.008, .010, .018), vec3(.937, .945, .957));
+  col = mix(col, th(vec3(.32, .47, .95), vec3(.72, .79, .97)), th(vec3(.16), vec3(.55)).x * blob(q, vec2(ar * .12 + .05 * sin(t * 1.1), -.05 + .05 * cos(t)), .55));
+  col = mix(col, th(vec3(.07, .17, .52), vec3(.62, .71, .93)), th(vec3(.30), vec3(.45)).x * blob(q, vec2(ar * .78 + .08 * cos(t * .8), .02 + .06 * sin(t * .9)), .62));
+  col = mix(col, th(vec3(.02, .035, .10), vec3(.86, .87, .90)), .45 * blob(q, vec2(ar * .22 + .06 * sin(t * .7), .60 + .08 * cos(t * .8)), .58));
 
   // Page-anchored glow lower down (it scrolls with the content).
   vec2 qc = p / uRes.y; qc.y += uScroll / uRes.y * 0.88;
-  col += vec3(.09, .19, .60) * .22 * blob(qc, vec2(ar * .5, 3.35 + .05 * sin(t)), .55);
+  col += th(vec3(.09, .19, .60), vec3(0.)) * .22 * blob(qc, vec2(ar * .5, 3.35 + .05 * sin(t)), .55);
 
-  // The key lattice: square cells that flip on and off.
+  // The block lattice: square cells that flip on and off like a slow Game of Life.
   float m = blob(qc, vec2(ar * .12, 1.18), .42) * (1. - soft);
   float cell = 11.0;
   vec2 id = floor(p / cell);
   vec2 g = mod(p, cell) - cell * .5;
   float alive = step(.62, hash(id + floor(uTime * .45 + hash(id) * 3.)));
   float sq = 1. - smoothstep(cell * .36 - .8, cell * .36 + .8, max(abs(g.x), abs(g.y)));
-  col = mix(col, vec3(.32, .47, .95), sq * alive * m * .16);
+  col = mix(col, th(vec3(.32, .47, .95), vec3(.10, .18, .45)), sq * alive * m * th(vec3(.16), vec3(.10)).x);
 
   vec2 v = q / vec2(ar, 1.) - .5;
-  col *= 1. - .35 * dot(v, v);
+  col *= 1. - th(vec3(.35), vec3(.10)).x * dot(v, v);
   return clamp(col, 0., 1.);
 }
 
@@ -136,16 +139,16 @@ vec3 glass(vec2 p, float d, vec2 n, vec4 tint, float kind){
   c.g = scene(p + off * 1.03, soft).g;
   c.b = scene(p + off * 1.06, soft).b;
   float frost = kind > .5 ? .06 + .08 * t : mix(.04, .26, smoothstep(0., .5, t));
-  c = mix(c, vec3(.016, .020, .036), frost);
+  c = mix(c, th(vec3(.022, .030, .040), vec3(.985, .975, .955)), frost);
   c = mix(c, tint.rgb, tint.a * (.6 + .4 * t));
   vec2 L = normalize(mix(vec2(-.35, -.94), normalize(uMouse - p + .001), .35));
   float facing = dot(n, L);
   float rim = pow(e, kind > .5 ? 5. : 7.);
-  c += (max(facing, 0.) * .9 + .12) * rim * .7;
+  c += (max(facing, 0.) * .9 + .12) * rim * mix(.7, .45, uL);
   c += pow(max(-facing, 0.), 2.) * pow(e, 8.) * .25;
-  c *= 1. - .16 * smoothstep(.4, 1., e) * (.5 + .5 * max(-facing, 0.));
+  c *= 1. - mix(.16, .08, uL) * smoothstep(.4, 1., e) * (.5 + .5 * max(-facing, 0.));
   float edgeLine = 1. - smoothstep(0., 1.3, abs(d + .6));
-  c += edgeLine * (.16 + .45 * max(facing, 0.));
+  c += edgeLine * (.16 + .45 * max(facing, 0.)) * mix(1., .6, uL);
   return c;
 }
 
@@ -154,7 +157,7 @@ void main(){
   vec3 col = scene(p, 0.);
   vec4 tS; float dS = field(p, 0., tS);
   float sh = fieldD(p - vec2(0., 16.), 0.);
-  col *= 1. - .5 * exp(-max(sh, 0.) / 30.) * step(0., dS);
+  col *= 1. - mix(.5, .18, uL) * exp(-max(sh, 0.) / 30.) * step(0., dS);
   if (dS < 1.5){
     vec2 e = vec2(1., 0.);
     vec2 n = normalize(vec2(fieldD(p + e.xy, 0.) - fieldD(p - e.xy, 0.), fieldD(p + e.yx, 0.) - fieldD(p - e.yx, 0.)) + 1e-5);
@@ -162,7 +165,7 @@ void main(){
   }
   vec4 tD; float dD = field(p, 1., tD);
   float shd = fieldD(p - vec2(0., 6.), 1.);
-  col *= 1. - .3 * exp(-max(shd, 0.) / 9.) * step(0., dD);
+  col *= 1. - mix(.3, .12, uL) * exp(-max(shd, 0.) / 9.) * step(0., dD);
   if (dD < 1.5){
     vec2 e = vec2(1., 0.);
     vec2 n = normalize(vec2(fieldD(p + e.xy, 1.) - fieldD(p - e.xy, 1.), fieldD(p + e.yx, 1.) - fieldD(p - e.yx, 1.)) + 1e-5);
@@ -173,15 +176,24 @@ void main(){
 }`;
 const VS = `attribute vec2 a; void main(){ gl_Position = vec4(a, 0., 1.); }`;
 
-// Glass tints: [r, g, b, strength].
-const TINTS: Record<string, number[]> = {
-  surface: [0.012, 0.016, 0.030, 0.34],
-  card: [0.012, 0.016, 0.030, 0.42],
-  knob: [0.012, 0.016, 0.030, 0.58],
-  steel: [0.98, 0.9, 0.76, 0.1],
+// Glass tints per theme: [r, g, b, strength].
+const TINTS: Record<"dark" | "light", Record<string, number[]>> = {
+  dark: {
+    surface: [0.016, 0.024, 0.032, 0.34],
+    card: [0.016, 0.024, 0.032, 0.42],
+    knob: [0.016, 0.024, 0.032, 0.58],
+    steel: [0.78, 0.84, 0.98, 0.1],
+  },
+  light: {
+    surface: [0.99, 0.98, 0.96, 0.34],
+    card: [0.99, 0.98, 0.96, 0.46],
+    knob: [1, 1, 1, 0.62],
+    steel: [1, 1, 1, 0.2],
+  },
 };
 
 const isPhone = () => window.matchMedia("(max-width: 760px), (pointer: coarse)").matches;
+const isLight = () => document.documentElement.dataset.theme !== "dark";
 
 function makeGL(cv: HTMLCanvasElement) {
   let gl: WebGLRenderingContext | null = null;
@@ -212,7 +224,7 @@ function makeGL(cv: HTMLCanvasElement) {
   g.enableVertexAttribArray(loc);
   g.vertexAttribPointer(loc, 2, g.FLOAT, false, 0, 0);
   const U: Record<string, WebGLUniformLocation | null> = {};
-  for (const n of ["uRes", "uScale", "uTime", "uMouse", "uScroll", "uN", "uRect", "uMeta", "uTint"]) {
+  for (const n of ["uRes", "uScale", "uTime", "uMouse", "uScroll", "uN", "uRect", "uMeta", "uTint", "uL"]) {
     U[n] = g.getUniformLocation(prog, n);
   }
 
@@ -224,6 +236,7 @@ function makeGL(cv: HTMLCanvasElement) {
   const tint = new Float32Array(MAXS * 4);
   const morph = new WeakMap<Element, { x: number; v: number; start: number }>();
   const t0 = performance.now();
+  let light = isLight() ? 1 : 0;
   let frames = 0;
   let acc = 0;
   let on = true;
@@ -239,6 +252,7 @@ function makeGL(cv: HTMLCanvasElement) {
     let n = 0;
     if (document.documentElement.classList.contains("scrolling")) return 0;
     const H = window.innerHeight;
+    const tints = TINTS[isLight() ? "light" : "dark"];
     for (const el of document.querySelectorAll<HTMLElement>("[data-lg]")) {
       if (n >= MAXS) break;
       const r = el.getBoundingClientRect();
@@ -255,6 +269,7 @@ function makeGL(cv: HTMLCanvasElement) {
         m.v += a * dt;
         m.x += m.v * dt;
       }
+      if ((m.x > 0.55 || now - m.start > 900) && !el.classList.contains("lg-shown")) el.classList.add("lg-shown");
       const k = Math.max(0, m.x);
       const w0 = kind ? Math.min(r.height, r.width) : Math.min(r.width, 140);
       const h0 = kind ? r.height * 0.8 : Math.min(r.height, 60);
@@ -265,7 +280,7 @@ function makeGL(cv: HTMLCanvasElement) {
       rect.set([cx - w / 2, cy - h / 2, w, h], n * 4);
       const rad = el.dataset.lgR ? Number(el.dataset.lgR) : r.height / 2;
       meta.set([rad, kind, 0, 0], n * 4);
-      tint.set(TINTS[el.dataset.lgTint ?? ""] ?? (kind ? TINTS.knob : TINTS.surface), n * 4);
+      tint.set(tints[el.dataset.lgTint ?? ""] ?? (kind ? tints.knob : tints.surface), n * 4);
       n++;
     }
     return n;
@@ -279,6 +294,8 @@ function makeGL(cv: HTMLCanvasElement) {
     draw(now: number, dt: number, mouse: [number, number]) {
       if (!on) return;
       const n = collect(now, Math.min(dt, 1 / 30));
+      // Ease between themes instead of snapping.
+      light += ((isLight() ? 1 : 0) - light) * Math.min(1, dt * 6);
       g.uniform2f(U.uRes, cv.clientWidth, cv.clientHeight);
       g.uniform1f(U.uScale, scale);
       g.uniform1f(U.uTime, reduced() ? 0 : (now - t0) / 1000);
@@ -288,6 +305,7 @@ function makeGL(cv: HTMLCanvasElement) {
       g.uniform4fv(U.uRect, rect);
       g.uniform4fv(U.uMeta, meta);
       g.uniform4fv(U.uTint, tint);
+      g.uniform1f(U.uL, light);
       g.drawArrays(g.TRIANGLES, 0, 3);
       // Drop resolution, then switch off entirely, if frames are too slow.
       frames++;
@@ -306,6 +324,7 @@ function makeGL(cv: HTMLCanvasElement) {
       on = false;
       document.documentElement.classList.remove("gl");
       cv.style.display = "none";
+      document.querySelectorAll("[data-lg]").forEach((el) => el.classList.add("lg-shown"));
     },
   };
 }
@@ -362,17 +381,23 @@ export function buildNavLens() {
   const ua = navigator.userAgent;
   const can = !!(window as unknown as { chrome?: unknown }).chrome && /Chrome\/|Edg\//.test(ua) && !/CriOS|FxiOS|EdgiOS/.test(ua);
   if (!can) return;
-  const bar = document.getElementById("nav");
+  const html = document.documentElement;
+  const phone = isPhone();
+  html.classList.toggle("svgref", !phone);
+  html.classList.toggle("svgref1", phone);
+  // The top nav on desktop, the tab bar on phones: whichever bar is on screen gets the lens.
+  const bar = ["nav", "tabbar"].map((id) => document.getElementById(id)).find((el) => !!el && el.getBoundingClientRect().width > 10);
   if (!bar) return;
   const r = bar.getBoundingClientRect();
-  if (r.width < 10) return;
-  document.documentElement.classList.add("svgref");
-  const url = lensMap(r.width, r.height, Math.min(r.width, r.height) / 2);
-  const fe = document.getElementById("lgmap");
-  if (!fe) return;
-  fe.setAttribute("href", url);
-  fe.setAttribute("width", String(r.width));
-  fe.setAttribute("height", String(r.height));
+  const radius = Number(bar.dataset.lensR) || Math.min(r.width, r.height) / 2;
+  const url = lensMap(r.width, r.height, Math.min(radius, r.width / 2, r.height / 2));
+  for (const id of ["lgmapA", "lgmapB"]) {
+    const fe = document.getElementById(id);
+    if (!fe) continue;
+    fe.setAttribute("href", url);
+    fe.setAttribute("width", String(r.width));
+    fe.setAttribute("height", String(r.height));
+  }
 }
 
 export function startGlass(cv: HTMLCanvasElement) {

@@ -124,16 +124,16 @@ export function PaymentOptions({ onPaymentSet, onCancel }: PaymentOptionsProps) 
         <div
             style={{
                 borderRadius: '0.875rem',
-                border: '1px solid rgba(255, 255, 255, 0.08)',
-                background: 'rgba(12, 16, 24, 0.95)',
+                border: '1px solid color-mix(in srgb, var(--fg) 8%, transparent)',
+                background: 'var(--surface)',
                 padding: '1rem',
                 backdropFilter: 'blur(10px)',
             }}
         >
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <Coins style={{ width: '1rem', height: '1rem', color: 'rgba(255, 255, 255, 0.7)' }} />
-                    <h3 style={{ fontSize: '0.875rem', fontWeight: 600, color: '#ffffff' }}>Payment Options</h3>
+                    <Coins style={{ width: '1rem', height: '1rem', color: 'color-mix(in srgb, var(--fg) 70%, transparent)' }} />
+                    <h3 style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--fg)' }}>Payment Options</h3>
                 </div>
                 <button
                     onClick={onCancel}
@@ -142,17 +142,17 @@ export function PaymentOptions({ onPaymentSet, onCancel }: PaymentOptionsProps) 
                         borderRadius: '0.875rem',
                         background: 'transparent',
                         border: 'none',
-                        color: 'rgba(255, 255, 255, 0.7)',
+                        color: 'color-mix(in srgb, var(--fg) 70%, transparent)',
                         cursor: 'pointer',
                         transition: 'all 0.2s',
                     }}
                     onMouseEnter={(e) => {
-                        e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
-                        e.currentTarget.style.color = '#ffffff';
+                        e.currentTarget.style.background = 'color-mix(in srgb, var(--fg) 5%, transparent)';
+                        e.currentTarget.style.color = 'var(--fg)';
                     }}
                     onMouseLeave={(e) => {
                         e.currentTarget.style.background = 'transparent';
-                        e.currentTarget.style.color = 'rgba(255, 255, 255, 0.7)';
+                        e.currentTarget.style.color = 'color-mix(in srgb, var(--fg) 70%, transparent)';
                     }}
                 >
                     <X style={{ width: '1rem', height: '1rem' }} />
@@ -161,7 +161,7 @@ export function PaymentOptions({ onPaymentSet, onCancel }: PaymentOptionsProps) 
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                 <div>
-                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 500, color: 'rgba(255, 255, 255, 0.7)', marginBottom: '0.5rem' }}>
+                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 500, color: 'color-mix(in srgb, var(--fg) 70%, transparent)', marginBottom: '0.5rem' }}>
                         Amount {useToken ? '(token units)' : '(Base ETH)'}
                     </label>
                     <input
@@ -173,19 +173,19 @@ export function PaymentOptions({ onPaymentSet, onCancel }: PaymentOptionsProps) 
                         style={{
                             width: '100%',
                             borderRadius: '0.875rem',
-                            border: '1px solid rgba(255, 255, 255, 0.1)',
-                            background: 'rgba(255, 255, 255, 0.03)',
+                            border: '1px solid color-mix(in srgb, var(--fg) 10%, transparent)',
+                            background: 'color-mix(in srgb, var(--fg) 3%, transparent)',
                             padding: '0.625rem 0.75rem',
                             fontSize: '0.875rem',
-                            color: '#ffffff',
+                            color: 'var(--fg)',
                             outline: 'none',
                             transition: 'all 0.2s',
                         }}
                         onFocus={(e) => {
-                            e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+                            e.currentTarget.style.borderColor = 'color-mix(in srgb, var(--fg) 20%, transparent)';
                         }}
                         onBlur={(e) => {
-                            e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+                            e.currentTarget.style.borderColor = 'color-mix(in srgb, var(--fg) 10%, transparent)';
                         }}
                     />
                 </div>
@@ -200,12 +200,12 @@ export function PaymentOptions({ onPaymentSet, onCancel }: PaymentOptionsProps) 
                             width: '1rem',
                             height: '1rem',
                             borderRadius: '0.25rem',
-                            border: '1px solid rgba(255, 255, 255, 0.2)',
-                            background: useToken ? '#ffffff' : 'transparent',
+                            border: '1px solid color-mix(in srgb, var(--fg) 20%, transparent)',
+                            background: useToken ? 'var(--btn-white-bg)' : 'transparent',
                             cursor: 'pointer',
                         }}
                     />
-                    <label htmlFor="useToken" style={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.7)', cursor: 'pointer' }}>
+                    <label htmlFor="useToken" style={{ fontSize: '0.75rem', color: 'color-mix(in srgb, var(--fg) 70%, transparent)', cursor: 'pointer' }}>
                         Use ERC20 token instead
                     </label>
                 </div>
@@ -213,7 +213,7 @@ export function PaymentOptions({ onPaymentSet, onCancel }: PaymentOptionsProps) 
                 {useToken && (
                     <>
                         <div>
-                            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 500, color: 'rgba(255, 255, 255, 0.7)', marginBottom: '0.5rem' }}>
+                            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 500, color: 'color-mix(in srgb, var(--fg) 70%, transparent)', marginBottom: '0.5rem' }}>
                                 Token Address (Base Network)
                             </label>
                             <input
@@ -224,20 +224,20 @@ export function PaymentOptions({ onPaymentSet, onCancel }: PaymentOptionsProps) 
                                 style={{
                                     width: '100%',
                                     borderRadius: '0.875rem',
-                                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                                    background: 'rgba(255, 255, 255, 0.03)',
+                                    border: '1px solid color-mix(in srgb, var(--fg) 10%, transparent)',
+                                    background: 'color-mix(in srgb, var(--fg) 3%, transparent)',
                                     padding: '0.625rem 0.75rem',
                                     fontSize: '0.875rem',
-                                    color: '#ffffff',
+                                    color: 'var(--fg)',
                                     fontFamily: 'var(--font-mono)',
                                     outline: 'none',
                                     transition: 'all 0.2s',
                                 }}
                                 onFocus={(e) => {
-                                    e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+                                    e.currentTarget.style.borderColor = 'color-mix(in srgb, var(--fg) 20%, transparent)';
                                 }}
                                 onBlur={(e) => {
-                                    e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+                                    e.currentTarget.style.borderColor = 'color-mix(in srgb, var(--fg) 10%, transparent)';
                                 }}
                             />
                         </div>
@@ -248,15 +248,15 @@ export function PaymentOptions({ onPaymentSet, onCancel }: PaymentOptionsProps) 
                                     borderRadius: '0.875rem',
                                     background:
                                         approvalStatus === 'approved'
-                                            ? 'rgba(16, 185, 129, 0.1)'
+                                            ? 'color-mix(in srgb, var(--good) 10%, transparent)'
                                             : approvalStatus === 'needs-approval'
-                                                ? 'rgba(245, 158, 11, 0.1)'
-                                                : 'rgba(255, 255, 255, 0.03)',
+                                                ? 'color-mix(in srgb, var(--warn) 10%, transparent)'
+                                                : 'color-mix(in srgb, var(--fg) 3%, transparent)',
                                     border: `1px solid ${approvalStatus === 'approved'
-                                            ? 'rgba(16, 185, 129, 0.2)'
+                                            ? 'color-mix(in srgb, var(--good) 20%, transparent)'
                                             : approvalStatus === 'needs-approval'
-                                                ? 'rgba(245, 158, 11, 0.2)'
-                                                : 'rgba(255, 255, 255, 0.1)'
+                                                ? 'color-mix(in srgb, var(--warn) 20%, transparent)'
+                                                : 'color-mix(in srgb, var(--fg) 10%, transparent)'
                                         }`,
                                     display: 'flex',
                                     alignItems: 'center',
@@ -266,18 +266,18 @@ export function PaymentOptions({ onPaymentSet, onCancel }: PaymentOptionsProps) 
                             >
                                 <div style={{ flex: 1 }}>
                                     {isCheckingApproval ? (
-                                        <div style={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.6)' }}>
+                                        <div style={{ fontSize: '0.75rem', color: 'color-mix(in srgb, var(--fg) 60%, transparent)' }}>
                                             Checking approval...
                                         </div>
                                     ) : approvalStatus === 'approved' ? (
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                            <CheckCircle2 style={{ width: '1rem', height: '1rem', color: '#10b981' }} />
-                                            <span style={{ fontSize: '0.75rem', color: '#10b981', fontWeight: 500 }}>
+                                            <CheckCircle2 style={{ width: '1rem', height: '1rem', color: 'var(--good)' }} />
+                                            <span style={{ fontSize: '0.75rem', color: 'var(--good)', fontWeight: 500 }}>
                                                 Token approved
                                             </span>
                                         </div>
                                     ) : approvalStatus === 'needs-approval' ? (
-                                        <div style={{ fontSize: '0.75rem', color: '#fbbf24' }}>
+                                        <div style={{ fontSize: '0.75rem', color: 'var(--warn)' }}>
                                             Approval required before sending
                                         </div>
                                     ) : null}
@@ -289,9 +289,9 @@ export function PaymentOptions({ onPaymentSet, onCancel }: PaymentOptionsProps) 
                                         style={{
                                             padding: '0.5rem 1rem',
                                             borderRadius: '0.875rem',
-                                            background: '#fbbf24',
+                                            background: 'var(--warn)',
                                             border: 'none',
-                                            color: '#05070c',
+                                            color: 'var(--btn-white-fg)',
                                             fontSize: '0.75rem',
                                             fontWeight: 600,
                                             cursor: isApproving ? 'not-allowed' : 'pointer',
@@ -321,12 +321,12 @@ export function PaymentOptions({ onPaymentSet, onCancel }: PaymentOptionsProps) 
                     <div
                         style={{
                             borderRadius: '0.875rem',
-                            background: 'rgba(239, 68, 68, 0.1)',
-                            border: '1px solid rgba(239, 68, 68, 0.2)',
+                            background: 'color-mix(in srgb, var(--bad) 10%, transparent)',
+                            border: '1px solid color-mix(in srgb, var(--bad) 20%, transparent)',
                             padding: '0.75rem',
                         }}
                     >
-                        <p style={{ fontSize: '0.75rem', color: '#fca5a5' }}>{error}</p>
+                        <p style={{ fontSize: '0.75rem', color: 'var(--bad)' }}>{error}</p>
                     </div>
                 )}
 
@@ -335,12 +335,12 @@ export function PaymentOptions({ onPaymentSet, onCancel }: PaymentOptionsProps) 
                     style={{
                         width: '100%',
                         borderRadius: '0.875rem',
-                        background: '#ffffff',
+                        background: 'var(--btn-white-bg)',
                         border: 'none',
                         padding: '0.75rem 1rem',
                         fontSize: '0.875rem',
                         fontWeight: 600,
-                        color: '#05070c',
+                        color: 'var(--btn-white-fg)',
                         cursor: 'pointer',
                         transition: 'opacity 0.2s',
                     }}

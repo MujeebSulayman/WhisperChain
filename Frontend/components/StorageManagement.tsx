@@ -81,14 +81,14 @@ export function StorageManagement({ userAddress, onUpdate }: StorageManagementPr
         <div
             style={{
                 borderRadius: '0.875rem',
-                border: '1px solid rgba(255, 255, 255, 0.08)',
-                background: 'rgba(255, 255, 255, 0.03)',
+                border: '1px solid color-mix(in srgb, var(--fg) 8%, transparent)',
+                background: 'color-mix(in srgb, var(--fg) 3%, transparent)',
                 padding: '1rem',
             }}
         >
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
-                <HardDrive style={{ width: '1rem', height: '1rem', color: 'rgba(255, 255, 255, 0.7)' }} />
-                <h3 style={{ fontSize: '0.875rem', fontWeight: 600, color: '#ffffff' }}>Storage Management</h3>
+                <HardDrive style={{ width: '1rem', height: '1rem', color: 'color-mix(in srgb, var(--fg) 70%, transparent)' }} />
+                <h3 style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--fg)' }}>Storage Management</h3>
             </div>
 
             <div
@@ -96,12 +96,12 @@ export function StorageManagement({ userAddress, onUpdate }: StorageManagementPr
                     marginBottom: '1rem',
                     padding: '0.75rem',
                     borderRadius: '0.875rem',
-                    background: 'rgba(255, 255, 255, 0.02)',
-                    border: '1px solid rgba(255, 255, 255, 0.05)',
+                    background: 'color-mix(in srgb, var(--fg) 2%, transparent)',
+                    border: '1px solid color-mix(in srgb, var(--fg) 5%, transparent)',
                 }}
             >
-                <p style={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.6)', marginBottom: '0.25rem' }}>Storage Limit</p>
-                <p style={{ fontSize: '0.875rem', color: '#ffffff', fontFamily: 'var(--font-mono)' }}>{formatBytes(MAX_STORAGE_PER_USER)}</p>
+                <p style={{ fontSize: '0.75rem', color: 'color-mix(in srgb, var(--fg) 60%, transparent)', marginBottom: '0.25rem' }}>Storage Limit</p>
+                <p style={{ fontSize: '0.875rem', color: 'var(--fg)', fontFamily: 'var(--font-mono)' }}>{formatBytes(MAX_STORAGE_PER_USER)}</p>
             </div>
 
             {error && (
@@ -113,12 +113,12 @@ export function StorageManagement({ userAddress, onUpdate }: StorageManagementPr
                         gap: '0.5rem',
                         padding: '0.75rem',
                         borderRadius: '0.875rem',
-                        background: 'rgba(239, 68, 68, 0.1)',
-                        border: '1px solid rgba(239, 68, 68, 0.2)',
+                        background: 'color-mix(in srgb, var(--bad) 10%, transparent)',
+                        border: '1px solid color-mix(in srgb, var(--bad) 20%, transparent)',
                     }}
                 >
-                    <AlertTriangle style={{ width: '1rem', height: '1rem', color: '#f87171', flexShrink: 0 }} />
-                    <p style={{ fontSize: '0.75rem', color: '#fca5a5' }}>{error}</p>
+                    <AlertTriangle style={{ width: '1rem', height: '1rem', color: 'var(--bad)', flexShrink: 0 }} />
+                    <p style={{ fontSize: '0.75rem', color: 'var(--bad)' }}>{error}</p>
                 </div>
             )}
 
@@ -134,9 +134,9 @@ export function StorageManagement({ userAddress, onUpdate }: StorageManagementPr
                         gap: '0.5rem',
                         padding: '0.625rem 1rem',
                         borderRadius: '0.875rem',
-                        border: '1px solid rgba(239, 68, 68, 0.3)',
-                        background: 'rgba(239, 68, 68, 0.1)',
-                        color: '#f87171',
+                        border: '1px solid color-mix(in srgb, var(--bad) 30%, transparent)',
+                        background: 'color-mix(in srgb, var(--bad) 10%, transparent)',
+                        color: 'var(--bad)',
                         cursor: isClearing ? 'not-allowed' : 'pointer',
                         fontSize: '0.875rem',
                         fontWeight: 500,
@@ -145,12 +145,12 @@ export function StorageManagement({ userAddress, onUpdate }: StorageManagementPr
                     }}
                     onMouseEnter={(e) => {
                         if (!isClearing) {
-                            e.currentTarget.style.background = 'rgba(239, 68, 68, 0.15)';
+                            e.currentTarget.style.background = 'color-mix(in srgb, var(--bad) 15%, transparent)';
                         }
                     }}
                     onMouseLeave={(e) => {
                         if (!isClearing) {
-                            e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)';
+                            e.currentTarget.style.background = 'color-mix(in srgb, var(--bad) 10%, transparent)';
                         }
                     }}
                 >
@@ -173,9 +173,9 @@ export function StorageManagement({ userAddress, onUpdate }: StorageManagementPr
                         gap: '0.5rem',
                         padding: '0.625rem 1rem',
                         borderRadius: '0.875rem',
-                        border: '1px solid rgba(255, 255, 255, 0.1)',
-                        background: 'rgba(255, 255, 255, 0.05)',
-                        color: 'rgba(255, 255, 255, 0.7)',
+                        border: '1px solid color-mix(in srgb, var(--fg) 10%, transparent)',
+                        background: 'color-mix(in srgb, var(--fg) 5%, transparent)',
+                        color: 'color-mix(in srgb, var(--fg) 70%, transparent)',
                         cursor: isWithdrawing ? 'not-allowed' : 'pointer',
                         fontSize: '0.875rem',
                         fontWeight: 500,
@@ -184,14 +184,14 @@ export function StorageManagement({ userAddress, onUpdate }: StorageManagementPr
                     }}
                     onMouseEnter={(e) => {
                         if (!isWithdrawing) {
-                            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)';
-                            e.currentTarget.style.color = '#ffffff';
+                            e.currentTarget.style.background = 'color-mix(in srgb, var(--fg) 8%, transparent)';
+                            e.currentTarget.style.color = 'var(--fg)';
                         }
                     }}
                     onMouseLeave={(e) => {
                         if (!isWithdrawing) {
-                            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
-                            e.currentTarget.style.color = 'rgba(255, 255, 255, 0.7)';
+                            e.currentTarget.style.background = 'color-mix(in srgb, var(--fg) 5%, transparent)';
+                            e.currentTarget.style.color = 'color-mix(in srgb, var(--fg) 70%, transparent)';
                         }
                     }}
                 >

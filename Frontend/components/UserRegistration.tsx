@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { UserPlus, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
-import { LogoMark } from './landing/icons';
+import { Logo } from './site/Icons';
 import {
 	registerUserGasless,
 	submitSignedForwardRequest,
@@ -71,7 +71,7 @@ export function UserRegistration({ onRegistered, address }: UserRegistrationProp
 
     return (
         <div className="glass rise rounded-[var(--r-panel)] p-6 sm:p-8">
-            <LogoMark size={44} />
+            <Logo size={44} wordmark={false} />
             <p className="eyebrow mt-6">One-time setup</p>
             <h2 className="display mt-2 text-[clamp(28px,4vw,36px)]">Create your profile.</h2>
             <p className="mt-3 text-[15px] leading-relaxed text-dim">
@@ -91,7 +91,7 @@ export function UserRegistration({ onRegistered, address }: UserRegistrationProp
                         placeholder="e.g. satoshi"
                         disabled={isRegistering}
                         autoFocus
-                        className="field"
+                        className="input"
                     />
                     <span className="text-[12px] text-mute">A unique public key is generated for you automatically.</span>
                 </label>

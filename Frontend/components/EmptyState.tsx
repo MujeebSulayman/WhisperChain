@@ -14,36 +14,51 @@ const STEPS = [
     { icon: ShieldCheck, title: 'Settle', description: 'WhisperChain records it on Base.' },
 ];
 
+/** The glowing glass orb from the Prinet chat screen. */
+function Orb() {
+    return (
+        <div className="relative mx-auto h-24 w-24 md:h-28 md:w-28" aria-hidden>
+            <div className="assistant-glow absolute -inset-10 rounded-full blur-2xl" />
+            <div className="assistant-orb relative h-full w-full rounded-full" />
+        </div>
+    );
+}
+
 export function EmptyState({ onNewConversation, connected = false }: EmptyStateProps) {
     return (
         <div className="flex flex-1 items-center justify-center overflow-y-auto p-6 md:p-10">
-            <div className="rise w-full max-w-[560px] text-center">
-                <span className="tile is-on mx-auto h-16 w-16 rounded-[var(--r-card)]">
-                    <MessageSquarePlus size={26} strokeWidth={1.8} />
-                </span>
-                <p className="eyebrow mt-8">{connected ? 'Ready when you are' : 'Wallet not connected'}</p>
-                <h2 className="display mt-3 text-[clamp(28px,3.4vw,40px)]">
-                    {connected ? 'Start a conversation.' : 'Connect to start messaging.'}
+            <div className="w-full max-w-3xl text-center">
+                <Orb />
+                <h2 className="display rise mt-10 text-[clamp(1.9rem,4vw,3rem)]">
+                    {connected ? (
+                        <>
+                            Say it here. <span className="text-gradient">Settle it on-chain.</span>
+                        </>
+                    ) : (
+                        <>
+                            Connect a wallet. <span className="text-gradient">Start talking.</span>
+                        </>
+                    )}
                 </h2>
-                <p className="mx-auto mt-4 max-w-[44ch] text-[15px] leading-relaxed text-dim">
+                <p className="rise mx-auto mt-4 max-w-md text-[15px] leading-relaxed text-dim" style={{ animationDelay: '0.08s' }}>
                     {connected
-                        ? 'Pick a conversation on the right, or open a new one with any registered wallet address.'
-                        : 'Connect your wallet from the menu. Your address is your account, so there is nothing else to sign up for.'}
+                        ? 'Pick a conversation, or open a new one with any registered wallet address.'
+                        : 'Your address is your account, so there is nothing else to sign up for. Connect from the menu to begin.'}
                 </p>
-                <button onClick={onNewConversation} className="btn btn-lg btn-white mt-8">
+                <button onClick={onNewConversation} className="rise btn btn-lg btn-white mt-8" style={{ animationDelay: '0.12s' }}>
                     <MessageSquarePlus size={18} strokeWidth={2} />
                     New conversation
                 </button>
 
-                <ol className="mt-12 grid gap-px overflow-hidden rounded-[var(--r-card)] text-left sm:grid-cols-3">
+                <ol className="rise mt-10 grid gap-3 text-left sm:grid-cols-3" style={{ animationDelay: '0.16s' }}>
                     {STEPS.map(({ icon: Icon, title, description }, i) => (
-                        <li key={title} className="inset-panel flex gap-3 p-4">
+                        <li key={title} className="card flex gap-3 !rounded-[22px] p-4">
                             <Icon size={18} strokeWidth={1.8} className="mt-0.5 shrink-0 text-accent" />
                             <div>
                                 <p className="font-mono text-[12px] text-accent">
                                     0{i + 1} · {title}
                                 </p>
-                                <p className="mt-1 text-[13px] leading-snug text-dim">{description}</p>
+                                <p className="mt-1 text-[13.5px] leading-snug text-dim">{description}</p>
                             </div>
                         </li>
                     ))}

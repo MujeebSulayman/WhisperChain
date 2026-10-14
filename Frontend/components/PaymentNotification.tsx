@@ -50,9 +50,9 @@ export function PaymentNotification({
                 maxWidth: '24rem',
                 borderRadius: '1.25rem',
                 background: isReceived
-                    ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.95) 0%, rgba(5, 150, 105, 0.95) 100%)'
-                    : 'linear-gradient(135deg, rgba(245, 158, 11, 0.95) 0%, rgba(217, 119, 6, 0.95) 100%)',
-                border: `1px solid ${isReceived ? 'rgba(16, 185, 129, 0.3)' : 'rgba(245, 158, 11, 0.3)'}`,
+                    ? 'linear-gradient(135deg, color-mix(in srgb, var(--good) 95%, transparent) 0%, color-mix(in srgb, var(--good) 95%, transparent) 100%)'
+                    : 'linear-gradient(135deg, color-mix(in srgb, var(--warn) 95%, transparent) 0%, color-mix(in srgb, var(--warn) 95%, transparent) 100%)',
+                border: `1px solid ${isReceived ? 'color-mix(in srgb, var(--good) 30%, transparent)' : 'color-mix(in srgb, var(--warn) 30%, transparent)'}`,
                 padding: '1rem',
                 boxShadow: '0 8px 24px rgba(0, 0, 0, 0.4)',
                 backdropFilter: 'blur(10px)',
@@ -67,7 +67,7 @@ export function PaymentNotification({
                         width: '2.5rem',
                         height: '2.5rem',
                         borderRadius: '50%',
-                        background: 'rgba(255, 255, 255, 0.2)',
+                        background: 'color-mix(in srgb, var(--fg) 20%, transparent)',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -75,9 +75,9 @@ export function PaymentNotification({
                     }}
                 >
                     {isReceived ? (
-                        <CheckCircle2 style={{ width: '1.5rem', height: '1.5rem', color: '#ffffff' }} />
+                        <CheckCircle2 style={{ width: '1.5rem', height: '1.5rem', color: 'var(--fg)' }} />
                     ) : (
-                        <Coins style={{ width: '1.5rem', height: '1.5rem', color: '#ffffff' }} />
+                        <Coins style={{ width: '1.5rem', height: '1.5rem', color: 'var(--fg)' }} />
                     )}
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
@@ -85,7 +85,7 @@ export function PaymentNotification({
                         style={{
                             fontSize: '0.875rem',
                             fontWeight: 600,
-                            color: '#ffffff',
+                            color: 'var(--fg)',
                             marginBottom: '0.25rem',
                         }}
                     >
@@ -95,7 +95,7 @@ export function PaymentNotification({
                         style={{
                             fontSize: '1.125rem',
                             fontWeight: 700,
-                            color: '#ffffff',
+                            color: 'var(--fg)',
                             marginBottom: '0.375rem',
                         }}
                     >
@@ -105,7 +105,7 @@ export function PaymentNotification({
                         <div
                             style={{
                                 fontSize: '0.75rem',
-                                color: 'rgba(255, 255, 255, 0.8)',
+                                color: 'color-mix(in srgb, var(--fg) 80%, transparent)',
                                 fontFamily: 'var(--font-mono)',
                             }}
                         >
@@ -116,7 +116,7 @@ export function PaymentNotification({
                         <div
                             style={{
                                 fontSize: '0.75rem',
-                                color: 'rgba(255, 255, 255, 0.8)',
+                                color: 'color-mix(in srgb, var(--fg) 80%, transparent)',
                                 fontFamily: 'var(--font-mono)',
                             }}
                         >
@@ -134,18 +134,18 @@ export function PaymentNotification({
                         borderRadius: '0.875rem',
                         background: 'transparent',
                         border: 'none',
-                        color: 'rgba(255, 255, 255, 0.7)',
+                        color: 'color-mix(in srgb, var(--fg) 70%, transparent)',
                         cursor: 'pointer',
                         transition: 'all 0.2s',
                         flexShrink: 0,
                     }}
                     onMouseEnter={(e) => {
-                        e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
-                        e.currentTarget.style.color = '#ffffff';
+                        e.currentTarget.style.background = 'color-mix(in srgb, var(--fg) 10%, transparent)';
+                        e.currentTarget.style.color = 'var(--fg)';
                     }}
                     onMouseLeave={(e) => {
                         e.currentTarget.style.background = 'transparent';
-                        e.currentTarget.style.color = 'rgba(255, 255, 255, 0.7)';
+                        e.currentTarget.style.color = 'color-mix(in srgb, var(--fg) 70%, transparent)';
                     }}
                 >
                     <X style={{ width: '1rem', height: '1rem' }} />

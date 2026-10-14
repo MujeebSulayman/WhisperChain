@@ -39,10 +39,10 @@ export function FileUpload({ onFileSelected, onCancel, selectedFile: externalFil
 
     const getFileIcon = (file: File) => {
         const type = file.type.toLowerCase();
-        if (type.startsWith('image/')) return <Image style={{ width: '1.25rem', height: '1.25rem', color: 'rgba(255, 255, 255, 0.7)' }} />;
-        if (type.startsWith('video/')) return <Video style={{ width: '1.25rem', height: '1.25rem', color: 'rgba(255, 255, 255, 0.7)' }} />;
-        if (type.startsWith('audio/')) return <Music style={{ width: '1.25rem', height: '1.25rem', color: 'rgba(255, 255, 255, 0.7)' }} />;
-        return <FileText style={{ width: '1.25rem', height: '1.25rem', color: 'rgba(255, 255, 255, 0.7)' }} />;
+        if (type.startsWith('image/')) return <Image style={{ width: '1.25rem', height: '1.25rem', color: 'color-mix(in srgb, var(--fg) 70%, transparent)' }} />;
+        if (type.startsWith('video/')) return <Video style={{ width: '1.25rem', height: '1.25rem', color: 'color-mix(in srgb, var(--fg) 70%, transparent)' }} />;
+        if (type.startsWith('audio/')) return <Music style={{ width: '1.25rem', height: '1.25rem', color: 'color-mix(in srgb, var(--fg) 70%, transparent)' }} />;
+        return <FileText style={{ width: '1.25rem', height: '1.25rem', color: 'color-mix(in srgb, var(--fg) 70%, transparent)' }} />;
     };
 
     const formatFileSize = (bytes: number) => {
@@ -55,8 +55,8 @@ export function FileUpload({ onFileSelected, onCancel, selectedFile: externalFil
         <div
             style={{
                 borderRadius: '0.875rem',
-                border: '1px solid rgba(255, 255, 255, 0.08)',
-                background: 'rgba(12, 16, 24, 0.95)',
+                border: '1px solid color-mix(in srgb, var(--fg) 8%, transparent)',
+                background: 'var(--surface)',
                 padding: '1rem',
                 backdropFilter: 'blur(10px)',
             }}
@@ -71,26 +71,26 @@ export function FileUpload({ onFileSelected, onCancel, selectedFile: externalFil
                         justifyContent: 'center',
                         gap: '0.75rem',
                         borderRadius: '0.875rem',
-                        border: '2px dashed rgba(255, 255, 255, 0.1)',
+                        border: '2px dashed color-mix(in srgb, var(--fg) 10%, transparent)',
                         padding: '2rem',
                         cursor: 'pointer',
                         transition: 'all 0.2s',
                     }}
                     onMouseEnter={(e) => {
-                        e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.2)';
-                        e.currentTarget.style.background = 'rgba(255, 255, 255, 0.02)';
+                        e.currentTarget.style.borderColor = 'color-mix(in srgb, var(--fg) 20%, transparent)';
+                        e.currentTarget.style.background = 'color-mix(in srgb, var(--fg) 2%, transparent)';
                     }}
                     onMouseLeave={(e) => {
-                        e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+                        e.currentTarget.style.borderColor = 'color-mix(in srgb, var(--fg) 10%, transparent)';
                         e.currentTarget.style.background = 'transparent';
                     }}
                 >
-                    <Upload style={{ width: '2rem', height: '2rem', color: 'rgba(255, 255, 255, 0.5)' }} />
+                    <Upload style={{ width: '2rem', height: '2rem', color: 'color-mix(in srgb, var(--fg) 50%, transparent)' }} />
                     <div style={{ textAlign: 'center' }}>
-                        <p style={{ fontSize: '0.875rem', fontWeight: 500, color: '#ffffff', marginBottom: '0.25rem' }}>
+                        <p style={{ fontSize: '0.875rem', fontWeight: 500, color: 'var(--fg)', marginBottom: '0.25rem' }}>
                             Click to upload file
                         </p>
-                        <p style={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.5)' }}>
+                        <p style={{ fontSize: '0.75rem', color: 'color-mix(in srgb, var(--fg) 50%, transparent)' }}>
                             Max size: {(MAX_FILE_SIZE / 1024 / 1024).toFixed(0)}MB (contract limit)
                         </p>
                     </div>
@@ -110,8 +110,8 @@ export function FileUpload({ onFileSelected, onCancel, selectedFile: externalFil
                             alignItems: 'center',
                             gap: '0.75rem',
                             borderRadius: '0.875rem',
-                            border: '1px solid rgba(255, 255, 255, 0.08)',
-                            background: 'rgba(255, 255, 255, 0.03)',
+                            border: '1px solid color-mix(in srgb, var(--fg) 8%, transparent)',
+                            background: 'color-mix(in srgb, var(--fg) 3%, transparent)',
                             padding: '0.75rem',
                         }}
                     >
@@ -121,7 +121,7 @@ export function FileUpload({ onFileSelected, onCancel, selectedFile: externalFil
                                 style={{
                                     fontSize: '0.875rem',
                                     fontWeight: 500,
-                                    color: '#ffffff',
+                                    color: 'var(--fg)',
                                     overflow: 'hidden',
                                     textOverflow: 'ellipsis',
                                     whiteSpace: 'nowrap',
@@ -129,7 +129,7 @@ export function FileUpload({ onFileSelected, onCancel, selectedFile: externalFil
                             >
                                 {file.name}
                             </p>
-                            <p style={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.5)' }}>
+                            <p style={{ fontSize: '0.75rem', color: 'color-mix(in srgb, var(--fg) 50%, transparent)' }}>
                                 {formatFileSize(file.size)}
                             </p>
                         </div>
@@ -139,13 +139,13 @@ export function FileUpload({ onFileSelected, onCancel, selectedFile: externalFil
                                 borderRadius: '0.875rem',
                                 padding: '0.375rem',
                                 background: 'transparent',
-                                border: '1px solid rgba(255, 255, 255, 0.1)',
-                                color: 'rgba(255, 255, 255, 0.7)',
+                                border: '1px solid color-mix(in srgb, var(--fg) 10%, transparent)',
+                                color: 'color-mix(in srgb, var(--fg) 70%, transparent)',
                                 cursor: 'pointer',
                                 transition: 'all 0.2s',
                             }}
                             onMouseEnter={(e) => {
-                                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
+                                e.currentTarget.style.background = 'color-mix(in srgb, var(--fg) 5%, transparent)';
                             }}
                             onMouseLeave={(e) => {
                                 e.currentTarget.style.background = 'transparent';
@@ -163,16 +163,16 @@ export function FileUpload({ onFileSelected, onCancel, selectedFile: externalFil
                                 gap: '0.5rem',
                                 padding: '0.75rem',
                                 borderRadius: '0.875rem',
-                                background: 'rgba(239, 68, 68, 0.1)',
-                                border: '1px solid rgba(239, 68, 68, 0.2)',
+                                background: 'color-mix(in srgb, var(--bad) 10%, transparent)',
+                                border: '1px solid color-mix(in srgb, var(--bad) 20%, transparent)',
                             }}
                         >
-                            <AlertCircle style={{ width: '1rem', height: '1rem', color: '#f87171', flexShrink: 0 }} />
-                            <p style={{ fontSize: '0.75rem', color: '#fca5a5' }}>{error}</p>
+                            <AlertCircle style={{ width: '1rem', height: '1rem', color: 'var(--bad)', flexShrink: 0 }} />
+                            <p style={{ fontSize: '0.75rem', color: 'var(--bad)' }}>{error}</p>
                         </div>
                     )}
 
-                    <p style={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.5)', textAlign: 'center', marginTop: '0.5rem' }}>
+                    <p style={{ fontSize: '0.75rem', color: 'color-mix(in srgb, var(--fg) 50%, transparent)', textAlign: 'center', marginTop: '0.5rem' }}>
                         File will be uploaded when you send the message
                     </p>
                 </div>

@@ -16,7 +16,6 @@ import { BatchMessaging } from './BatchMessaging';
 import { PaymentNotification } from './PaymentNotification';
 import { PaymentHistory } from './PaymentHistory';
 import { Modal } from './Modal';
-import { GlassBoot } from './landing/GlassBoot';
 import {
 	sendWhisper,
 	sendWhisperGasless,
@@ -572,29 +571,26 @@ export function ChatContainer() {
 
 	if (needsRegistration && connectedAddress) {
 		return (
-			<div className='wc wc-app'>
-				<GlassBoot />
-				<div className='grid h-full place-items-center overflow-y-auto p-4'>
-					<div className='w-full max-w-[28rem]'>
-						<UserRegistration
-							address={connectedAddress}
-							onRegistered={() => {
-								setNeedsRegistration(false);
-								checkRegistration();
-								loadUserData();
-							}}
-						/>
-					</div>
+			<div className='page-shell grid min-h-[calc(100svh-84px-104px)] place-items-center pb-6 lg:min-h-[calc(100svh-116px)]'>
+				<div className='w-full max-w-[30rem]'>
+					<UserRegistration
+						address={connectedAddress}
+						onRegistered={() => {
+							setNeedsRegistration(false);
+							checkRegistration();
+							loadUserData();
+						}}
+					/>
 				</div>
 			</div>
 		);
 	}
 
 	return (
-		<div className='wc wc-app'>
-			<GlassBoot />
-			<div className={`relative flex h-full ${isMobile ? 'p-2' : 'gap-3 p-3'}`}>
-				{drawerOpen && <div className='scrim z-40' aria-hidden onClick={closeDrawers} />}
+		// Fills the viewport between the bars: top bar + tab bar on phones, below the top nav on desktop.
+		<div className='page-shell !max-w-[1440px] h-[calc(100svh-84px-104px)] pb-3 lg:h-[calc(100svh-116px)] lg:pb-4'>
+			<div className='relative flex h-full gap-4'>
+				{drawerOpen && <div className='scrim z-[55]' aria-hidden onClick={closeDrawers} />}
 
 				<Sidebar
 					isOpen={sidebarOpen}
@@ -641,7 +637,7 @@ export function ChatContainer() {
 					isMobile={isMobile}
 				/>
 
-				<main className='glass relative flex min-w-0 flex-1 flex-col overflow-hidden rounded-[var(--r-card)]'>
+				<main className='glass relative flex min-w-0 flex-1 flex-col overflow-hidden rounded-[var(--r-card)]' data-lg='surface' data-lg-r='28' data-lg-tint='card'>
 					{error && (
 						<ErrorToast
 							message={error}

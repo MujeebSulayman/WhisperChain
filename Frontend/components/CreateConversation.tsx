@@ -111,16 +111,16 @@ export function CreateConversation({
         <div
             style={{
                 borderRadius: '0.875rem',
-                border: '1px solid rgba(255, 255, 255, 0.08)',
-                background: 'rgba(12, 16, 24, 0.95)',
+                border: '1px solid color-mix(in srgb, var(--fg) 8%, transparent)',
+                background: 'var(--surface)',
                 padding: '1.5rem',
                 backdropFilter: 'blur(10px)',
             }}
         >
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <Users style={{ width: '1.25rem', height: '1.25rem', color: 'rgba(255, 255, 255, 0.7)' }} />
-                    <h3 style={{ fontSize: '1.125rem', fontWeight: 600, color: '#ffffff' }}>Create Conversation</h3>
+                    <Users style={{ width: '1.25rem', height: '1.25rem', color: 'color-mix(in srgb, var(--fg) 70%, transparent)' }} />
+                    <h3 style={{ fontSize: '1.125rem', fontWeight: 600, color: 'var(--fg)' }}>Create Conversation</h3>
                 </div>
                 <button
                     onClick={onCancel}
@@ -129,17 +129,17 @@ export function CreateConversation({
                         borderRadius: '0.875rem',
                         background: 'transparent',
                         border: 'none',
-                        color: 'rgba(255, 255, 255, 0.7)',
+                        color: 'color-mix(in srgb, var(--fg) 70%, transparent)',
                         cursor: 'pointer',
                         transition: 'all 0.2s',
                     }}
                     onMouseEnter={(e) => {
-                        e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
-                        e.currentTarget.style.color = '#ffffff';
+                        e.currentTarget.style.background = 'color-mix(in srgb, var(--fg) 5%, transparent)';
+                        e.currentTarget.style.color = 'var(--fg)';
                     }}
                     onMouseLeave={(e) => {
                         e.currentTarget.style.background = 'transparent';
-                        e.currentTarget.style.color = 'rgba(255, 255, 255, 0.7)';
+                        e.currentTarget.style.color = 'color-mix(in srgb, var(--fg) 70%, transparent)';
                     }}
                 >
                     <X style={{ width: '1rem', height: '1rem' }} />
@@ -148,7 +148,7 @@ export function CreateConversation({
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 <div>
-                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: 'rgba(255, 255, 255, 0.7)', marginBottom: '0.5rem' }}>
+                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: 'color-mix(in srgb, var(--fg) 70%, transparent)', marginBottom: '0.5rem' }}>
                         Participants (minimum 2 including you)
                     </label>
                     <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
@@ -161,40 +161,40 @@ export function CreateConversation({
                             style={{
                                 flex: 1,
                                 borderRadius: '0.875rem',
-                                border: '1px solid rgba(255, 255, 255, 0.1)',
-                                background: 'rgba(255, 255, 255, 0.03)',
+                                border: '1px solid color-mix(in srgb, var(--fg) 10%, transparent)',
+                                background: 'color-mix(in srgb, var(--fg) 3%, transparent)',
                                 padding: '0.625rem 0.75rem',
                                 fontSize: '0.875rem',
-                                color: '#ffffff',
+                                color: 'var(--fg)',
                                 fontFamily: 'var(--font-mono)',
                                 outline: 'none',
                                 transition: 'all 0.2s',
                             }}
                             onFocus={(e) => {
-                                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+                                e.currentTarget.style.borderColor = 'color-mix(in srgb, var(--fg) 20%, transparent)';
                             }}
                             onBlur={(e) => {
-                                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+                                e.currentTarget.style.borderColor = 'color-mix(in srgb, var(--fg) 10%, transparent)';
                             }}
                         />
                         <button
                             onClick={addParticipant}
                             style={{
                                 borderRadius: '0.875rem',
-                                border: '1px solid rgba(255, 255, 255, 0.1)',
-                                background: 'rgba(255, 255, 255, 0.05)',
+                                border: '1px solid color-mix(in srgb, var(--fg) 10%, transparent)',
+                                background: 'color-mix(in srgb, var(--fg) 5%, transparent)',
                                 padding: '0.625rem 0.75rem',
-                                color: 'rgba(255, 255, 255, 0.7)',
+                                color: 'color-mix(in srgb, var(--fg) 70%, transparent)',
                                 cursor: 'pointer',
                                 transition: 'all 0.2s',
                             }}
                             onMouseEnter={(e) => {
-                                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)';
-                                e.currentTarget.style.color = '#ffffff';
+                                e.currentTarget.style.background = 'color-mix(in srgb, var(--fg) 8%, transparent)';
+                                e.currentTarget.style.color = 'var(--fg)';
                             }}
                             onMouseLeave={(e) => {
-                                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
-                                e.currentTarget.style.color = 'rgba(255, 255, 255, 0.7)';
+                                e.currentTarget.style.background = 'color-mix(in srgb, var(--fg) 5%, transparent)';
+                                e.currentTarget.style.color = 'color-mix(in srgb, var(--fg) 70%, transparent)';
                             }}
                         >
                             <Plus style={{ width: '1rem', height: '1rem' }} />
@@ -211,12 +211,12 @@ export function CreateConversation({
                                         alignItems: 'center',
                                         justifyContent: 'space-between',
                                         borderRadius: '0.875rem',
-                                        border: '1px solid rgba(255, 255, 255, 0.08)',
-                                        background: 'rgba(255, 255, 255, 0.03)',
+                                        border: '1px solid color-mix(in srgb, var(--fg) 8%, transparent)',
+                                        background: 'color-mix(in srgb, var(--fg) 3%, transparent)',
                                         padding: '0.625rem 0.75rem',
                                     }}
                                 >
-                                    <p style={{ fontSize: '0.75rem', fontFamily: 'var(--font-mono)', color: 'rgba(255, 255, 255, 0.7)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>
+                                    <p style={{ fontSize: '0.75rem', fontFamily: 'var(--font-mono)', color: 'color-mix(in srgb, var(--fg) 70%, transparent)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>
                                         {address}
                                     </p>
                                     <button
@@ -226,15 +226,15 @@ export function CreateConversation({
                                             padding: '0.25rem',
                                             background: 'transparent',
                                             border: 'none',
-                                            color: 'rgba(255, 255, 255, 0.5)',
+                                            color: 'color-mix(in srgb, var(--fg) 50%, transparent)',
                                             cursor: 'pointer',
                                             transition: 'all 0.2s',
                                         }}
                                         onMouseEnter={(e) => {
-                                            e.currentTarget.style.color = '#ef4444';
+                                            e.currentTarget.style.color = 'var(--bad)';
                                         }}
                                         onMouseLeave={(e) => {
-                                            e.currentTarget.style.color = 'rgba(255, 255, 255, 0.5)';
+                                            e.currentTarget.style.color = 'color-mix(in srgb, var(--fg) 50%, transparent)';
                                         }}
                                     >
                                         <X style={{ width: '0.875rem', height: '0.875rem' }} />
@@ -249,12 +249,12 @@ export function CreateConversation({
                     <div
                         style={{
                             borderRadius: '0.875rem',
-                            background: 'rgba(239, 68, 68, 0.1)',
-                            border: '1px solid rgba(239, 68, 68, 0.2)',
+                            background: 'color-mix(in srgb, var(--bad) 10%, transparent)',
+                            border: '1px solid color-mix(in srgb, var(--bad) 20%, transparent)',
                             padding: '0.75rem',
                         }}
                     >
-                        <p style={{ fontSize: '0.75rem', color: '#fca5a5' }}>{error}</p>
+                        <p style={{ fontSize: '0.75rem', color: 'var(--bad)' }}>{error}</p>
                     </div>
                 )}
 
@@ -264,12 +264,12 @@ export function CreateConversation({
                     style={{
                         width: '100%',
                         borderRadius: '0.875rem',
-                        background: '#ffffff',
+                        background: 'var(--btn-white-bg)',
                         border: 'none',
                         padding: '0.75rem 1rem',
                         fontSize: '0.875rem',
                         fontWeight: 600,
-                        color: '#05070c',
+                        color: 'var(--btn-white-fg)',
                         cursor: isCreating || participants.length < 1 ? 'not-allowed' : 'pointer',
                         opacity: isCreating || participants.length < 1 ? 0.6 : 1,
                         transition: 'opacity 0.2s',

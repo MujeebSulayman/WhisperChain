@@ -1,47 +1,58 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import type { Metadata, Viewport } from "next";
+import type { ReactNode } from "react";
+import { GlassBoot } from "@/components/site/GlassBoot";
+import { Header, TabBar } from "@/components/site/Header";
+import { LiquidGlassDefs } from "@/components/site/LiquidGlass";
+import { ThemeProvider, themeInitScript } from "@/components/site/ThemeProvider";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
-
 export const metadata: Metadata = {
-  title: "WhisperChain - Decentralized Messaging on Blockchain",
-  description: "Secure, private, and decentralized messaging platform built on blockchain. Send encrypted messages, files, and payments directly on-chain.",
-  keywords: ["blockchain", "messaging", "decentralized", "web3", "crypto", "encrypted messaging"],
+  title: "WhisperChain - Gasless Messaging on Base",
+  description:
+    "Wallet-to-wallet messages, files and payments on Base. Sign once with EIP-712; a relayer submits it and the paymaster covers the gas.",
+  keywords: ["blockchain", "messaging", "decentralized", "web3", "base", "gasless", "meta-transactions"],
   authors: [{ name: "WhisperChain" }],
   openGraph: {
-    title: "WhisperChain - Decentralized Messaging",
-    description: "Secure, private, and decentralized messaging platform built on blockchain",
+    title: "WhisperChain",
+    description: "Wallet-to-wallet messaging, settled on Base. You sign; the paymaster pays the gas.",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "WhisperChain - Decentralized Messaging",
-    description: "Secure, private, and decentralized messaging platform built on blockchain",
+    title: "WhisperChain",
+    description: "Wallet-to-wallet messaging, settled on Base. You sign; the paymaster pays the gas.",
   },
 };
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+};
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
   return (
-    <html lang="en" className="dark">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#0a0a0f] text-white`}
-      >
-        {children}
+    // data-theme is rewritten by themeInitScript before hydration.
+    <html lang="en" data-theme="dark" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+        <link rel="preconnect" href="https://api.fontshare.com" />
+        {/* eslint-disable-next-line @next/next/no-page-custom-font */}
+        <link
+          rel="stylesheet"
+          href="https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&f[]=clash-display@400,500,600,700&display=swap"
+        />
+      </head>
+      <body>
+        <LiquidGlassDefs />
+        <ThemeProvider>
+          <GlassBoot />
+          <Header />
+          <div className="shell flex min-h-screen flex-col">
+            <main className="flex-1">{children}</main>
+            <TabBar />
+          </div>
+        </ThemeProvider>
       </body>
     </html>
   );

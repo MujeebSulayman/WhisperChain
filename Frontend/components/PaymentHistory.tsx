@@ -119,8 +119,8 @@ export function PaymentHistory({ userAddress, onClose }: PaymentHistoryProps) {
                     maxWidth: '48rem',
                     maxHeight: '90vh',
                     borderRadius: '1rem',
-                    background: '#0c1018',
-                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    background: 'var(--surface)',
+                    border: '1px solid color-mix(in srgb, var(--fg) 10%, transparent)',
                     display: 'flex',
                     flexDirection: 'column',
                     overflow: 'hidden',
@@ -130,17 +130,17 @@ export function PaymentHistory({ userAddress, onClose }: PaymentHistoryProps) {
                 <div
                     style={{
                         padding: '1.5rem',
-                        borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+                        borderBottom: '1px solid color-mix(in srgb, var(--fg) 10%, transparent)',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'space-between',
                     }}
                 >
                     <div>
-                        <h2 style={{ fontSize: '1.5rem', fontWeight: 600, color: '#ffffff', marginBottom: '0.5rem' }}>
+                        <h2 style={{ fontSize: '1.5rem', fontWeight: 600, color: 'var(--fg)', marginBottom: '0.5rem' }}>
                             Payment History
                         </h2>
-                        <p style={{ fontSize: '0.875rem', color: 'rgba(255, 255, 255, 0.6)' }}>
+                        <p style={{ fontSize: '0.875rem', color: 'color-mix(in srgb, var(--fg) 60%, transparent)' }}>
                             View all payment transactions on Base
                         </p>
                     </div>
@@ -150,18 +150,18 @@ export function PaymentHistory({ userAddress, onClose }: PaymentHistoryProps) {
                             padding: '0.5rem',
                             borderRadius: '0.875rem',
                             background: 'transparent',
-                            border: '1px solid rgba(255, 255, 255, 0.1)',
-                            color: 'rgba(255, 255, 255, 0.7)',
+                            border: '1px solid color-mix(in srgb, var(--fg) 10%, transparent)',
+                            color: 'color-mix(in srgb, var(--fg) 70%, transparent)',
                             cursor: 'pointer',
                             transition: 'all 0.2s',
                         }}
                         onMouseEnter={(e) => {
-                            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
-                            e.currentTarget.style.color = '#ffffff';
+                            e.currentTarget.style.background = 'color-mix(in srgb, var(--fg) 5%, transparent)';
+                            e.currentTarget.style.color = 'var(--fg)';
                         }}
                         onMouseLeave={(e) => {
                             e.currentTarget.style.background = 'transparent';
-                            e.currentTarget.style.color = 'rgba(255, 255, 255, 0.7)';
+                            e.currentTarget.style.color = 'color-mix(in srgb, var(--fg) 70%, transparent)';
                         }}
                     >
                         <ExternalLink style={{ width: '1.25rem', height: '1.25rem' }} />
@@ -171,7 +171,7 @@ export function PaymentHistory({ userAddress, onClose }: PaymentHistoryProps) {
                 <div
                     style={{
                         padding: '1.5rem',
-                        borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+                        borderBottom: '1px solid color-mix(in srgb, var(--fg) 10%, transparent)',
                         display: 'grid',
                         gridTemplateColumns: 'repeat(auto-fit, minmax(10rem, 1fr))',
                         gap: '1rem',
@@ -181,14 +181,14 @@ export function PaymentHistory({ userAddress, onClose }: PaymentHistoryProps) {
                         style={{
                             padding: '1rem',
                             borderRadius: '1.25rem',
-                            background: 'rgba(16, 185, 129, 0.1)',
-                            border: '1px solid rgba(16, 185, 129, 0.2)',
+                            background: 'color-mix(in srgb, var(--good) 10%, transparent)',
+                            border: '1px solid color-mix(in srgb, var(--good) 20%, transparent)',
                         }}
                     >
-                        <div style={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.6)', marginBottom: '0.5rem' }}>
+                        <div style={{ fontSize: '0.75rem', color: 'color-mix(in srgb, var(--fg) 60%, transparent)', marginBottom: '0.5rem' }}>
                             Total Received (ETH)
                         </div>
-                        <div style={{ fontSize: '1.25rem', fontWeight: 600, color: '#10b981' }}>
+                        <div style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--good)' }}>
                             {formatEther(totalReceived)} Base ETH
                         </div>
                     </div>
@@ -196,14 +196,14 @@ export function PaymentHistory({ userAddress, onClose }: PaymentHistoryProps) {
                         style={{
                             padding: '1rem',
                             borderRadius: '1.25rem',
-                            background: 'rgba(245, 158, 11, 0.1)',
-                            border: '1px solid rgba(245, 158, 11, 0.2)',
+                            background: 'color-mix(in srgb, var(--warn) 10%, transparent)',
+                            border: '1px solid color-mix(in srgb, var(--warn) 20%, transparent)',
                         }}
                     >
-                        <div style={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.6)', marginBottom: '0.5rem' }}>
+                        <div style={{ fontSize: '0.75rem', color: 'color-mix(in srgb, var(--fg) 60%, transparent)', marginBottom: '0.5rem' }}>
                             Total Sent (ETH)
                         </div>
-                        <div style={{ fontSize: '1.25rem', fontWeight: 600, color: '#fbbf24' }}>
+                        <div style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--warn)' }}>
                             {formatEther(totalSent)} Base ETH
                         </div>
                     </div>
@@ -211,14 +211,14 @@ export function PaymentHistory({ userAddress, onClose }: PaymentHistoryProps) {
                         style={{
                             padding: '1rem',
                             borderRadius: '1.25rem',
-                            background: 'rgba(51, 102, 238, 0.1)',
-                            border: '1px solid rgba(51, 102, 238, 0.2)',
+                            background: 'color-mix(in srgb, var(--accent) 10%, transparent)',
+                            border: '1px solid color-mix(in srgb, var(--accent) 20%, transparent)',
                         }}
                     >
-                        <div style={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.6)', marginBottom: '0.5rem' }}>
+                        <div style={{ fontSize: '0.75rem', color: 'color-mix(in srgb, var(--fg) 60%, transparent)', marginBottom: '0.5rem' }}>
                             Pending (ETH)
                         </div>
-                        <div style={{ fontSize: '1.25rem', fontWeight: 600, color: '#4a7bf7' }}>
+                        <div style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--accent)' }}>
                             {formatEther(pendingReceived)} Base ETH
                         </div>
                     </div>
@@ -227,7 +227,7 @@ export function PaymentHistory({ userAddress, onClose }: PaymentHistoryProps) {
                 <div
                     style={{
                         padding: '1rem 1.5rem',
-                        borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+                        borderBottom: '1px solid color-mix(in srgb, var(--fg) 10%, transparent)',
                         display: 'flex',
                         gap: '0.5rem',
                         flexWrap: 'wrap',
@@ -240,9 +240,9 @@ export function PaymentHistory({ userAddress, onClose }: PaymentHistoryProps) {
                             style={{
                                 padding: '0.5rem 1rem',
                                 borderRadius: '0.875rem',
-                                background: filter === f ? 'rgba(51, 102, 238, 0.2)' : 'transparent',
-                                border: `1px solid ${filter === f ? 'rgba(51, 102, 238, 0.3)' : 'rgba(255, 255, 255, 0.1)'}`,
-                                color: filter === f ? '#4a7bf7' : 'rgba(255, 255, 255, 0.7)',
+                                background: filter === f ? 'color-mix(in srgb, var(--accent) 20%, transparent)' : 'transparent',
+                                border: `1px solid ${filter === f ? 'color-mix(in srgb, var(--accent) 30%, transparent)' : 'color-mix(in srgb, var(--fg) 10%, transparent)'}`,
+                                color: filter === f ? 'var(--accent)' : 'color-mix(in srgb, var(--fg) 70%, transparent)',
                                 fontSize: '0.875rem',
                                 fontWeight: 500,
                                 cursor: 'pointer',
@@ -251,7 +251,7 @@ export function PaymentHistory({ userAddress, onClose }: PaymentHistoryProps) {
                             }}
                             onMouseEnter={(e) => {
                                 if (filter !== f) {
-                                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
+                                    e.currentTarget.style.background = 'color-mix(in srgb, var(--fg) 5%, transparent)';
                                 }
                             }}
                             onMouseLeave={(e) => {
@@ -268,12 +268,12 @@ export function PaymentHistory({ userAddress, onClose }: PaymentHistoryProps) {
                 <div style={{ flex: 1, overflowY: 'auto', padding: '1rem' }}>
                     {isLoading ? (
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '3rem' }}>
-                            <Loader2 style={{ width: '2rem', height: '2rem', color: '#3366ee', animation: 'spin 1s linear infinite' }} />
+                            <Loader2 style={{ width: '2rem', height: '2rem', color: 'var(--accent)', animation: 'spin 1s linear infinite' }} />
                         </div>
                     ) : filteredPayments.length === 0 ? (
                         <div style={{ textAlign: 'center', padding: '3rem' }}>
-                            <Coins style={{ width: '3rem', height: '3rem', color: 'rgba(255, 255, 255, 0.2)', margin: '0 auto 1rem' }} />
-                            <p style={{ color: 'rgba(255, 255, 255, 0.5)' }}>No payments found</p>
+                            <Coins style={{ width: '3rem', height: '3rem', color: 'color-mix(in srgb, var(--fg) 20%, transparent)', margin: '0 auto 1rem' }} />
+                            <p style={{ color: 'color-mix(in srgb, var(--fg) 50%, transparent)' }}>No payments found</p>
                         </div>
                     ) : (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
@@ -300,14 +300,14 @@ function PaymentHistoryRow({ payment }: { payment: PaymentTransaction }) {
                 borderRadius: '1.25rem',
                 background: payment.isReceived
                     ? payment.settled
-                        ? 'rgba(16, 185, 129, 0.1)'
-                        : 'rgba(51, 102, 238, 0.1)'
-                    : 'rgba(245, 158, 11, 0.1)',
+                        ? 'color-mix(in srgb, var(--good) 10%, transparent)'
+                        : 'color-mix(in srgb, var(--accent) 10%, transparent)'
+                    : 'color-mix(in srgb, var(--warn) 10%, transparent)',
                 border: `1px solid ${payment.isReceived
                     ? payment.settled
-                        ? 'rgba(16, 185, 129, 0.2)'
-                        : 'rgba(51, 102, 238, 0.2)'
-                    : 'rgba(245, 158, 11, 0.2)'
+                        ? 'color-mix(in srgb, var(--good) 20%, transparent)'
+                        : 'color-mix(in srgb, var(--accent) 20%, transparent)'
+                    : 'color-mix(in srgb, var(--warn) 20%, transparent)'
                     }`,
                 display: 'flex',
                 alignItems: 'center',
@@ -321,9 +321,9 @@ function PaymentHistoryRow({ payment }: { payment: PaymentTransaction }) {
                     borderRadius: '50%',
                     background: payment.isReceived
                         ? payment.settled
-                            ? 'rgba(16, 185, 129, 0.2)'
-                            : 'rgba(51, 102, 238, 0.2)'
-                        : 'rgba(245, 158, 11, 0.2)',
+                            ? 'color-mix(in srgb, var(--good) 20%, transparent)'
+                            : 'color-mix(in srgb, var(--accent) 20%, transparent)'
+                        : 'color-mix(in srgb, var(--warn) 20%, transparent)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -335,16 +335,16 @@ function PaymentHistoryRow({ payment }: { payment: PaymentTransaction }) {
                         style={{
                             width: '1.25rem',
                             height: '1.25rem',
-                            color: payment.settled ? '#10b981' : '#4a7bf7',
+                            color: payment.settled ? 'var(--good)' : 'var(--accent)',
                         }}
                     />
                 ) : (
-                    <ArrowUpRight style={{ width: '1.25rem', height: '1.25rem', color: '#fbbf24' }} />
+                    <ArrowUpRight style={{ width: '1.25rem', height: '1.25rem', color: 'var(--warn)' }} />
                 )}
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
-                    <span style={{ fontSize: '0.9375rem', fontWeight: 600, color: '#ffffff' }}>
+                    <span style={{ fontSize: '0.9375rem', fontWeight: 600, color: 'var(--fg)' }}>
                         {tokenInfo.loading ? '...' : amountStr} {label}
                     </span>
                     {!payment.settled && (
@@ -352,8 +352,8 @@ function PaymentHistoryRow({ payment }: { payment: PaymentTransaction }) {
                             style={{
                                 padding: '0.125rem 0.5rem',
                                 borderRadius: '0.25rem',
-                                background: 'rgba(51, 102, 238, 0.2)',
-                                color: '#4a7bf7',
+                                background: 'color-mix(in srgb, var(--accent) 20%, transparent)',
+                                color: 'var(--accent)',
                                 fontSize: '0.6875rem',
                                 fontWeight: 500,
                             }}
@@ -362,12 +362,12 @@ function PaymentHistoryRow({ payment }: { payment: PaymentTransaction }) {
                         </span>
                     )}
                 </div>
-                <div style={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.6)', fontFamily: 'var(--font-mono)' }}>
+                <div style={{ fontSize: '0.75rem', color: 'color-mix(in srgb, var(--fg) 60%, transparent)', fontFamily: 'var(--font-mono)' }}>
                     {payment.isReceived ? 'From' : 'To'}:{' '}
                     {(payment.isReceived ? payment.from : payment.to).slice(0, 6)}...
                     {(payment.isReceived ? payment.from : payment.to).slice(-4)}
                 </div>
-                <div style={{ fontSize: '0.6875rem', color: 'rgba(255, 255, 255, 0.5)', marginTop: '0.25rem' }}>
+                <div style={{ fontSize: '0.6875rem', color: 'color-mix(in srgb, var(--fg) 50%, transparent)', marginTop: '0.25rem' }}>
                     {format(new Date(payment.timestamp * 1000), 'MMM d, yyyy HH:mm')}
                 </div>
             </div>
@@ -379,19 +379,19 @@ function PaymentHistoryRow({ payment }: { payment: PaymentTransaction }) {
                     padding: '0.5rem',
                     borderRadius: '0.875rem',
                     background: 'transparent',
-                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                    color: 'rgba(255, 255, 255, 0.7)',
+                    border: '1px solid color-mix(in srgb, var(--fg) 10%, transparent)',
+                    color: 'color-mix(in srgb, var(--fg) 70%, transparent)',
                     cursor: 'pointer',
                     transition: 'all 0.2s',
                     flexShrink: 0,
                 }}
                 onMouseEnter={(e) => {
-                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
-                    e.currentTarget.style.color = '#ffffff';
+                    e.currentTarget.style.background = 'color-mix(in srgb, var(--fg) 5%, transparent)';
+                    e.currentTarget.style.color = 'var(--fg)';
                 }}
                 onMouseLeave={(e) => {
                     e.currentTarget.style.background = 'transparent';
-                    e.currentTarget.style.color = 'rgba(255, 255, 255, 0.7)';
+                    e.currentTarget.style.color = 'color-mix(in srgb, var(--fg) 70%, transparent)';
                 }}
             >
                 <ExternalLink style={{ width: '1rem', height: '1rem' }} />

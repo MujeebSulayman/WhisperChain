@@ -45,7 +45,7 @@ export function ConversationsSidebar({
     );
 
     const frame = isMobile
-        ? 'fixed inset-y-2 right-2 z-50 w-[20rem] max-w-[calc(100vw-1rem)] rise'
+        ? 'sheet fixed inset-y-3 right-3 z-[60] w-[20rem] max-w-[calc(100vw-1.5rem)] rise'
         : `relative shrink-0 transition-[width] duration-300 [transition-timing-function:var(--ease-out)] ${isOpen ? 'w-[20rem]' : 'w-[4.5rem]'}`;
 
     if (!isOpen) {
@@ -78,7 +78,7 @@ export function ConversationsSidebar({
     }
 
     return (
-        <aside className={`glass flex flex-col overflow-hidden rounded-[var(--r-card)] ${frame}`}>
+        <aside className={`${isMobile ? '' : 'glass'} flex flex-col overflow-hidden rounded-[var(--r-card)] ${frame}`}>
             <div className="shrink-0 px-4 pb-3 pt-4">
                 <div className="flex items-center justify-between gap-2">
                     <div>
@@ -98,7 +98,7 @@ export function ConversationsSidebar({
                         placeholder="Search by address or message"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="field pl-10!"
+                        className="input !pl-10"
                     />
                 </label>
             </div>
