@@ -13,6 +13,7 @@ const LINKS = [
   { href: "/#how", label: "How it works" },
   { href: "/#contracts", label: "Contracts" },
   { href: "/#faq", label: "FAQ" },
+  { href: "/docs", label: "Docs" },
   { href: APP_URL, label: "Chat" },
 ];
 
@@ -61,7 +62,7 @@ export function Header() {
 
         <nav className="sitebar-links hidden items-center gap-7 lg:flex" aria-label="Main">
           {LINKS.map((l) => (
-            <Link key={l.href} href={l.href} aria-current={l.href === APP_URL && inApp ? "page" : undefined}>
+            <Link key={l.href} href={l.href} aria-current={(l.href === APP_URL && inApp) || (l.href === "/docs" && path.startsWith("/docs")) ? "page" : undefined}>
               {l.label}
             </Link>
           ))}

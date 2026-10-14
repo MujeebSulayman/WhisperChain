@@ -23,7 +23,7 @@ const FAQS: [string, string][] = [
   ],
   [
     "Do I need ETH to chat?",
-    "Not when gasless sending is set up. You sign each message in your wallet, a relayer submits it, and the Paymaster covers the gas. If gasless isn't configured, the app sends the transaction from your wallet and you pay the network fee.",
+    "No. You sign each message in your wallet, the app's relayer submits it, and the Paymaster covers the gas. Whoever runs the app needs to keep the relayer and Paymaster funded.",
   ],
   [
     "Who can read my messages?",
@@ -31,7 +31,7 @@ const FAQS: [string, string][] = [
   ],
   [
     "Can I delete a message?",
-    "The sender or recipient can mark a message deleted, and the app stops showing it. The original transaction stays in Base's history, as everything on-chain does.",
+    "Not from the app yet. The contract lets the sender or recipient mark a message as deleted, but the original transaction always stays in Base's history, as everything on-chain does.",
   ],
   [
     "Which network is it on?",

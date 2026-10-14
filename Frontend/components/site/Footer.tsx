@@ -9,6 +9,7 @@ const LINKS = [
   { href: "/#how", label: "How it works" },
   { href: "/#contracts", label: "Contracts" },
   { href: "/#faq", label: "FAQ" },
+  { href: "/docs", label: "Docs" },
 ];
 
 export function Footer() {
