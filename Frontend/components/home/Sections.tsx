@@ -1,7 +1,8 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { FORWARDER_ADDRESS, PAYMASTER_ADDRESS, WHISPERCHAIN_ADDRESS } from "@/lib/deployments";
-import { APP_URL, CONTRACTS_SRC_URL, GITHUB_URL, explorerAddress } from "@/lib/links";
+import { APP_URL, TELEGRAM_URL, explorerAddress } from "@/lib/links";
+import { TelegramIcon } from "../site/Socials";
 import { ContractAddress } from "../site/ContractAddress";
 import { Icon } from "../site/Icons";
 import { Reveal } from "../site/Reveal";
@@ -286,7 +287,7 @@ const CONTRACTS = [
 export function Stack() {
   return (
     <Section id="stack">
-      <SectionHead index="04" eyebrow="The contracts" title="Three contracts. One messaging protocol." link={{ href: GITHUB_URL, label: "GitHub" }} />
+      <SectionHead index="04" eyebrow="The contracts" title="Three contracts. One messaging protocol." />
       <div className="grid gap-4 lg:grid-cols-3">
         {CONTRACTS.map((c, i) => (
           <Reveal key={c.title} delay={i * 60} variant="scale" className="h-full min-w-0">
@@ -337,9 +338,9 @@ export function Closing() {
                 Open the app
                 <Icon name="arrowRight" size={18} stroke={2.2} />
               </Link>
-              <a href={GITHUB_URL} target="_blank" rel="noreferrer" className="btn btn-lg btn-ghost">
-                <Icon name="github" size={18} />
-                View source
+              <a href={TELEGRAM_URL} target="_blank" rel="noreferrer" className="btn btn-lg btn-ghost">
+                <TelegramIcon className="h-[18px] w-[18px]" />
+                Join the community
               </a>
             </div>
           </div>

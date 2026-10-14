@@ -4,8 +4,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useLayoutEffect, useRef } from "react";
 import { buildNavLens, springTo } from "@/lib/glass";
-import { APP_URL, GITHUB_URL } from "@/lib/links";
+import { APP_URL, TELEGRAM_URL, X_URL } from "@/lib/links";
 import { Icon, Logo, type IconName } from "./Icons";
+import { TelegramIcon, XIcon } from "./Socials";
 import { useTheme } from "./ThemeProvider";
 
 const NAV: { href: string; label: string; icon: IconName }[] = [
@@ -73,6 +74,20 @@ function ThemeButton() {
   );
 }
 
+/** X and Telegram as round glass buttons. */
+function SocialButtons() {
+  return (
+    <>
+      <a href={X_URL} target="_blank" rel="noreferrer" aria-label="WhisperChain on X" className="btn btn-sm btn-ghost !h-10 !w-10 !px-0">
+        <XIcon className="h-[15px] w-[15px]" />
+      </a>
+      <a href={TELEGRAM_URL} target="_blank" rel="noreferrer" aria-label="WhisperChain on Telegram" className="btn btn-sm btn-ghost !h-10 !w-10 !px-0">
+        <TelegramIcon className="h-[17px] w-[17px]" />
+      </a>
+    </>
+  );
+}
+
 /** Desktop: a floating liquid-glass bar across the top. Phones and tablets: a slim glass top bar. */
 export function Header() {
   const path = usePathname() ?? "/";
@@ -109,10 +124,7 @@ export function Header() {
         </nav>
         <div className="flex shrink-0 items-center gap-1.5">
           <ThemeButton />
-          <a href={GITHUB_URL} target="_blank" rel="noreferrer" className="btn btn-sm btn-ghost !h-10">
-            <Icon name="github" size={15} />
-            GitHub
-          </a>
+          <SocialButtons />
           {!inApp && (
             <Link href={APP_URL} className="btn btn-sm btn-accent !h-10">
               <Icon name="send" size={15} stroke={2} />
@@ -128,9 +140,7 @@ export function Header() {
         </Link>
         <div className="ml-auto flex items-center gap-1">
           <ThemeButton />
-          <a href={GITHUB_URL} target="_blank" rel="noreferrer" className="btn btn-sm btn-ghost !h-10" aria-label="GitHub">
-            <Icon name="github" size={15} />
-          </a>
+          <SocialButtons />
         </div>
       </header>
     </>

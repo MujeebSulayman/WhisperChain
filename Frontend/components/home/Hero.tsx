@@ -35,12 +35,7 @@ export function Hero() {
   return (
     <section className="relative mx-auto grid w-full max-w-[1200px] items-center gap-12 px-4 pt-4 sm:px-6 md:pt-10 lg:min-h-[calc(100vh-100px)] lg:grid-cols-[1.1fr_1fr] lg:gap-8 lg:pt-0">
       <div className="min-w-0">
-        <span className="rise pill">
-          <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-good shadow-[0_0_10px_var(--good)]" />
-          Live on Base
-        </span>
-
-        <h1 className="display rise mt-7 text-[clamp(44px,6.6vw,92px)]" style={{ animationDelay: "80ms" }}>
+        <h1 className="display rise text-[clamp(44px,6.6vw,92px)]" style={{ animationDelay: "80ms" }}>
           Your wallet
           <br />
           is <span className="text-gradient">your inbox.</span>

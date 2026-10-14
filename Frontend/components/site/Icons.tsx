@@ -75,12 +75,12 @@ export function Logo({ size = 32, wordmark = true, className = "" }: { size?: nu
     <span className={`inline-flex items-center ${className}`} style={{ gap: size * 0.38 }}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src="/logo.png"
+        src="/brand-mark.svg"
         alt={wordmark ? "" : "WhisperChain"}
         aria-hidden={wordmark || undefined}
         width={size}
         height={size}
-        className="shrink-0 rounded-[24%] object-contain"
+        className="brand-mark shrink-0 object-contain"
       />
       {wordmark ? (
         <span className="font-display leading-none tracking-[0.08em]" style={{ fontSize: size * 0.72 }}>

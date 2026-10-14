@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { BASE_CHAIN } from "@/lib/deployments";
-import { APP_URL, CONTRACTS_SRC_URL, FRONTEND_SRC_URL, GITHUB_URL } from "@/lib/links";
+import { APP_URL, TELEGRAM_URL, X_URL } from "@/lib/links";
 import { ContractAddress } from "./ContractAddress";
-import { Icon, Logo } from "./Icons";
+import { Logo } from "./Icons";
+import { SOCIALS } from "./Socials";
 
 const COLUMNS: { title: string; links: { href: string; label: string; external?: boolean }[] }[] = [
   {
@@ -16,11 +17,10 @@ const COLUMNS: { title: string; links: { href: string; label: string; external?:
     ],
   },
   {
-    title: "Source",
+    title: "Community",
     links: [
-      { href: GITHUB_URL, label: "GitHub", external: true },
-      { href: CONTRACTS_SRC_URL, label: "Contract source", external: true },
-      { href: FRONTEND_SRC_URL, label: "Frontend source", external: true },
+      { href: X_URL, label: "X", external: true },
+      { href: TELEGRAM_URL, label: "Telegram", external: true },
     ],
   },
 ];
@@ -36,9 +36,18 @@ export function Footer() {
               Chat wallet to wallet: direct messages, groups, files and payments, on {BASE_CHAIN.name}.
             </p>
             <div className="mt-5 flex items-center gap-4">
-              <a href={GITHUB_URL} target="_blank" rel="noreferrer" aria-label="GitHub" className="text-mute transition-colors duration-300 hover:text-fg">
-                <Icon name="github" size={20} />
-              </a>
+              {SOCIALS.map(({ label, Icon }) => (
+                <a
+                  key={label}
+                  href={label === "X" ? X_URL : TELEGRAM_URL}
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label={label}
+                  className="text-mute transition-colors duration-300 hover:text-fg"
+                >
+                  <Icon className="h-5 w-5" />
+                </a>
+              ))}
             </div>
           </div>
           {COLUMNS.map((c) => (
