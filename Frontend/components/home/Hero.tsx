@@ -106,11 +106,17 @@ const TICKER: { icon: IconName; label: string }[] = [
   { icon: "key", label: "Wallet sign-in" },
 ];
 
+const TICKER_FADE = "linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent)";
+
+/** An endless horizontal carousel of features. Self-styled, so it never falls back to a vertical list. */
 function Ticker() {
-  const items = (
-    <div aria-hidden>
+  const track = (copy: number) => (
+    <div
+      aria-hidden={copy > 0 || undefined}
+      style={{ display: "flex", flexShrink: 0, gap: 40, paddingRight: 40, animation: "wc-ticker 36s linear infinite" }}
+    >
       {TICKER.map((t) => (
-        <span key={t.label} className="flex shrink-0 items-center gap-2.5 whitespace-nowrap text-[15px] text-dim">
+        <span key={t.label} style={{ display: "flex", flexShrink: 0, alignItems: "center", gap: 10, whiteSpace: "nowrap" }} className="text-[15px] text-dim">
           <Icon name={t.icon} size={16} className="text-accent" />
           {t.label}
         </span>
@@ -118,9 +124,14 @@ function Ticker() {
     </div>
   );
   return (
-    <div className="ticker mt-20 border-y border-line py-5">
-      {items}
-      {items}
+    <div
+      className="mt-20 border-y border-line py-5"
+      style={{ display: "flex", overflow: "hidden", WebkitMaskImage: TICKER_FADE, maskImage: TICKER_FADE }}
+    >
+      <style>{`@keyframes wc-ticker { to { transform: translateX(-100%); } }
+@media (prefers-reduced-motion: reduce) { [style*="wc-ticker"] { animation: none !important; } }`}</style>
+      {track(0)}
+      {track(1)}
     </div>
   );
 }
