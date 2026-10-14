@@ -5,7 +5,6 @@ import { APP_URL, CONTRACTS_SRC_URL, GITHUB_URL, explorerAddress } from "@/lib/l
 import { ContractAddress } from "../site/ContractAddress";
 import { Icon } from "../site/Icons";
 import { Reveal } from "../site/Reveal";
-import { ContractFlow } from "./ContractFlow";
 
 function Section({ id, className = "", children }: { id?: string; className?: string; children: ReactNode }) {
   return (
@@ -76,12 +75,12 @@ function RelayIllustration() {
 export function HowItWorks() {
   return (
     <Section id="how">
-      <SectionHead index="01" eyebrow="How a message gets sent" title="Three steps between your words and the chain." />
+      <SectionHead index="02" eyebrow="Under the hood" title="What happens when you hit send." />
       <div className="grid gap-4 lg:grid-cols-[1.15fr_1fr] lg:grid-rows-2">
         <Reveal variant="scale" className="h-full lg:row-span-2">
           <article className="card flex h-full flex-col overflow-hidden p-7">
             <p className="font-mono text-[12px] text-accent">01 / Sign</p>
-            <p className="mt-3 text-[28px] font-semibold leading-tight tracking-[-0.04em]">One signature. No ETH needed.</p>
+            <p className="mt-3 text-[28px] font-semibold leading-tight tracking-[-0.04em]">One tap, one signature.</p>
             <p className="mt-2 max-w-[42ch] text-[15.5px] text-dim">
               Your wallet signs an EIP-712 ForwardRequest: a readable description of the exact call, bound to your next nonce so it
               can only run once.
@@ -110,14 +109,14 @@ export function HowItWorks() {
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="font-mono text-[12px] text-accent">02 / Relay</p>
-                <p className="mt-3 text-[28px] font-semibold leading-tight tracking-[-0.04em]">Someone else pays the gas.</p>
+                <p className="mt-3 text-[28px] font-semibold leading-tight tracking-[-0.04em]">A relayer delivers it.</p>
               </div>
               <span className="grid h-12 w-12 shrink-0 place-items-center rounded-[16px] bg-[var(--knob)] text-accent shadow-[var(--edge-sm)]">
                 <Icon name="send" size={22} />
               </span>
             </div>
             <p className="mt-2 text-[15.5px] text-dim">
-              The app&apos;s relayer submits your request through the Paymaster, which refunds the relayer from its own balance.
+              The app&apos;s relayer submits your signed request, and the Paymaster covers its gas, so you never need ETH to chat.
             </p>
             <div className="mt-4 text-fg">
               <RelayIllustration />
@@ -152,49 +151,13 @@ export function HowItWorks() {
   );
 }
 
-/* ── 02 Why ───────────────────────────────────────────────────── */
-
-export function Why() {
-  return (
-    <Section id="why">
-      <SectionHead
-        index="02"
-        eyebrow="Why this exists"
-        title={
-          <>
-            Gas is the wall <span className="text-mute">between wallets and conversation.</span>
-          </>
-        }
-      />
-      <Reveal variant="scale">
-        <div className="glass rounded-[36px] p-6 sm:p-10 lg:p-14" data-lg="surface" data-lg-r="36" data-lg-tint="card">
-          <div className="max-w-2xl">
-            <p className="label">The relay path</p>
-            <p className="mt-3 text-[clamp(22px,2.4vw,30px)] font-semibold leading-snug tracking-[-0.03em]">
-              Others can carry your message. Only your signature can send it.
-            </p>
-          </div>
-          <div className="mt-10">
-            <ContractFlow />
-          </div>
-          <p className="mt-8 max-w-2xl text-[15.5px] leading-relaxed text-dim">
-            Asking people to buy ETH before they can say hello stops most conversations before they start. WhisperChain separates who
-            authorizes a message from who pays to submit it. The relayer and the Paymaster only move it along; the Forwarder rejects
-            anything your key didn&apos;t sign.
-          </p>
-        </div>
-      </Reveal>
-    </Section>
-  );
-}
-
 /* ── 03 What the contract enforces ────────────────────────────── */
 
 const LIMITS = [
-  { rule: "File size", note: "Images, video, audio and documents, pinned to IPFS.", value: "50 MB" },
+  { rule: "File size", note: "Photos, video, audio and documents, pinned to IPFS.", value: "50 MB" },
   { rule: "Storage per user", note: "Tracked on-chain; free it with clearStorage().", value: "1 GB" },
   { rule: "Messages per user", note: "A hard cap in the contract, not a server setting.", value: "10,000" },
-  { rule: "Relayer refund per tx", note: "The default maxReimbursementPerTx; the owner can change it.", value: "0.01 ETH" },
+  { rule: "Batch send", note: "Recipients in one signed batch.", value: "10" },
   { rule: "IPFS hash reuse", note: "A media hash can be recorded only once.", value: "once", accent: true },
 ];
 
@@ -348,62 +311,6 @@ export function Stack() {
   );
 }
 
-/* ── 05 Payments ──────────────────────────────────────────────── */
-
-export function Payments() {
-  return (
-    <Section id="payments">
-      <div className="grid items-start gap-10 lg:grid-cols-[1.1fr_1fr]">
-        <div>
-          <SectionHead
-            index="05"
-            eyebrow="Payments"
-            title={
-              <>
-                <span className="text-gradient">Money</span> travels with the message.
-              </>
-            }
-          />
-          <Reveal variant="fade">
-            <p className="-mt-4 max-w-[44ch] text-[16px] leading-relaxed text-dim">
-              Attach ETH or any ERC-20 to a message. It moves in the same transaction that records the message, so a paid message is
-              never half-sent.
-            </p>
-            <div className="mt-6">
-              <ContractAddress />
-            </div>
-            <div className="mt-7 flex flex-wrap gap-3">
-              <Link href={APP_URL} className="btn btn-white">
-                Send a paid message <Icon name="arrowRight" size={16} />
-              </Link>
-              <a href={CONTRACTS_SRC_URL} target="_blank" rel="noreferrer" className="btn btn-ghost">
-                Read the contract
-              </a>
-            </div>
-          </Reveal>
-        </div>
-        <div className="grid gap-4">
-          {[
-            { n: "01", title: "ETH or any ERC-20", line: "Pick a token and an amount in the composer. ERC-20 transfers use transferFrom, so approve the token first." },
-            { n: "02", title: "Straight to the recipient", line: "Funds go directly to the other wallet. Nothing sits in escrow and there is nothing to claim later." },
-            { n: "03", title: "On the record", line: "Each payment emits PaymentSettled next to MessageSent, so the receipt lives on-chain." },
-          ].map((point, i) => (
-            <Reveal key={point.n} delay={i * 80} variant="right">
-              <article className="card flex gap-5 p-7">
-                <span className="font-mono text-[34px] font-medium leading-none tracking-[-0.06em] text-fg/15">{point.n}</span>
-                <div>
-                  <h3 className="h3">{point.title}</h3>
-                  <p className="mt-2 text-[15px] leading-relaxed text-dim">{point.line}</p>
-                </div>
-              </article>
-            </Reveal>
-          ))}
-        </div>
-      </div>
-    </Section>
-  );
-}
-
 /* ── Closing ──────────────────────────────────────────────────── */
 
 export function Closing() {
@@ -419,11 +326,11 @@ export function Closing() {
           <div>
             <p className="eyebrow">Start here</p>
             <h2 className="display mt-4 text-[clamp(36px,5vw,68px)]">
-              Your wallet. <span className="text-gradient">Your inbox.</span>
+              Start a conversation. <span className="text-gradient">Bring your wallet.</span>
             </h2>
             <p className="mt-5 max-w-[42ch] text-[17px] text-dim">
-              Connect a wallet, pick a username and send your first message. It takes one signature, and you don&apos;t need ETH to do
-              it.
+              Connect a wallet, pick a username and say hello. Chats, groups, files and payments are all in one inbox, and you don&apos;t need
+              ETH to send.
             </p>
             <div className="mt-9 flex flex-wrap gap-3">
               <Link href={APP_URL} className="btn btn-lg btn-white">

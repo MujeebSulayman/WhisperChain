@@ -9,6 +9,7 @@ const COLUMNS: { title: string; links: { href: string; label: string; external?:
     title: "Product",
     links: [
       { href: APP_URL, label: "Open the app" },
+      { href: "/#features", label: "Features" },
       { href: "/#how", label: "How it works" },
       { href: "/#stack", label: "Contracts" },
       { href: "/#faq", label: "FAQ" },
@@ -32,7 +33,7 @@ export function Footer() {
           <div>
             <Logo size={36} />
             <p className="mt-5 max-w-[32ch] text-[20px] font-semibold leading-snug tracking-[-0.03em]">
-              Wallet-to-wallet messages, files and payments, settled on {BASE_CHAIN.name}.
+              Chat wallet to wallet: direct messages, groups, files and payments, on {BASE_CHAIN.name}.
             </p>
             <div className="mt-5 flex items-center gap-4">
               <a href={GITHUB_URL} target="_blank" rel="noreferrer" aria-label="GitHub" className="text-mute transition-colors duration-300 hover:text-fg">

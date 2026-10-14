@@ -11,10 +11,10 @@ import { useTheme } from "./ThemeProvider";
 const NAV: { href: string; label: string; icon: IconName }[] = [
   { href: "/", label: "Home", icon: "home" },
   { href: APP_URL, label: "Chat", icon: "chat" },
+  { href: "/#features", label: "Features", icon: "sparkles" },
   { href: "/#how", label: "How it works", icon: "layers" },
   { href: "/#stack", label: "Contracts", icon: "code" },
-  { href: "/#faq", label: "FAQ", icon: "book" },
-];
+  ];
 
 /** Routes are active by path; in-page links (with a #) never are. */
 const isActive = (path: string, href: string) =>
@@ -155,7 +155,7 @@ export function TabBar() {
     <nav className="tabbar lgx" id="tabbar" aria-label="Main" ref={drop.host}>
       <span className="drop" ref={drop.drop} aria-hidden />
       {tab("/", "Home", "home")}
-      {tab("/#how", "How", "layers")}
+      {tab("/#features", "Features", "sparkles")}
       <Link
         href={APP_URL}
         aria-label="Chat"

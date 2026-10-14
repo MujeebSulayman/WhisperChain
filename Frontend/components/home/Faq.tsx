@@ -6,27 +6,27 @@ import { Icon } from "../site/Icons";
 const FAQS: [string, string][] = [
   [
     "What is WhisperChain?",
-    "Wallet-to-wallet messaging on Base. Messages, files and payments are calls to a smart contract, your wallet address is your account, and a relayer can submit the transaction for you so you don't pay gas.",
+    "A messaging app where your wallet is your account. Chat one-to-one or in groups, share photos, video, audio and documents, message several people at once, and send a payment in the thread when you need to. Everything runs on smart contracts on Base.",
   ],
   [
-    "Do I need ETH to send a message?",
-    "Not when gasless sending is set up. You sign a request in your wallet, a relayer submits it, and the Paymaster refunds the relayer's gas. If gasless isn't configured, the app sends the transaction from your wallet and you pay the network fee.",
+    "Can I chat in groups?",
+    "Yes. Start a new conversation and add as many registered wallet addresses as you like. Everyone in the group sees the conversation in their inbox.",
+  ],
+  [
+    "What can I share?",
+    "Text, photos, video, audio and documents. Files up to 50 MB are uploaded to IPFS and linked in the chat, and each user has 1 GB of storage.",
+  ],
+  [
+    "Can I message many people at once?",
+    "Yes. Batch send lets you write one message to up to ten recipients and send it with a single signature.",
+  ],
+  [
+    "Do I need ETH to chat?",
+    "Not when gasless sending is set up. You sign each message in your wallet, a relayer submits it, and the Paymaster covers the gas. If gasless isn't configured, the app sends the transaction from your wallet and you pay the network fee.",
   ],
   [
     "Who can read my messages?",
-    "Anyone who reads the chain. Message text is stored in the contract on a public network, and files on IPFS can be fetched by anyone with their CID. Don't send anything you need to keep secret.",
-  ],
-  [
-    "Can the relayer change or fake my message?",
-    "No. The Forwarder checks your EIP-712 signature over the exact call and your nonce. If a single byte changes, or the request is replayed, the signature fails and nothing runs.",
-  ],
-  [
-    "How do payments work?",
-    "Attach ETH or any ERC-20 to a message. The contract transfers it straight to the recipient in the same transaction and emits PaymentSettled. ERC-20 payments need a token approval first.",
-  ],
-  [
-    "Where are files stored?",
-    "On IPFS, pinned through Pinata. The contract records the file's CID, type and size, caps each file at 50 MB and each user at 1 GB, and won't accept the same CID twice.",
+    "Anyone who reads the chain. Message text is stored in the contract on a public network, and files on IPFS can be fetched by anyone with their link. Don't send anything you need to keep secret.",
   ],
   [
     "Can I delete a message?",

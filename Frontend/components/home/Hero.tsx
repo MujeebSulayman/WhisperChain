@@ -4,17 +4,17 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { APP_URL } from "@/lib/links";
 import { Icon, type IconName } from "../site/Icons";
-import { DEMO_MODES, RelayDemo, type DemoMode } from "./RelayDemo";
+import { ChatDemo, DEMO_MODES, type DemoMode } from "./ChatDemo";
 
 const PROMISES: { icon: IconName; text: string }[] = [
+  { icon: "chat", text: "Direct and group chats" },
+  { icon: "file", text: "Photos, video and files" },
   { icon: "bolt", text: "No gas to send" },
-  { icon: "key", text: "Signed by your wallet" },
-  { icon: "coin", text: "Payments in the message" },
 ];
 
 /**
- * Split hero: the pitch on the left; on the right a live demo of one message reaching the chain,
- * with a switch to compare a direct transaction and a gasless relay (it cycles until you pick one).
+ * Split hero: the pitch on the left; on the right a live conversation in the app,
+ * with a switch between a direct chat, a group and a batch send (it cycles until you pick one).
  */
 export function Hero() {
   const [loop, setLoop] = useState(0);
@@ -26,7 +26,7 @@ export function Hero() {
     return () => window.clearInterval(t);
   }, []);
 
-  const mode = picked ?? DEMO_MODES[(loop + 1) % DEMO_MODES.length].id;
+  const mode = picked ?? DEMO_MODES[loop % DEMO_MODES.length].id;
   const pick = (id: DemoMode) => {
     setPicked(id);
     setReplay((n) => n + 1);
@@ -41,14 +41,14 @@ export function Hero() {
         </span>
 
         <h1 className="display rise mt-7 text-[clamp(44px,6.6vw,92px)]" style={{ animationDelay: "80ms" }}>
-          Message any wallet.
+          Your wallet
           <br />
-          Pay <span className="text-gradient">no gas.</span>
+          is <span className="text-gradient">your inbox.</span>
         </h1>
 
         <p className="rise mt-7 max-w-[46ch] text-[clamp(16px,1.5vw,19px)] leading-relaxed text-dim" style={{ animationDelay: "160ms" }}>
-          WhisperChain sends messages, files and payments between wallets on Base. You sign once with your wallet, a relayer submits
-          it, and the paymaster covers the gas.
+          WhisperChain is a messaging app built on Base. Chat one-to-one or in groups, share photos, video, audio and documents,
+          message up to ten people at once, and send a payment right in the thread.
         </p>
 
         <div className="rise mt-9 flex flex-wrap gap-3" style={{ animationDelay: "240ms" }}>
@@ -56,9 +56,9 @@ export function Hero() {
             Open the app
             <Icon name="arrowRight" size={18} stroke={2.2} />
           </Link>
-          <Link href="/#stack" className="btn btn-lg btn-ghost">
-            <Icon name="code" size={18} />
-            See the contracts
+          <Link href="/#features" className="btn btn-lg btn-ghost">
+            <Icon name="sparkles" size={18} />
+            See the features
           </Link>
         </div>
 
@@ -75,10 +75,10 @@ export function Hero() {
       </div>
 
       <div className="rise flex flex-col items-center" style={{ animationDelay: "200ms" }}>
-        <RelayDemo mode={mode} replay={replay} />
+        <ChatDemo mode={mode} replay={replay} />
         <div className="mt-7 flex w-full flex-col items-center">
-          <p className="label mb-3">Send the same message as a</p>
-          <div className="seg" role="group" aria-label="Compare sending modes">
+          <p className="label mb-3">See it in a</p>
+          <div className="seg" role="group" aria-label="Conversation type">
             {DEMO_MODES.map((m) => (
               <button key={m.id} type="button" aria-pressed={mode === m.id} onClick={() => pick(m.id)}>
                 {m.label}
