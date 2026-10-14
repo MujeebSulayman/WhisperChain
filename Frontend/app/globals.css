@@ -2,7 +2,7 @@
 
 /*
  * Scarf liquid glass (the PRINET design system). A near-black (dark) or
- * cream (light) field with soft lime glows, and beveled glass on top. Colors are CSS
+ * cream (light) field with soft blue glows, and beveled glass on top. Colors are CSS
  * variables per theme, exposed to Tailwind so `text-mute`, `border-line`, `bg-accent` etc.
  * follow the theme.
  */
@@ -40,48 +40,48 @@
 
 /* ── Theme tokens ─────────────────────────────────────────────── */
 html {
-  --bg: #0b0c0e;
-  --fg: #ecede6;
+  --bg: #0a0d14;
+  --fg: #e8edf5;
   --dim: #b4b6ae;
   --mute: #84877e;
   --mute-soft: #5d6058;
   --line: rgba(255, 255, 255, 0.08);
   --line2: rgba(255, 255, 255, 0.14);
-  --accent: #c5f24a;
-  --accent-ink: #0b0c0e;
+  --accent: #4da3ff;
+  --accent-ink: #0a0d14;
   --good: #5ce6a5;
   --bad: #ff8f9b;
   --warm: #c9b99c;
-  --g-accent: linear-gradient(110deg, #9ccc2a, #b8e43c 45%, #d4f76e);
-  --text-gradient: linear-gradient(104deg, #fff 0%, #eef9cf 46%, #c5f24a 100%);
+  --g-accent: linear-gradient(110deg, #2f7fe6, #4da3ff 45%, #8cc4ff);
+  --text-gradient: linear-gradient(104deg, #fff 0%, #dcebff 46%, #4da3ff 100%);
 
-  --steel: rgba(225, 232, 205, 0.08);
-  --steel-2: rgba(225, 232, 205, 0.14);
+  --steel: rgba(205, 218, 240, 0.08);
+  --steel-2: rgba(205, 218, 240, 0.14);
   --knob: rgba(8, 9, 10, 0.62);
-  --rim: rgba(240, 244, 228, 0.42);
+  --rim: rgba(228, 236, 248, 0.42);
   --glass-bg: rgba(10, 11, 12, 0.52);
-  --glass-hi: rgba(215, 240, 160, 0.13);
+  --glass-hi: rgba(170, 205, 255, 0.13);
   --card-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.018));
-  --card-rim: inset 0 1px 0 rgba(240, 244, 228, 0.11), inset 0 0 0 1px rgba(255, 255, 255, 0.035);
+  --card-rim: inset 0 1px 0 rgba(228, 236, 248, 0.11), inset 0 0 0 1px rgba(255, 255, 255, 0.035);
   --field-bg: rgba(0, 0, 0, 0.26);
   --field-in: inset 0 1px 2px rgba(0, 0, 0, 0.5), inset 0 -1px 0 rgba(255, 255, 255, 0.05);
   --placeholder: #555850;
-  --edge: inset 0 1px 0 var(--rim), inset 0 -1px 0 rgba(255, 255, 255, 0.04), inset 0 18px 30px -22px rgba(236, 240, 222, 0.24),
+  --edge: inset 0 1px 0 var(--rim), inset 0 -1px 0 rgba(255, 255, 255, 0.04), inset 0 18px 30px -22px rgba(222, 232, 246, 0.24),
     inset 0 -22px 34px -26px rgba(0, 0, 0, 0.7);
-  --edge-sm: inset 0 1px 0 rgba(240, 244, 228, 0.34), inset 0 -1px 0 rgba(255, 255, 255, 0.03),
-    inset 0 10px 16px -12px rgba(236, 240, 222, 0.2), inset 0 -10px 16px -12px rgba(0, 0, 0, 0.55);
+  --edge-sm: inset 0 1px 0 rgba(228, 236, 248, 0.34), inset 0 -1px 0 rgba(255, 255, 255, 0.03),
+    inset 0 10px 16px -12px rgba(222, 232, 246, 0.2), inset 0 -10px 16px -12px rgba(0, 0, 0, 0.55);
   --shadow: 0 40px 80px -40px rgba(0, 0, 0, 0.9);
-  --btn-white-bg: #ecede6;
-  --btn-white-fg: #0b0c0e;
+  --btn-white-bg: #e8edf5;
+  --btn-white-fg: #0a0d14;
 
   /* Canvas widgets (Game of Life, stipple noise). */
-  --life-cell: rgba(197, 242, 74, 0.45);
+  --life-cell: rgba(77, 163, 255, 0.45);
   --stipple-ink: rgba(255, 255, 255, 0.55);
 
-  --accent-fill: #c5f24a;
+  --accent-fill: #4da3ff;
   --warn: #f5c26b;
   /* An opaque panel colour, for dialogs and drawers that sit over content. */
-  --surface: #121315;
+  --surface: #10141c;
   /* Three radii; everything else derives from these. */
   --r-panel: 32px;
   --r-card: 28px;
@@ -92,26 +92,26 @@ html {
 }
 
 html[data-theme="light"] {
-  --bg: #ecede6;
+  --bg: #e9eef6;
   --fg: #0c0c0c;
   --dim: #3d3d3d;
   --mute: #5c5c5c;
   --mute-soft: #7a7a7a;
   --line: rgba(12, 12, 12, 0.1);
   --line2: rgba(12, 12, 12, 0.16);
-  --accent: #4c6b0a;
+  --accent: #1d5fd1;
   --accent-ink: #f4f5ef;
   --good: #11865a;
   --bad: #c03a4a;
   --warm: #8a6d3b;
-  --g-accent: linear-gradient(110deg, #3a5206, #4c6b0a 45%, #678f12);
-  --text-gradient: linear-gradient(104deg, #0c0c0c 0%, #2f4205 48%, #5b7f0c 100%);
+  --g-accent: linear-gradient(110deg, #154aa8, #1d5fd1 45%, #3b7ee8);
+  --text-gradient: linear-gradient(104deg, #0c0c0c 0%, #0f3a85 48%, #1d5fd1 100%);
 
   --steel: rgba(255, 255, 255, 0.42);
   --steel-2: rgba(255, 255, 255, 0.66);
   --knob: rgba(255, 255, 255, 0.74);
   --rim: rgba(255, 255, 255, 0.95);
-  --glass-bg: rgba(255, 252, 246, 0.56);
+  --glass-bg: rgba(246, 250, 255, 0.56);
   --glass-hi: rgba(255, 255, 255, 0.55);
   --card-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.36));
   --card-rim: inset 0 1px 0 rgba(255, 255, 255, 0.95), inset 0 0 0 1px rgba(12, 12, 12, 0.06);
@@ -119,18 +119,18 @@ html[data-theme="light"] {
   --field-in: inset 0 1px 2px rgba(12, 12, 12, 0.12), inset 0 -1px 0 rgba(255, 255, 255, 0.7);
   --placeholder: #9a958b;
   --edge: inset 0 1px 0 var(--rim), inset 0 -1px 0 rgba(12, 12, 12, 0.05), inset 0 18px 30px -22px rgba(255, 255, 255, 0.8),
-    inset 0 -22px 34px -26px rgba(60, 45, 20, 0.14);
+    inset 0 -22px 34px -26px rgba(20, 40, 80, 0.14);
   --edge-sm: inset 0 1px 0 rgba(255, 255, 255, 0.95), inset 0 -1px 0 rgba(12, 12, 12, 0.05),
-    inset 0 10px 16px -12px rgba(255, 255, 255, 0.7), inset 0 -10px 16px -12px rgba(60, 45, 20, 0.12);
-  --shadow: 0 40px 80px -40px rgba(60, 45, 20, 0.35);
+    inset 0 10px 16px -12px rgba(255, 255, 255, 0.7), inset 0 -10px 16px -12px rgba(20, 40, 80, 0.12);
+  --shadow: 0 40px 80px -40px rgba(20, 40, 80, 0.35);
   --btn-white-bg: #0c0c0c;
-  --btn-white-fg: #ecede6;
+  --btn-white-fg: #e9eef6;
 
   --life-cell: rgba(12, 12, 12, 0.22);
   --stipple-ink: rgba(12, 12, 12, 0.7);
-  --accent-fill: #4c6b0a;
+  --accent-fill: #1d5fd1;
   --warn: #9a6a12;
-  --surface: #f6f6f1;
+  --surface: #f4f7fc;
   color-scheme: light;
 }
 
@@ -186,15 +186,15 @@ html[data-theme="light"] {
   z-index: -2;
   pointer-events: none;
   background:
-    radial-gradient(70vmax 50vmax at 85% -10%, rgba(150, 195, 40, 0.16), transparent 60%),
-    radial-gradient(60vmax 50vmax at 10% 10%, rgba(197, 242, 74, 0.07), transparent 60%),
-    radial-gradient(70vmax 60vmax at 30% 85%, rgba(30, 36, 14, 0.45), transparent 60%), var(--bg);
+    radial-gradient(70vmax 50vmax at 85% -10%, rgba(40, 110, 230, 0.2), transparent 60%),
+    radial-gradient(60vmax 50vmax at 10% 10%, rgba(77, 163, 255, 0.08), transparent 60%),
+    radial-gradient(70vmax 60vmax at 30% 85%, rgba(12, 22, 48, 0.5), transparent 60%), var(--bg);
 }
 html[data-theme="light"] .bg-fallback {
   background:
-    radial-gradient(70vmax 50vmax at 85% -10%, rgba(197, 242, 74, 0.32), transparent 60%),
-    radial-gradient(60vmax 50vmax at 10% 10%, rgba(76, 107, 10, 0.1), transparent 60%),
-    radial-gradient(70vmax 60vmax at 30% 85%, rgba(201, 185, 156, 0.35), transparent 60%), var(--bg);
+    radial-gradient(70vmax 50vmax at 85% -10%, rgba(77, 163, 255, 0.28), transparent 60%),
+    radial-gradient(60vmax 50vmax at 10% 10%, rgba(29, 95, 209, 0.1), transparent 60%),
+    radial-gradient(70vmax 60vmax at 30% 85%, rgba(160, 185, 225, 0.35), transparent 60%), var(--bg);
 }
 #lg {
   position: fixed;
@@ -464,7 +464,7 @@ html.gl.scrolling [data-lg="surface"] {
     box-shadow:
       inset 0 1px 0 rgba(255, 255, 255, 0.6),
       inset 0 -2px 0 rgba(0, 0, 0, 0.12),
-      0 14px 30px -14px rgba(60, 80, 10, 0.45);
+      0 14px 30px -14px rgba(15, 50, 120, 0.45);
   }
   .btn-ghost,
   .btn-secondary {
@@ -479,7 +479,7 @@ html.gl.scrolling [data-lg="surface"] {
     box-shadow:
       inset 0 1px 0 rgba(255, 255, 255, 0.5),
       inset 0 -1px 0 rgba(0, 0, 0, 0.15),
-      0 14px 30px -14px rgba(150, 200, 40, 0.6);
+      0 14px 30px -14px rgba(40, 120, 230, 0.6);
   }
   .btn-danger:hover:not(:disabled) {
     color: var(--bad);
@@ -695,7 +695,7 @@ html.gl.scrolling [data-lg="surface"] {
     background: var(--g-accent);
     box-shadow:
       inset 0 1px 0 rgba(255, 255, 255, 0.45),
-      0 10px 24px -10px rgba(150, 200, 40, 0.6);
+      0 10px 24px -10px rgba(40, 120, 230, 0.6);
   }
 
   /* Initials in a glass circle. */
@@ -716,7 +716,7 @@ html.gl.scrolling [data-lg="surface"] {
     background: var(--g-accent);
     box-shadow:
       inset 0 1px 0 rgba(255, 255, 255, 0.45),
-      0 8px 20px -8px rgba(150, 200, 40, 0.5);
+      0 8px 20px -8px rgba(40, 120, 230, 0.5);
   }
 
   /* A round button holding a single icon. */

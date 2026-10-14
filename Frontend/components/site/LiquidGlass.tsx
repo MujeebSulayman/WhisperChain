@@ -29,7 +29,7 @@ export function LiquidGlassDefs() {
         </linearGradient>
         <linearGradient id="lgRim" x1="0" y1="0" x2="1" y2="1">
           <stop offset="0%" stopColor="#EEF9CF" stopOpacity="0.9" />
-          <stop offset="40%" stopColor="#C5F24A" stopOpacity="0.55" />
+          <stop offset="40%" stopColor="#4DA3FF" stopOpacity="0.55" />
           <stop offset="70%" stopColor="#E3F2B0" stopOpacity="0.4" />
           <stop offset="100%" stopColor="#FFF2D5" stopOpacity="0.35" />
         </linearGradient>
@@ -47,7 +47,7 @@ export function LiquidGlassDefs() {
           <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
         </radialGradient>
         <radialGradient id="lgGlow" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="#C5F24A" stopOpacity="0.18" />
+          <stop offset="0%" stopColor="#4DA3FF" stopOpacity="0.18" />
           <stop offset="55%" stopColor="#9BC832" stopOpacity="0.05" />
           <stop offset="100%" stopColor="#000000" stopOpacity="0" />
         </radialGradient>
