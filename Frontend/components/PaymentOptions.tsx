@@ -123,9 +123,9 @@ export function PaymentOptions({ onPaymentSet, onCancel }: PaymentOptionsProps) 
     return (
         <div
             style={{
-                borderRadius: '0.5rem',
+                borderRadius: '0.875rem',
                 border: '1px solid rgba(255, 255, 255, 0.08)',
-                background: 'rgba(26, 26, 26, 0.95)',
+                background: 'rgba(12, 16, 24, 0.95)',
                 padding: '1rem',
                 backdropFilter: 'blur(10px)',
             }}
@@ -139,7 +139,7 @@ export function PaymentOptions({ onPaymentSet, onCancel }: PaymentOptionsProps) 
                     onClick={onCancel}
                     style={{
                         padding: '0.375rem',
-                        borderRadius: '0.5rem',
+                        borderRadius: '0.875rem',
                         background: 'transparent',
                         border: 'none',
                         color: 'rgba(255, 255, 255, 0.7)',
@@ -172,7 +172,7 @@ export function PaymentOptions({ onPaymentSet, onCancel }: PaymentOptionsProps) 
                         placeholder="0.0"
                         style={{
                             width: '100%',
-                            borderRadius: '0.5rem',
+                            borderRadius: '0.875rem',
                             border: '1px solid rgba(255, 255, 255, 0.1)',
                             background: 'rgba(255, 255, 255, 0.03)',
                             padding: '0.625rem 0.75rem',
@@ -223,13 +223,13 @@ export function PaymentOptions({ onPaymentSet, onCancel }: PaymentOptionsProps) 
                                 placeholder="0x..."
                                 style={{
                                     width: '100%',
-                                    borderRadius: '0.5rem',
+                                    borderRadius: '0.875rem',
                                     border: '1px solid rgba(255, 255, 255, 0.1)',
                                     background: 'rgba(255, 255, 255, 0.03)',
                                     padding: '0.625rem 0.75rem',
                                     fontSize: '0.875rem',
                                     color: '#ffffff',
-                                    fontFamily: 'monospace',
+                                    fontFamily: 'var(--font-mono)',
                                     outline: 'none',
                                     transition: 'all 0.2s',
                                 }}
@@ -245,7 +245,7 @@ export function PaymentOptions({ onPaymentSet, onCancel }: PaymentOptionsProps) 
                             <div
                                 style={{
                                     padding: '0.75rem',
-                                    borderRadius: '0.5rem',
+                                    borderRadius: '0.875rem',
                                     background:
                                         approvalStatus === 'approved'
                                             ? 'rgba(16, 185, 129, 0.1)'
@@ -288,10 +288,10 @@ export function PaymentOptions({ onPaymentSet, onCancel }: PaymentOptionsProps) 
                                         disabled={isApproving}
                                         style={{
                                             padding: '0.5rem 1rem',
-                                            borderRadius: '0.5rem',
+                                            borderRadius: '0.875rem',
                                             background: '#fbbf24',
                                             border: 'none',
-                                            color: '#0f0f0f',
+                                            color: '#05070c',
                                             fontSize: '0.75rem',
                                             fontWeight: 600,
                                             cursor: isApproving ? 'not-allowed' : 'pointer',
@@ -320,7 +320,7 @@ export function PaymentOptions({ onPaymentSet, onCancel }: PaymentOptionsProps) 
                 {error && (
                     <div
                         style={{
-                            borderRadius: '0.5rem',
+                            borderRadius: '0.875rem',
                             background: 'rgba(239, 68, 68, 0.1)',
                             border: '1px solid rgba(239, 68, 68, 0.2)',
                             padding: '0.75rem',
@@ -334,13 +334,13 @@ export function PaymentOptions({ onPaymentSet, onCancel }: PaymentOptionsProps) 
                     onClick={handleSet}
                     style={{
                         width: '100%',
-                        borderRadius: '0.5rem',
+                        borderRadius: '0.875rem',
                         background: '#ffffff',
                         border: 'none',
                         padding: '0.75rem 1rem',
                         fontSize: '0.875rem',
                         fontWeight: 600,
-                        color: '#0f0f0f',
+                        color: '#05070c',
                         cursor: 'pointer',
                         transition: 'opacity 0.2s',
                     }}

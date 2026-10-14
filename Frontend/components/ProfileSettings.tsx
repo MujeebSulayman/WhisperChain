@@ -83,7 +83,7 @@ export function ProfileSettings({ onUpdate, onClose }: ProfileSettingsProps) {
         return (
             <div
                 style={{
-                    borderRadius: '0.5rem',
+                    borderRadius: '0.875rem',
                     border: '1px solid rgba(16, 185, 129, 0.3)',
                     background: 'rgba(16, 185, 129, 0.1)',
                     padding: '2rem',
@@ -99,9 +99,9 @@ export function ProfileSettings({ onUpdate, onClose }: ProfileSettingsProps) {
     return (
         <div
             style={{
-                borderRadius: '0.5rem',
+                borderRadius: '0.875rem',
                 border: '1px solid rgba(255, 255, 255, 0.08)',
-                background: 'rgba(26, 26, 26, 0.95)',
+                background: 'rgba(12, 16, 24, 0.95)',
                 padding: '1.5rem',
                 backdropFilter: 'blur(10px)',
             }}
@@ -115,7 +115,7 @@ export function ProfileSettings({ onUpdate, onClose }: ProfileSettingsProps) {
                     onClick={onClose}
                     style={{
                         padding: '0.375rem',
-                        borderRadius: '0.5rem',
+                        borderRadius: '0.875rem',
                         background: 'transparent',
                         border: 'none',
                         color: 'rgba(255, 255, 255, 0.7)',
@@ -148,13 +148,13 @@ export function ProfileSettings({ onUpdate, onClose }: ProfileSettingsProps) {
                         placeholder="Enter new public key"
                         style={{
                             width: '100%',
-                            borderRadius: '0.5rem',
+                            borderRadius: '0.875rem',
                             border: '1px solid rgba(255, 255, 255, 0.1)',
                             background: 'rgba(255, 255, 255, 0.03)',
                             padding: '0.75rem',
                             fontSize: '0.875rem',
                             color: '#ffffff',
-                            fontFamily: 'monospace',
+                            fontFamily: 'var(--font-mono)',
                             outline: 'none',
                             transition: 'all 0.2s',
                         }}
@@ -171,13 +171,13 @@ export function ProfileSettings({ onUpdate, onClose }: ProfileSettingsProps) {
                         style={{
                             marginTop: '0.5rem',
                             width: '100%',
-                            borderRadius: '0.5rem',
+                            borderRadius: '0.875rem',
                             background: '#ffffff',
                             border: 'none',
                             padding: '0.75rem 1rem',
                             fontSize: '0.875rem',
                             fontWeight: 600,
-                            color: '#0f0f0f',
+                            color: '#05070c',
                             cursor: isUpdating || !newPublicKey.trim() ? 'not-allowed' : 'pointer',
                             opacity: isUpdating || !newPublicKey.trim() ? 0.6 : 1,
                             transition: 'opacity 0.2s',
@@ -201,7 +201,7 @@ export function ProfileSettings({ onUpdate, onClose }: ProfileSettingsProps) {
                             alignItems: 'center',
                             justifyContent: 'center',
                             gap: '0.5rem',
-                            borderRadius: '0.5rem',
+                            borderRadius: '0.875rem',
                             border: '1px solid rgba(255, 255, 255, 0.1)',
                             background: 'rgba(255, 255, 255, 0.03)',
                             padding: '0.75rem 1rem',
@@ -239,7 +239,7 @@ export function ProfileSettings({ onUpdate, onClose }: ProfileSettingsProps) {
                 {error && (
                     <div
                         style={{
-                            borderRadius: '0.5rem',
+                            borderRadius: '0.875rem',
                             background: 'rgba(239, 68, 68, 0.1)',
                             border: '1px solid rgba(239, 68, 68, 0.2)',
                             padding: '0.75rem',

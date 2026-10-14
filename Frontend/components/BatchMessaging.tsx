@@ -114,9 +114,9 @@ export function BatchMessaging({ onComplete, onCancel }: BatchMessagingProps) {
     return (
         <div
             style={{
-                borderRadius: '0.5rem',
+                borderRadius: '0.875rem',
                 border: '1px solid rgba(255, 255, 255, 0.08)',
-                background: 'rgba(26, 26, 26, 0.95)',
+                background: 'rgba(12, 16, 24, 0.95)',
                 padding: '1.5rem',
                 backdropFilter: 'blur(10px)',
                 maxHeight: '80vh',
@@ -132,7 +132,7 @@ export function BatchMessaging({ onComplete, onCancel }: BatchMessagingProps) {
                     onClick={onCancel}
                     style={{
                         padding: '0.375rem',
-                        borderRadius: '0.5rem',
+                        borderRadius: '0.875rem',
                         background: 'transparent',
                         border: 'none',
                         color: 'rgba(255, 255, 255, 0.7)',
@@ -152,7 +152,7 @@ export function BatchMessaging({ onComplete, onCancel }: BatchMessagingProps) {
                 </button>
             </div>
 
-            <div style={{ marginBottom: '1rem', padding: '0.75rem', borderRadius: '0.5rem', background: 'rgba(255, 255, 255, 0.02)', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
+            <div style={{ marginBottom: '1rem', padding: '0.75rem', borderRadius: '0.875rem', background: 'rgba(255, 255, 255, 0.02)', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
                 <p style={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.6)' }}>
                     Maximum {MAX_BATCH_MESSAGES} messages per batch (contract limit)
                 </p>
@@ -163,7 +163,7 @@ export function BatchMessaging({ onComplete, onCancel }: BatchMessagingProps) {
                     <div
                         key={index}
                         style={{
-                            borderRadius: '0.5rem',
+                            borderRadius: '0.875rem',
                             border: '1px solid rgba(255, 255, 255, 0.08)',
                             background: 'rgba(255, 255, 255, 0.03)',
                             padding: '1rem',
@@ -202,13 +202,13 @@ export function BatchMessaging({ onComplete, onCancel }: BatchMessagingProps) {
                             style={{
                                 width: '100%',
                                 marginBottom: '0.5rem',
-                                borderRadius: '0.5rem',
+                                borderRadius: '0.875rem',
                                 border: '1px solid rgba(255, 255, 255, 0.1)',
                                 background: 'rgba(255, 255, 255, 0.03)',
                                 padding: '0.625rem 0.75rem',
                                 fontSize: '0.875rem',
                                 color: '#ffffff',
-                                fontFamily: 'monospace',
+                                fontFamily: 'var(--font-mono)',
                                 outline: 'none',
                                 transition: 'all 0.2s',
                             }}
@@ -226,7 +226,7 @@ export function BatchMessaging({ onComplete, onCancel }: BatchMessagingProps) {
                             rows={3}
                             style={{
                                 width: '100%',
-                                borderRadius: '0.5rem',
+                                borderRadius: '0.875rem',
                                 border: '1px solid rgba(255, 255, 255, 0.1)',
                                 background: 'rgba(255, 255, 255, 0.03)',
                                 padding: '0.625rem 0.75rem',
@@ -255,7 +255,7 @@ export function BatchMessaging({ onComplete, onCancel }: BatchMessagingProps) {
                             alignItems: 'center',
                             justifyContent: 'center',
                             gap: '0.5rem',
-                            borderRadius: '0.5rem',
+                            borderRadius: '0.875rem',
                             border: '2px dashed rgba(255, 255, 255, 0.1)',
                             background: 'rgba(255, 255, 255, 0.02)',
                             padding: '0.75rem 1rem',
@@ -287,7 +287,7 @@ export function BatchMessaging({ onComplete, onCancel }: BatchMessagingProps) {
                             display: 'flex',
                             alignItems: 'center',
                             gap: '0.5rem',
-                            borderRadius: '0.5rem',
+                            borderRadius: '0.875rem',
                             background: 'rgba(239, 68, 68, 0.1)',
                             border: '1px solid rgba(239, 68, 68, 0.2)',
                             padding: '0.75rem',
@@ -303,13 +303,13 @@ export function BatchMessaging({ onComplete, onCancel }: BatchMessagingProps) {
                     disabled={isSending || recipients.length === 0 || recipients.some(r => !r.trim()) || messages.some(m => !m.trim())}
                     style={{
                         width: '100%',
-                        borderRadius: '0.5rem',
+                        borderRadius: '0.875rem',
                         background: '#ffffff',
                         border: 'none',
                         padding: '0.75rem 1rem',
                         fontSize: '0.875rem',
                         fontWeight: 600,
-                        color: '#0f0f0f',
+                        color: '#05070c',
                         cursor: isSending || recipients.length === 0 ? 'not-allowed' : 'pointer',
                         opacity: isSending || recipients.length === 0 ? 0.6 : 1,
                         transition: 'opacity 0.2s',

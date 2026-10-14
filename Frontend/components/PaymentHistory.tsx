@@ -119,7 +119,7 @@ export function PaymentHistory({ userAddress, onClose }: PaymentHistoryProps) {
                     maxWidth: '48rem',
                     maxHeight: '90vh',
                     borderRadius: '1rem',
-                    background: '#1a1a1a',
+                    background: '#0c1018',
                     border: '1px solid rgba(255, 255, 255, 0.1)',
                     display: 'flex',
                     flexDirection: 'column',
@@ -148,7 +148,7 @@ export function PaymentHistory({ userAddress, onClose }: PaymentHistoryProps) {
                         onClick={onClose}
                         style={{
                             padding: '0.5rem',
-                            borderRadius: '0.5rem',
+                            borderRadius: '0.875rem',
                             background: 'transparent',
                             border: '1px solid rgba(255, 255, 255, 0.1)',
                             color: 'rgba(255, 255, 255, 0.7)',
@@ -180,7 +180,7 @@ export function PaymentHistory({ userAddress, onClose }: PaymentHistoryProps) {
                     <div
                         style={{
                             padding: '1rem',
-                            borderRadius: '0.75rem',
+                            borderRadius: '1.25rem',
                             background: 'rgba(16, 185, 129, 0.1)',
                             border: '1px solid rgba(16, 185, 129, 0.2)',
                         }}
@@ -195,7 +195,7 @@ export function PaymentHistory({ userAddress, onClose }: PaymentHistoryProps) {
                     <div
                         style={{
                             padding: '1rem',
-                            borderRadius: '0.75rem',
+                            borderRadius: '1.25rem',
                             background: 'rgba(245, 158, 11, 0.1)',
                             border: '1px solid rgba(245, 158, 11, 0.2)',
                         }}
@@ -210,15 +210,15 @@ export function PaymentHistory({ userAddress, onClose }: PaymentHistoryProps) {
                     <div
                         style={{
                             padding: '1rem',
-                            borderRadius: '0.75rem',
-                            background: 'rgba(99, 102, 241, 0.1)',
-                            border: '1px solid rgba(99, 102, 241, 0.2)',
+                            borderRadius: '1.25rem',
+                            background: 'rgba(51, 102, 238, 0.1)',
+                            border: '1px solid rgba(51, 102, 238, 0.2)',
                         }}
                     >
                         <div style={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.6)', marginBottom: '0.5rem' }}>
                             Pending (ETH)
                         </div>
-                        <div style={{ fontSize: '1.25rem', fontWeight: 600, color: '#a5b4fc' }}>
+                        <div style={{ fontSize: '1.25rem', fontWeight: 600, color: '#4a7bf7' }}>
                             {formatEther(pendingReceived)} Base ETH
                         </div>
                     </div>
@@ -239,10 +239,10 @@ export function PaymentHistory({ userAddress, onClose }: PaymentHistoryProps) {
                             onClick={() => setFilter(f)}
                             style={{
                                 padding: '0.5rem 1rem',
-                                borderRadius: '0.5rem',
-                                background: filter === f ? 'rgba(99, 102, 241, 0.2)' : 'transparent',
-                                border: `1px solid ${filter === f ? 'rgba(99, 102, 241, 0.3)' : 'rgba(255, 255, 255, 0.1)'}`,
-                                color: filter === f ? '#a5b4fc' : 'rgba(255, 255, 255, 0.7)',
+                                borderRadius: '0.875rem',
+                                background: filter === f ? 'rgba(51, 102, 238, 0.2)' : 'transparent',
+                                border: `1px solid ${filter === f ? 'rgba(51, 102, 238, 0.3)' : 'rgba(255, 255, 255, 0.1)'}`,
+                                color: filter === f ? '#4a7bf7' : 'rgba(255, 255, 255, 0.7)',
                                 fontSize: '0.875rem',
                                 fontWeight: 500,
                                 cursor: 'pointer',
@@ -268,7 +268,7 @@ export function PaymentHistory({ userAddress, onClose }: PaymentHistoryProps) {
                 <div style={{ flex: 1, overflowY: 'auto', padding: '1rem' }}>
                     {isLoading ? (
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '3rem' }}>
-                            <Loader2 style={{ width: '2rem', height: '2rem', color: '#6366f1', animation: 'spin 1s linear infinite' }} />
+                            <Loader2 style={{ width: '2rem', height: '2rem', color: '#3366ee', animation: 'spin 1s linear infinite' }} />
                         </div>
                     ) : filteredPayments.length === 0 ? (
                         <div style={{ textAlign: 'center', padding: '3rem' }}>
@@ -297,16 +297,16 @@ function PaymentHistoryRow({ payment }: { payment: PaymentTransaction }) {
         <div
             style={{
                 padding: '1rem',
-                borderRadius: '0.75rem',
+                borderRadius: '1.25rem',
                 background: payment.isReceived
                     ? payment.settled
                         ? 'rgba(16, 185, 129, 0.1)'
-                        : 'rgba(99, 102, 241, 0.1)'
+                        : 'rgba(51, 102, 238, 0.1)'
                     : 'rgba(245, 158, 11, 0.1)',
                 border: `1px solid ${payment.isReceived
                     ? payment.settled
                         ? 'rgba(16, 185, 129, 0.2)'
-                        : 'rgba(99, 102, 241, 0.2)'
+                        : 'rgba(51, 102, 238, 0.2)'
                     : 'rgba(245, 158, 11, 0.2)'
                     }`,
                 display: 'flex',
@@ -322,7 +322,7 @@ function PaymentHistoryRow({ payment }: { payment: PaymentTransaction }) {
                     background: payment.isReceived
                         ? payment.settled
                             ? 'rgba(16, 185, 129, 0.2)'
-                            : 'rgba(99, 102, 241, 0.2)'
+                            : 'rgba(51, 102, 238, 0.2)'
                         : 'rgba(245, 158, 11, 0.2)',
                     display: 'flex',
                     alignItems: 'center',
@@ -335,7 +335,7 @@ function PaymentHistoryRow({ payment }: { payment: PaymentTransaction }) {
                         style={{
                             width: '1.25rem',
                             height: '1.25rem',
-                            color: payment.settled ? '#10b981' : '#a5b4fc',
+                            color: payment.settled ? '#10b981' : '#4a7bf7',
                         }}
                     />
                 ) : (
@@ -352,8 +352,8 @@ function PaymentHistoryRow({ payment }: { payment: PaymentTransaction }) {
                             style={{
                                 padding: '0.125rem 0.5rem',
                                 borderRadius: '0.25rem',
-                                background: 'rgba(99, 102, 241, 0.2)',
-                                color: '#a5b4fc',
+                                background: 'rgba(51, 102, 238, 0.2)',
+                                color: '#4a7bf7',
                                 fontSize: '0.6875rem',
                                 fontWeight: 500,
                             }}
@@ -362,7 +362,7 @@ function PaymentHistoryRow({ payment }: { payment: PaymentTransaction }) {
                         </span>
                     )}
                 </div>
-                <div style={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.6)', fontFamily: 'monospace' }}>
+                <div style={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.6)', fontFamily: 'var(--font-mono)' }}>
                     {payment.isReceived ? 'From' : 'To'}:{' '}
                     {(payment.isReceived ? payment.from : payment.to).slice(0, 6)}...
                     {(payment.isReceived ? payment.from : payment.to).slice(-4)}
@@ -377,7 +377,7 @@ function PaymentHistoryRow({ payment }: { payment: PaymentTransaction }) {
                 rel="noopener noreferrer"
                 style={{
                     padding: '0.5rem',
-                    borderRadius: '0.5rem',
+                    borderRadius: '0.875rem',
                     background: 'transparent',
                     border: '1px solid rgba(255, 255, 255, 0.1)',
                     color: 'rgba(255, 255, 255, 0.7)',

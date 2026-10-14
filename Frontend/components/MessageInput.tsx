@@ -1,6 +1,7 @@
 'use client';
 
-import { Send, Paperclip, Loader2, Coins, X, Image, Video, Music, FileText } from 'lucide-react';
+import { Send, Paperclip, Loader2, Coins, X, Image, Video, Music, FileText, Zap } from 'lucide-react';
+import { isGaslessConfigured } from '@WhisperChain/lib/gasless';
 import { useState, KeyboardEvent, useRef, useEffect } from 'react';
 import { FileUpload } from './FileUpload';
 import { PaymentOptions } from './PaymentOptions';
@@ -28,7 +29,7 @@ type MessageInputProps = {
 export function MessageInput({
     onSend,
     disabled = false,
-    placeholder = 'Type a message...',
+    placeholder = 'Write a message…',
 }: MessageInputProps) {
     const isMobile = useIsMobile();
     const [input, setInput] = useState('');
@@ -132,20 +133,14 @@ export function MessageInput({
         return `${(bytes / 1024 / 1024).toFixed(2)} MB`;
     };
 
+
+    const canSend = Boolean(input.trim() || selectedFile) && !isSending && !disabled;
+    const chip = 'flex items-center gap-2 rounded-full py-1.5 pl-3 pr-1.5 text-[12px]';
+
     return (
-        <div
-            style={{
-                borderTop: '1px solid rgba(255, 255, 255, 0.05)',
-                background: 'linear-gradient(180deg, rgba(12, 12, 14, 0.6) 0%, rgba(10, 10, 12, 0.95) 100%)',
-                backdropFilter: 'blur(16px)',
-                padding: isMobile ? '0.875rem 0.75rem' : '1rem 1.5rem 1.25rem',
-                position: 'sticky',
-                bottom: 0,
-                zIndex: 10,
-            }}
-        >
+        <div className="relative z-10 shrink-0 border-t border-line px-3 pb-3 pt-3 md:px-5 md:pb-5">
             {(showFileUpload || showPayment) && (
-                <div style={{ marginBottom: '1rem' }}>
+                <div className="mb-3">
                     {showFileUpload && (
                         <FileUpload
                             onFileSelected={handleFileSelected}
@@ -171,166 +166,51 @@ export function MessageInput({
             )}
 
             {(selectedFile || paymentAmount) && (
-                <div
-                    style={{
-                        marginBottom: '0.875rem',
-                        display: 'flex',
-                        flexWrap: 'wrap',
-                        alignItems: 'center',
-                        gap: '0.5rem',
-                    }}
-                >
+                <div className="mb-3 flex flex-wrap items-center gap-2">
                     {selectedFile && (
-                        <div
-                            style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '0.5rem',
-                                padding: '0.5rem 0.875rem',
-                                borderRadius: '9999px',
-                                background: 'rgba(99, 102, 241, 0.08)',
-                                border: '1px solid rgba(99, 102, 241, 0.15)',
-                                boxShadow: '0 1px 3px rgba(0, 0, 0, 0.15)',
-                            }}
-                        >
-                            {getFileIcon(selectedFile)}
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.125rem' }}>
-                                <span style={{ fontSize: '0.75rem', color: '#ffffff', fontWeight: 500 }}>
-                                    {selectedFile.name}
-                                </span>
-                                <span style={{ fontSize: '0.6875rem', color: 'rgba(255, 255, 255, 0.6)', fontFamily: 'monospace' }}>
-                                    {formatFileSize(selectedFile.size)}
-                                </span>
-                            </div>
-                            <button
-                                onClick={() => {
-                                    setSelectedFile(null);
-                                }}
-                                style={{
-                                    background: 'transparent',
-                                    border: 'none',
-                                    color: 'rgba(255, 255, 255, 0.5)',
-                                    cursor: 'pointer',
-                                    padding: 0,
-                                    transition: 'color 0.2s',
-                                }}
-                                onMouseEnter={(e) => {
-                                    e.currentTarget.style.color = '#ef4444';
-                                }}
-                                onMouseLeave={(e) => {
-                                    e.currentTarget.style.color = 'rgba(255, 255, 255, 0.5)';
-                                }}
-                            >
-                                <X style={{ width: '0.875rem', height: '0.875rem' }} />
+                        <div className={`${chip} inset-panel`}>
+                            <span className="text-accent">{getFileIcon(selectedFile)}</span>
+                            <span className="max-w-[14rem] truncate font-medium">{selectedFile.name}</span>
+                            <span className="font-mono text-[11px] text-mute">{formatFileSize(selectedFile.size)}</span>
+                            <button onClick={() => setSelectedFile(null)} className="icon-btn h-6! w-6!" aria-label="Remove file">
+                                <X size={13} strokeWidth={2} />
                             </button>
                         </div>
                     )}
                     {paymentAmount && (
-                        <div
-                            style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '0.5rem',
-                                padding: '0.5rem 0.875rem',
-                                borderRadius: '9999px',
-                                background: 'rgba(245, 158, 11, 0.08)',
-                                border: '1px solid rgba(245, 158, 11, 0.15)',
-                                boxShadow: '0 1px 3px rgba(0, 0, 0, 0.15)',
-                            }}
-                        >
-                            <Coins style={{ width: '1rem', height: '1rem', color: '#fbbf24' }} />
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.125rem' }}>
-                                <span style={{ fontSize: '0.75rem', color: '#ffffff', fontWeight: 500 }}>
-                                    {paymentTokenInfo.loading ? '...' : formatTokenAmount(BigInt(paymentAmount ?? 0), paymentTokenInfo.decimals)}{' '}
-                                    {paymentTokenStr === ZeroAddress ? 'Base ETH' : paymentTokenInfo.symbol}
-                                </span>
-                            </div>
+                        <div className={`${chip} pill-accent`}>
+                            <Coins size={14} strokeWidth={1.8} />
+                            <span className="font-semibold">
+                                {paymentTokenInfo.loading ? '…' : formatTokenAmount(BigInt(paymentAmount ?? 0), paymentTokenInfo.decimals)}{' '}
+                                {paymentTokenStr === ZeroAddress ? 'Base ETH' : paymentTokenInfo.symbol}
+                            </span>
                             <button
                                 onClick={() => {
                                     setPaymentAmount(undefined);
                                     setPaymentToken(undefined);
                                 }}
-                                style={{
-                                    background: 'transparent',
-                                    border: 'none',
-                                    color: 'rgba(255, 255, 255, 0.5)',
-                                    cursor: 'pointer',
-                                    padding: 0,
-                                    transition: 'color 0.2s',
-                                }}
-                                onMouseEnter={(e) => {
-                                    e.currentTarget.style.color = '#ef4444';
-                                }}
-                                onMouseLeave={(e) => {
-                                    e.currentTarget.style.color = 'rgba(255, 255, 255, 0.5)';
-                                }}
+                                className="icon-btn h-6! w-6!"
+                                aria-label="Remove payment"
                             >
-                                <X style={{ width: '0.875rem', height: '0.875rem' }} />
+                                <X size={13} strokeWidth={2} />
                             </button>
                         </div>
                     )}
                 </div>
             )}
 
-            <div
-                className="message-input-bar"
-                style={{
-                    display: 'flex',
-                    alignItems: 'flex-end',
-                    gap: '0.625rem',
-                    borderRadius: '9999px',
-                    background: 'rgba(255, 255, 255, 0.04)',
-                    padding: isMobile ? '0.375rem 0.5rem 0.375rem 0.875rem' : '0.5rem 0.625rem 0.5rem 1rem',
-                }}
-            >
+            <div className="glass flex items-end gap-1 rounded-[26px] p-1.5 pl-2">
                 <button
                     onClick={() => {
                         setShowFileUpload(!showFileUpload);
                         setShowPayment(false);
                     }}
                     disabled={disabled}
-                    style={{
-                        padding: '0.5rem',
-                        borderRadius: '50%',
-                        background: showFileUpload ? 'rgba(99, 102, 241, 0.12)' : 'transparent',
-                        border: 'none',
-                        color: showFileUpload ? '#a5b4fc' : 'rgba(255, 255, 255, 0.55)',
-                        cursor: disabled ? 'not-allowed' : 'pointer',
-                        opacity: disabled ? 0.5 : 1,
-                        transition: 'all 0.2s',
-                        width: isMobile ? '2.5rem' : '2.75rem',
-                        height: isMobile ? '2.5rem' : '2.75rem',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        flexShrink: 0,
-                        touchAction: 'manipulation',
-                    }}
-                    onMouseEnter={(e) => {
-                        if (!isMobile && !disabled && !showFileUpload) {
-                            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
-                            e.currentTarget.style.color = '#ffffff';
-                        }
-                    }}
-                    onMouseLeave={(e) => {
-                        if (!isMobile && !disabled && !showFileUpload) {
-                            e.currentTarget.style.background = 'transparent';
-                            e.currentTarget.style.color = 'rgba(255, 255, 255, 0.6)';
-                        }
-                    }}
-                    onTouchStart={(e) => {
-                        if (!disabled) {
-                            e.currentTarget.style.background = showFileUpload ? 'rgba(99, 102, 241, 0.2)' : 'rgba(255, 255, 255, 0.1)';
-                        }
-                    }}
-                    onTouchEnd={(e) => {
-                        if (!disabled) {
-                            e.currentTarget.style.background = showFileUpload ? 'rgba(99, 102, 241, 0.15)' : 'transparent';
-                        }
-                    }}
+                    className={`icon-btn ${showFileUpload ? 'is-on' : ''}`}
                     title="Attach file"
+                    aria-label="Attach file"
                 >
-                    <Paperclip style={{ width: isMobile ? '1.25rem' : '1.125rem', height: isMobile ? '1.25rem' : '1.125rem' }} />
+                    <Paperclip size={18} strokeWidth={1.8} />
                 </button>
                 <button
                     onClick={() => {
@@ -338,129 +218,38 @@ export function MessageInput({
                         setShowFileUpload(false);
                     }}
                     disabled={disabled}
-                    style={{
-                        padding: '0.5rem',
-                        borderRadius: '50%',
-                        background: showPayment ? 'rgba(245, 158, 11, 0.12)' : 'transparent',
-                        border: 'none',
-                        color: showPayment ? '#fbbf24' : 'rgba(255, 255, 255, 0.55)',
-                        cursor: disabled ? 'not-allowed' : 'pointer',
-                        opacity: disabled ? 0.5 : 1,
-                        transition: 'all 0.2s',
-                        width: isMobile ? '2.5rem' : '2.75rem',
-                        height: isMobile ? '2.5rem' : '2.75rem',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        flexShrink: 0,
-                        touchAction: 'manipulation',
-                    }}
-                    onMouseEnter={(e) => {
-                        if (!isMobile && !disabled && !showPayment) {
-                            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
-                            e.currentTarget.style.color = '#fbbf24';
-                        }
-                    }}
-                    onMouseLeave={(e) => {
-                        if (!isMobile && !disabled && !showPayment) {
-                            e.currentTarget.style.background = 'transparent';
-                            e.currentTarget.style.color = 'rgba(255, 255, 255, 0.6)';
-                        }
-                    }}
-                    onTouchStart={(e) => {
-                        if (!disabled) {
-                            e.currentTarget.style.background = showPayment ? 'rgba(245, 158, 11, 0.2)' : 'rgba(255, 255, 255, 0.1)';
-                        }
-                    }}
-                    onTouchEnd={(e) => {
-                        if (!disabled) {
-                            e.currentTarget.style.background = showPayment ? 'rgba(245, 158, 11, 0.15)' : 'transparent';
-                        }
-                    }}
+                    className={`icon-btn ${showPayment ? 'is-on' : ''}`}
                     title="Add payment"
+                    aria-label="Add payment"
                 >
-                    <Coins style={{ width: isMobile ? '1.25rem' : '1.125rem', height: isMobile ? '1.25rem' : '1.125rem' }} />
+                    <Coins size={18} strokeWidth={1.8} />
                 </button>
 
-                <div style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center' }}>
-                    <textarea
-                        ref={textareaRef}
-                        value={input}
-                        onChange={(e) => setInput(e.target.value)}
-                        onKeyDown={handleKeyDown}
-                        disabled={disabled || isSending}
-                        placeholder={placeholder}
-                        rows={1}
-                        style={{
-                            width: '100%',
-                            resize: 'none',
-                            background: 'transparent',
-                            fontSize: isMobile ? '0.875rem' : '0.9375rem',
-                            color: '#ffffff',
-                            border: 'none',
-                            outline: 'none',
-                            minHeight: isMobile ? '20px' : '24px',
-                            maxHeight: isMobile ? '100px' : '120px',
-                            lineHeight: '1.5',
-                            padding: '0.125rem 0',
-                            margin: 0,
-                        }}
-                    />
-                </div>
+                <textarea
+                    ref={textareaRef}
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    disabled={disabled || isSending}
+                    placeholder={disabled ? 'Connect and register to send messages' : placeholder}
+                    rows={1}
+                    className="max-h-[120px] min-h-[40px] flex-1 resize-none bg-transparent px-2 py-[9px] text-[15px] leading-normal text-fg outline-none placeholder:text-mute disabled:cursor-not-allowed"
+                />
+
+                {isGaslessConfigured() && !isMobile && (
+                    <span className="pill pill-accent mb-1.5 mr-1 h-7! px-3! text-[12px]">
+                        <Zap size={12} strokeWidth={2} />
+                        Gasless
+                    </span>
+                )}
 
                 <button
                     onClick={handleSend}
-                    disabled={(!input.trim() && !selectedFile) || isSending || disabled}
-                    style={{
-                        padding: '0.5rem',
-                        borderRadius: '50%',
-                        background: (!input.trim() && !selectedFile) || isSending || disabled
-                            ? 'rgba(99, 102, 241, 0.15)'
-                            : 'linear-gradient(135deg, #6366f1 0%, #7c3aed 100%)',
-                        border: 'none',
-                        color: '#ffffff',
-                        cursor: (!input.trim() && !selectedFile) || isSending || disabled ? 'not-allowed' : 'pointer',
-                        opacity: (!input.trim() && !selectedFile) || isSending || disabled ? 0.5 : 1,
-                        transition: 'all 0.2s',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        width: isMobile ? '2.5rem' : '2.75rem',
-                        height: isMobile ? '2.5rem' : '2.75rem',
-                        flexShrink: 0,
-                        boxShadow: (!input.trim() && !selectedFile) || isSending || disabled
-                            ? 'none'
-                            : '0 2px 10px rgba(99, 102, 241, 0.35), 0 1px 2px rgba(0, 0, 0, 0.2)',
-                        touchAction: 'manipulation',
-                    }}
-                    onMouseEnter={(e) => {
-                        if (!isMobile && !((!input.trim() && !selectedFile) || isSending || disabled)) {
-                            e.currentTarget.style.transform = 'scale(1.05)';
-                            e.currentTarget.style.boxShadow = '0 6px 16px rgba(99, 102, 241, 0.4)';
-                        }
-                    }}
-                    onMouseLeave={(e) => {
-                        if (!isMobile) {
-                            e.currentTarget.style.transform = 'scale(1)';
-                            e.currentTarget.style.boxShadow = (!input.trim() && !selectedFile) || isSending || disabled
-                                ? 'none'
-                                : '0 4px 12px rgba(99, 102, 241, 0.3)';
-                        }
-                    }}
-                    onTouchStart={(e) => {
-                        if (!((!input.trim() && !selectedFile) || isSending || disabled)) {
-                            e.currentTarget.style.transform = 'scale(0.95)';
-                        }
-                    }}
-                    onTouchEnd={(e) => {
-                        e.currentTarget.style.transform = 'scale(1)';
-                    }}
+                    disabled={!canSend}
+                    className="tile is-on h-10 w-10 rounded-full transition-[opacity,transform] duration-200 hover:scale-105 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:scale-100"
+                    aria-label="Send message"
                 >
-                    {isSending ? (
-                        <Loader2 style={{ width: isMobile ? '1.125rem' : '1.25rem', height: isMobile ? '1.125rem' : '1.25rem', animation: 'spin 1s linear infinite' }} />
-                    ) : (
-                        <Send style={{ width: isMobile ? '1.125rem' : '1.25rem', height: isMobile ? '1.125rem' : '1.25rem' }} />
-                    )}
+                    {isSending ? <Loader2 size={18} className="animate-spin" /> : <Send size={17} strokeWidth={2} />}
                 </button>
             </div>
         </div>

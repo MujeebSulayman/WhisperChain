@@ -80,7 +80,7 @@ export function StorageManagement({ userAddress, onUpdate }: StorageManagementPr
     return (
         <div
             style={{
-                borderRadius: '0.5rem',
+                borderRadius: '0.875rem',
                 border: '1px solid rgba(255, 255, 255, 0.08)',
                 background: 'rgba(255, 255, 255, 0.03)',
                 padding: '1rem',
@@ -95,13 +95,13 @@ export function StorageManagement({ userAddress, onUpdate }: StorageManagementPr
                 style={{
                     marginBottom: '1rem',
                     padding: '0.75rem',
-                    borderRadius: '0.5rem',
+                    borderRadius: '0.875rem',
                     background: 'rgba(255, 255, 255, 0.02)',
                     border: '1px solid rgba(255, 255, 255, 0.05)',
                 }}
             >
                 <p style={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.6)', marginBottom: '0.25rem' }}>Storage Limit</p>
-                <p style={{ fontSize: '0.875rem', color: '#ffffff', fontFamily: 'monospace' }}>{formatBytes(MAX_STORAGE_PER_USER)}</p>
+                <p style={{ fontSize: '0.875rem', color: '#ffffff', fontFamily: 'var(--font-mono)' }}>{formatBytes(MAX_STORAGE_PER_USER)}</p>
             </div>
 
             {error && (
@@ -112,7 +112,7 @@ export function StorageManagement({ userAddress, onUpdate }: StorageManagementPr
                         alignItems: 'center',
                         gap: '0.5rem',
                         padding: '0.75rem',
-                        borderRadius: '0.5rem',
+                        borderRadius: '0.875rem',
                         background: 'rgba(239, 68, 68, 0.1)',
                         border: '1px solid rgba(239, 68, 68, 0.2)',
                     }}
@@ -133,7 +133,7 @@ export function StorageManagement({ userAddress, onUpdate }: StorageManagementPr
                         justifyContent: 'center',
                         gap: '0.5rem',
                         padding: '0.625rem 1rem',
-                        borderRadius: '0.5rem',
+                        borderRadius: '0.875rem',
                         border: '1px solid rgba(239, 68, 68, 0.3)',
                         background: 'rgba(239, 68, 68, 0.1)',
                         color: '#f87171',
@@ -172,7 +172,7 @@ export function StorageManagement({ userAddress, onUpdate }: StorageManagementPr
                         justifyContent: 'center',
                         gap: '0.5rem',
                         padding: '0.625rem 1rem',
-                        borderRadius: '0.5rem',
+                        borderRadius: '0.875rem',
                         border: '1px solid rgba(255, 255, 255, 0.1)',
                         background: 'rgba(255, 255, 255, 0.05)',
                         color: 'rgba(255, 255, 255, 0.7)',

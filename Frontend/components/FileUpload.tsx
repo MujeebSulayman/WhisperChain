@@ -54,9 +54,9 @@ export function FileUpload({ onFileSelected, onCancel, selectedFile: externalFil
     return (
         <div
             style={{
-                borderRadius: '0.5rem',
+                borderRadius: '0.875rem',
                 border: '1px solid rgba(255, 255, 255, 0.08)',
-                background: 'rgba(26, 26, 26, 0.95)',
+                background: 'rgba(12, 16, 24, 0.95)',
                 padding: '1rem',
                 backdropFilter: 'blur(10px)',
             }}
@@ -70,7 +70,7 @@ export function FileUpload({ onFileSelected, onCancel, selectedFile: externalFil
                         alignItems: 'center',
                         justifyContent: 'center',
                         gap: '0.75rem',
-                        borderRadius: '0.5rem',
+                        borderRadius: '0.875rem',
                         border: '2px dashed rgba(255, 255, 255, 0.1)',
                         padding: '2rem',
                         cursor: 'pointer',
@@ -109,7 +109,7 @@ export function FileUpload({ onFileSelected, onCancel, selectedFile: externalFil
                             display: 'flex',
                             alignItems: 'center',
                             gap: '0.75rem',
-                            borderRadius: '0.5rem',
+                            borderRadius: '0.875rem',
                             border: '1px solid rgba(255, 255, 255, 0.08)',
                             background: 'rgba(255, 255, 255, 0.03)',
                             padding: '0.75rem',
@@ -136,7 +136,7 @@ export function FileUpload({ onFileSelected, onCancel, selectedFile: externalFil
                         <button
                             onClick={() => setFile(null)}
                             style={{
-                                borderRadius: '0.5rem',
+                                borderRadius: '0.875rem',
                                 padding: '0.375rem',
                                 background: 'transparent',
                                 border: '1px solid rgba(255, 255, 255, 0.1)',
@@ -162,7 +162,7 @@ export function FileUpload({ onFileSelected, onCancel, selectedFile: externalFil
                                 alignItems: 'center',
                                 gap: '0.5rem',
                                 padding: '0.75rem',
-                                borderRadius: '0.5rem',
+                                borderRadius: '0.875rem',
                                 background: 'rgba(239, 68, 68, 0.1)',
                                 border: '1px solid rgba(239, 68, 68, 0.2)',
                             }}

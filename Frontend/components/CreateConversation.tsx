@@ -110,9 +110,9 @@ export function CreateConversation({
     return (
         <div
             style={{
-                borderRadius: '0.5rem',
+                borderRadius: '0.875rem',
                 border: '1px solid rgba(255, 255, 255, 0.08)',
-                background: 'rgba(26, 26, 26, 0.95)',
+                background: 'rgba(12, 16, 24, 0.95)',
                 padding: '1.5rem',
                 backdropFilter: 'blur(10px)',
             }}
@@ -126,7 +126,7 @@ export function CreateConversation({
                     onClick={onCancel}
                     style={{
                         padding: '0.375rem',
-                        borderRadius: '0.5rem',
+                        borderRadius: '0.875rem',
                         background: 'transparent',
                         border: 'none',
                         color: 'rgba(255, 255, 255, 0.7)',
@@ -160,13 +160,13 @@ export function CreateConversation({
                             placeholder="0x..."
                             style={{
                                 flex: 1,
-                                borderRadius: '0.5rem',
+                                borderRadius: '0.875rem',
                                 border: '1px solid rgba(255, 255, 255, 0.1)',
                                 background: 'rgba(255, 255, 255, 0.03)',
                                 padding: '0.625rem 0.75rem',
                                 fontSize: '0.875rem',
                                 color: '#ffffff',
-                                fontFamily: 'monospace',
+                                fontFamily: 'var(--font-mono)',
                                 outline: 'none',
                                 transition: 'all 0.2s',
                             }}
@@ -180,7 +180,7 @@ export function CreateConversation({
                         <button
                             onClick={addParticipant}
                             style={{
-                                borderRadius: '0.5rem',
+                                borderRadius: '0.875rem',
                                 border: '1px solid rgba(255, 255, 255, 0.1)',
                                 background: 'rgba(255, 255, 255, 0.05)',
                                 padding: '0.625rem 0.75rem',
@@ -210,13 +210,13 @@ export function CreateConversation({
                                         display: 'flex',
                                         alignItems: 'center',
                                         justifyContent: 'space-between',
-                                        borderRadius: '0.5rem',
+                                        borderRadius: '0.875rem',
                                         border: '1px solid rgba(255, 255, 255, 0.08)',
                                         background: 'rgba(255, 255, 255, 0.03)',
                                         padding: '0.625rem 0.75rem',
                                     }}
                                 >
-                                    <p style={{ fontSize: '0.75rem', fontFamily: 'monospace', color: 'rgba(255, 255, 255, 0.7)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>
+                                    <p style={{ fontSize: '0.75rem', fontFamily: 'var(--font-mono)', color: 'rgba(255, 255, 255, 0.7)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>
                                         {address}
                                     </p>
                                     <button
@@ -248,7 +248,7 @@ export function CreateConversation({
                 {error && (
                     <div
                         style={{
-                            borderRadius: '0.5rem',
+                            borderRadius: '0.875rem',
                             background: 'rgba(239, 68, 68, 0.1)',
                             border: '1px solid rgba(239, 68, 68, 0.2)',
                             padding: '0.75rem',
@@ -263,13 +263,13 @@ export function CreateConversation({
                     disabled={isCreating || participants.length < 1}
                     style={{
                         width: '100%',
-                        borderRadius: '0.5rem',
+                        borderRadius: '0.875rem',
                         background: '#ffffff',
                         border: 'none',
                         padding: '0.75rem 1rem',
                         fontSize: '0.875rem',
                         fontWeight: 600,
-                        color: '#0f0f0f',
+                        color: '#05070c',
                         cursor: isCreating || participants.length < 1 ? 'not-allowed' : 'pointer',
                         opacity: isCreating || participants.length < 1 ? 0.6 : 1,
                         transition: 'opacity 0.2s',

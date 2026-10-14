@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { UserPlus, Loader2, CheckCircle2 } from 'lucide-react';
+import { UserPlus, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
+import { LogoMark } from './landing/icons';
 import {
 	registerUserGasless,
 	submitSignedForwardRequest,
@@ -58,138 +59,71 @@ export function UserRegistration({ onRegistered, address }: UserRegistrationProp
 
     if (success) {
         return (
-            <div
-                style={{
-                    borderRadius: '0.5rem',
-                    border: '1px solid rgba(16, 185, 129, 0.3)',
-                    background: 'rgba(16, 185, 129, 0.1)',
-                    padding: '2rem',
-                    textAlign: 'center',
-                }}
-            >
-                <CheckCircle2 style={{ width: '3rem', height: '3rem', margin: '0 auto 1rem', color: '#10b981' }} />
-                <p style={{ fontSize: '1rem', fontWeight: 600, color: '#10b981', marginBottom: '0.5rem' }}>Registration Successful!</p>
-                <p style={{ fontSize: '0.875rem', color: 'rgba(255, 255, 255, 0.5)' }}>Welcome to WhisperChain</p>
+            <div className="glass rise rounded-[var(--r-panel)] p-10 text-center">
+                <span className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-good/15 text-good">
+                    <CheckCircle2 size={30} strokeWidth={1.8} />
+                </span>
+                <h2 className="display mt-6 text-[30px]">You&apos;re registered.</h2>
+                <p className="mt-2 text-[15px] text-dim">Welcome to WhisperChain. Opening your inbox…</p>
             </div>
         );
     }
 
     return (
-        <div
-            style={{
-                borderRadius: '0.5rem',
-                border: '1px solid rgba(255, 255, 255, 0.08)',
-                background: 'rgba(26, 26, 26, 0.95)',
-                padding: '1.5rem',
-                backdropFilter: 'blur(10px)',
-                position: 'relative',
-                zIndex: 1,
-            }}
-        >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
-                <div
-                    style={{
-                        width: '2.5rem',
-                        height: '2.5rem',
-                        borderRadius: '50%',
-                        background: 'rgba(255, 255, 255, 0.1)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                    }}
-                >
-                    <UserPlus style={{ width: '1.25rem', height: '1.25rem', color: 'rgba(255, 255, 255, 0.7)' }} />
-                </div>
-                <div>
-                    <h3 style={{ fontSize: '1.125rem', fontWeight: 600, color: '#ffffff', marginBottom: '0.25rem' }}>Register on WhisperChain</h3>
-                    <p style={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.5)' }}>Create your profile to start messaging</p>
-                </div>
-            </div>
+        <div className="glass rise rounded-[var(--r-panel)] p-6 sm:p-8">
+            <LogoMark size={44} />
+            <p className="eyebrow mt-6">One-time setup</p>
+            <h2 className="display mt-2 text-[clamp(28px,4vw,36px)]">Create your profile.</h2>
+            <p className="mt-3 text-[15px] leading-relaxed text-dim">
+                Pick a username people will see. It&apos;s stored on-chain against your address, and it takes one signature.
+            </p>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                <div>
-                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: 'rgba(255, 255, 255, 0.7)', marginBottom: '0.5rem' }}>
-                        Username
-                    </label>
+            <div className="mt-7 grid gap-4">
+                <label className="grid gap-2">
+                    <span className="label">Username</span>
                     <input
                         type="text"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
-                        placeholder="Enter your username"
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter') handleRegister();
+                        }}
+                        placeholder="e.g. satoshi"
                         disabled={isRegistering}
                         autoFocus
-                        style={{
-                            width: '100%',
-                            borderRadius: '0.5rem',
-                            border: '1px solid rgba(255, 255, 255, 0.1)',
-                            background: 'rgba(255, 255, 255, 0.03)',
-                            padding: '0.75rem',
-                            fontSize: '0.875rem',
-                            color: '#ffffff',
-                            outline: 'none',
-                            transition: 'all 0.2s',
-                            cursor: isRegistering ? 'not-allowed' : 'text',
-                            opacity: isRegistering ? 0.6 : 1,
-                            pointerEvents: isRegistering ? 'none' : 'auto',
-                            WebkitAppearance: 'none',
-                            appearance: 'none',
-                        }}
-                        onFocus={(e) => {
-                            if (!isRegistering) {
-                                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.3)';
-                                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
-                            }
-                        }}
-                        onBlur={(e) => {
-                            e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)';
-                            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)';
-                        }}
+                        className="field"
                     />
-                    <p style={{ marginTop: '0.5rem', fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.5)' }}>
-                        A unique public key will be auto-generated for you
-                    </p>
+                    <span className="text-[12px] text-mute">A unique public key is generated for you automatically.</span>
+                </label>
+
+                <div className="inset-panel flex items-center gap-3 rounded-[var(--r-inset)] px-4 py-3">
+                    <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-good/15 text-good">
+                        <CheckCircle2 size={15} strokeWidth={2} />
+                    </span>
+                    <div className="min-w-0">
+                        <p className="label text-[10px]!">Wallet</p>
+                        <p className="truncate font-mono text-[13px]">{address.slice(0, 6)}…{address.slice(-4)}</p>
+                    </div>
                 </div>
 
                 {error && (
-                    <div
-                        style={{
-                            borderRadius: '0.5rem',
-                            background: 'rgba(239, 68, 68, 0.1)',
-                            border: '1px solid rgba(239, 68, 68, 0.2)',
-                            padding: '0.75rem',
-                        }}
-                    >
-                        <p style={{ fontSize: '0.75rem', color: '#fca5a5' }}>{error}</p>
-                    </div>
+                    <p className="inset-panel flex items-start gap-2 rounded-[var(--r-inset)] p-3 text-[13px] text-dim">
+                        <AlertCircle size={15} strokeWidth={1.8} className="mt-0.5 shrink-0 text-bad" />
+                        {error}
+                    </p>
                 )}
 
-                <button
-                    onClick={handleRegister}
-                    disabled={isRegistering || !username.trim()}
-                    style={{
-                        width: '100%',
-                        borderRadius: '0.5rem',
-                        background: '#ffffff',
-                        border: 'none',
-                        padding: '0.75rem 1rem',
-                        fontSize: '0.875rem',
-                        fontWeight: 600,
-                        color: '#0f0f0f',
-                        cursor: isRegistering || !username.trim() ? 'not-allowed' : 'pointer',
-                        opacity: isRegistering || !username.trim() ? 0.6 : 1,
-                        transition: 'opacity 0.2s',
-                    }}
-                >
+                <button onClick={handleRegister} disabled={isRegistering || !username.trim()} className="btn btn-lg btn-white mt-1 w-full disabled:opacity-50">
                     {isRegistering ? (
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
-                            <Loader2 style={{ width: '1rem', height: '1rem', animation: 'spin 1s linear infinite' }} />
-                            <span>Registering...</span>
-                        </div>
+                        <>
+                            <Loader2 size={18} className="animate-spin" />
+                            Registering…
+                        </>
                     ) : (
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
-                            <UserPlus style={{ width: '1rem', height: '1rem' }} />
-                            <span>Register</span>
-                        </div>
+                        <>
+                            <UserPlus size={18} strokeWidth={2} />
+                            Register
+                        </>
                     )}
                 </button>
             </div>

@@ -83,7 +83,7 @@ export function UserStats({ userAddress }: UserStatsProps) {
                     disabled={isLoading}
                     style={{
                         padding: '0.375rem',
-                        borderRadius: '0.5rem',
+                        borderRadius: '0.875rem',
                         background: 'transparent',
                         border: 'none',
                         color: 'rgba(255, 255, 255, 0.5)',
@@ -115,7 +115,7 @@ export function UserStats({ userAddress }: UserStatsProps) {
             {userBalance !== null && (
                 <div
                     style={{
-                        borderRadius: '0.5rem',
+                        borderRadius: '0.875rem',
                         border: '1px solid rgba(255, 255, 255, 0.08)',
                         background: 'rgba(255, 255, 255, 0.03)',
                         padding: '0.75rem',
@@ -136,7 +136,7 @@ export function UserStats({ userAddress }: UserStatsProps) {
             {messageCount !== null && (
                 <div
                     style={{
-                        borderRadius: '0.5rem',
+                        borderRadius: '0.875rem',
                         border: `1px solid ${isMessageNearLimit ? 'rgba(239, 68, 68, 0.3)' : 'rgba(255, 255, 255, 0.08)'}`,
                         background: 'rgba(255, 255, 255, 0.03)',
                         padding: '0.75rem',
@@ -154,7 +154,7 @@ export function UserStats({ userAddress }: UserStatsProps) {
                         <div
                             style={{
                                 height: '100%',
-                                background: isMessageNearLimit ? '#ef4444' : '#6366f1',
+                                background: isMessageNearLimit ? '#ef4444' : '#3366ee',
                                 transition: 'width 0.3s',
                                 width: `${Math.min(messagePercent, 100)}%`,
                             }}
@@ -172,7 +172,7 @@ export function UserStats({ userAddress }: UserStatsProps) {
             {storage && (
                 <div
                     style={{
-                        borderRadius: '0.5rem',
+                        borderRadius: '0.875rem',
                         border: `1px solid ${isStorageNearLimit ? 'rgba(239, 68, 68, 0.3)' : 'rgba(255, 255, 255, 0.08)'}`,
                         background: 'rgba(255, 255, 255, 0.03)',
                         padding: '0.75rem',
@@ -210,7 +210,7 @@ export function UserStats({ userAddress }: UserStatsProps) {
             {contractStats && (
                 <div
                     style={{
-                        borderRadius: '0.5rem',
+                        borderRadius: '0.875rem',
                         border: '1px solid rgba(255, 255, 255, 0.08)',
                         background: 'rgba(255, 255, 255, 0.03)',
                         padding: '0.75rem',
@@ -222,13 +222,13 @@ export function UserStats({ userAddress }: UserStatsProps) {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', fontSize: '0.75rem' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                             <span style={{ color: 'rgba(255, 255, 255, 0.5)' }}>Treasury</span>
-                            <span style={{ color: '#ffffff', fontFamily: 'monospace' }}>
+                            <span style={{ color: '#ffffff', fontFamily: 'var(--font-mono)' }}>
                                 {(Number(contractStats.treasuryBalance) / 1e18).toFixed(4)} ETH
                             </span>
                         </div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: '0.5rem', borderTop: '1px solid rgba(255, 255, 255, 0.08)' }}>
                             <span style={{ color: 'rgba(255, 255, 255, 0.5)' }}>Max File Size</span>
-                            <span style={{ color: '#ffffff', fontFamily: 'monospace' }}>{(MAX_FILE_SIZE / 1024 / 1024).toFixed(0)} MB</span>
+                            <span style={{ color: '#ffffff', fontFamily: 'var(--font-mono)' }}>{(MAX_FILE_SIZE / 1024 / 1024).toFixed(0)} MB</span>
                         </div>
                     </div>
                 </div>

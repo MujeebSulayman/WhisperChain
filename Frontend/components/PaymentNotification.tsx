@@ -48,7 +48,7 @@ export function PaymentNotification({
                 right: '1rem',
                 zIndex: 1000,
                 maxWidth: '24rem',
-                borderRadius: '0.75rem',
+                borderRadius: '1.25rem',
                 background: isReceived
                     ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.95) 0%, rgba(5, 150, 105, 0.95) 100%)'
                     : 'linear-gradient(135deg, rgba(245, 158, 11, 0.95) 0%, rgba(217, 119, 6, 0.95) 100%)',
@@ -106,7 +106,7 @@ export function PaymentNotification({
                             style={{
                                 fontSize: '0.75rem',
                                 color: 'rgba(255, 255, 255, 0.8)',
-                                fontFamily: 'monospace',
+                                fontFamily: 'var(--font-mono)',
                             }}
                         >
                             From: {from.slice(0, 6)}...{from.slice(-4)}
@@ -117,7 +117,7 @@ export function PaymentNotification({
                             style={{
                                 fontSize: '0.75rem',
                                 color: 'rgba(255, 255, 255, 0.8)',
-                                fontFamily: 'monospace',
+                                fontFamily: 'var(--font-mono)',
                             }}
                         >
                             To: {to.slice(0, 6)}...{to.slice(-4)}
@@ -131,7 +131,7 @@ export function PaymentNotification({
                     }}
                     style={{
                         padding: '0.25rem',
-                        borderRadius: '0.5rem',
+                        borderRadius: '0.875rem',
                         background: 'transparent',
                         border: 'none',
                         color: 'rgba(255, 255, 255, 0.7)',
