@@ -1,0 +1,541 @@
+/*
+ * Landing page theme (ported from the ROXI liquid-glass design): a near-black field lit by a
+ * cobalt ribbon, with beveled glass on top. Tokens live on `.wc` so the app at /app is untouched;
+ * they are exposed to Tailwind so `text-mute`, `bg-accent` etc. work inside the landing page.
+ */
+@theme {
+  --breakpoint-*: initial;
+  --breakpoint-xs: 390px;
+  --breakpoint-sm: 414px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 992px;
+  --breakpoint-xl: 1240px;
+  --breakpoint-2xl: 1340px;
+  --breakpoint-3xl: 1472px;
+}
+
+@theme inline {
+  --font-display: "Clash Display", "General Sans", sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --color-bg: var(--bg);
+  --color-fg: var(--fg);
+  --color-dim: var(--dim);
+  --color-mute: var(--mute);
+  --color-mute-soft: var(--mute-soft);
+  --color-line: var(--line);
+  --color-line2: var(--line2);
+  --color-accent: var(--accent);
+  --color-accent-2: var(--accent-2);
+  --color-accent-fill: var(--accent-fill);
+  --color-good: var(--good);
+  --color-warn: var(--warn);
+  --color-bad: var(--bad);
+
+  --ease-out: cubic-bezier(0.25, 0.6, 0.2, 1);
+  --ease-spring: cubic-bezier(0.25, 1.15, 0.35, 1);
+}
+
+/* ── Document: the app locks the page to the viewport; the landing page scrolls ── */
+html:has(.wc) {
+  height: auto;
+  overflow-x: clip;
+  overflow-y: auto;
+  background: #05070c;
+  scroll-padding-top: 96px;
+  -webkit-text-size-adjust: 100%;
+  color-scheme: dark;
+}
+/* Transparent so the fixed WebGL backdrop behind it shows through. */
+body:has(.wc):not(.overflow-hidden) {
+  height: auto;
+  overflow: visible;
+  background: transparent;
+}
+
+/* ── Theme tokens ─────────────────────────────────────────────── */
+.wc {
+  --bg: #05070c;
+  --fg: #e9edf5;
+  --dim: #a9b2c3;
+  --mute: #7d879a;
+  --mute-soft: #76819a;
+  --line: rgba(255, 255, 255, 0.08);
+  --line2: rgba(255, 255, 255, 0.14);
+  /* --accent is for text, links and small marks; --accent-fill sits behind white text (buttons, the logo tile). */
+  --accent: #4a7bf7;
+  --accent-fill: #3366ee;
+  --accent-2: #3366ee;
+  --accent-ink: #ffffff;
+  --good: #3dd68c;
+  --warn: #f5b94a;
+  --bad: #ff6b6b;
+
+  /* Artwork (components/landing/icons.tsx): highlight and the ends of the accent ramp. */
+  --art-hi: #e6edff;
+  --art-a1: #3366ee;
+  --art-a3: #3366ee;
+
+  --steel: rgba(205, 218, 245, 0.08);
+  --steel-2: rgba(205, 218, 245, 0.14);
+  --knob: rgba(3, 5, 10, 0.62);
+  --rim: rgba(228, 236, 252, 0.42);
+  --glass-bg: rgba(5, 7, 12, 0.52);
+  --glass-hi: rgba(150, 180, 255, 0.13);
+  --card-bg: #0c1018;
+  --card-rim: inset 0 1px 0 rgba(228, 236, 252, 0.11), inset 0 0 0 1px rgba(255, 255, 255, 0.035);
+  --field-bg: rgba(0, 0, 0, 0.26);
+  --field-in: inset 0 1px 2px rgba(0, 0, 0, 0.5), inset 0 -1px 0 rgba(255, 255, 255, 0.05);
+  --edge: inset 0 1px 0 var(--rim), inset 0 -1px 0 rgba(255, 255, 255, 0.04), inset 0 18px 30px -22px rgba(222, 232, 250, 0.24),
+    inset 0 -22px 34px -26px rgba(0, 0, 0, 0.7);
+  --edge-sm: inset 0 1px 0 rgba(228, 236, 252, 0.34), inset 0 -1px 0 rgba(255, 255, 255, 0.03),
+    inset 0 10px 16px -12px rgba(222, 232, 250, 0.2), inset 0 -10px 16px -12px rgba(0, 0, 0, 0.55);
+  --shadow: 0 40px 80px -40px rgba(0, 0, 0, 0.9);
+
+  /* Three radii and one type scale; everything else derives from these. */
+  --r-panel: 32px;
+  --r-card: 20px;
+  --r-inset: 14px;
+
+  --nav-h: 60px;
+
+  min-height: 100vh;
+  color: var(--fg);
+  font-family: "General Sans", ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+}
+
+/* Unlayered so it beats the app-wide ::selection in globals.css. */
+.wc ::selection {
+  color: var(--accent-ink);
+  background: var(--accent-fill);
+}
+
+/* ── Base ─────────────────────────────────────────────────────── */
+@layer base {
+  .wc h1,
+  .wc h2 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    letter-spacing: 0.01em;
+  }
+  .wc img {
+    max-width: 100%;
+  }
+  .wc a {
+    text-decoration: none !important;
+  }
+  .wc :focus-visible {
+    outline: 1.5px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: 10px;
+  }
+  .wc button {
+    cursor: pointer;
+  }
+}
+
+/* ── Backdrop: WebGL liquid glass, a CSS gradient when WebGL is off ── */
+.bg-fallback {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  background:
+    radial-gradient(70vmax 50vmax at 85% -10%, rgba(51, 102, 238, 0.14), transparent 60%),
+    radial-gradient(60vmax 50vmax at 10% 10%, rgba(74, 123, 247, 0.06), transparent 60%),
+    radial-gradient(70vmax 60vmax at 30% 85%, rgba(8, 14, 30, 0.45), transparent 60%), var(--bg);
+}
+#lg {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -2;
+  display: block;
+  pointer-events: none;
+}
+html.gl .bg-fallback {
+  display: none;
+}
+/* Panels the WebGL layer draws as real glass; CSS glass takes over while scrolling. */
+html.gl [data-lg="surface"] {
+  background: transparent !important;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  box-shadow: none !important;
+}
+html.gl [data-lg="surface"]::before {
+  display: none;
+}
+html.gl.scrolling [data-lg="surface"] {
+  background: var(--glass-bg) !important;
+  -webkit-backdrop-filter: blur(22px) saturate(140%);
+  backdrop-filter: blur(22px) saturate(140%);
+  box-shadow: var(--edge), var(--shadow) !important;
+}
+
+/* ── Components ───────────────────────────────────────────────── */
+@layer components {
+  .display {
+    font-family: var(--font-display);
+    letter-spacing: 0.01em;
+    line-height: 1.08;
+  }
+  .h2 {
+    font-family: var(--font-display);
+    letter-spacing: 0.01em;
+    font-size: clamp(30px, 4.2vw, 52px);
+    line-height: 1.08;
+  }
+  .h3 {
+    letter-spacing: -0.025em;
+    font-size: 19px;
+    font-weight: 600;
+    line-height: 1.25;
+  }
+
+  /* Mono, uppercase, with a glowing dot: the section kicker. */
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .label {
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--mute);
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+
+  /* Panels */
+  .card {
+    position: relative;
+    background: var(--card-bg);
+    border-radius: var(--r-card);
+    box-shadow: var(--card-rim);
+  }
+  .glass {
+    position: relative;
+    isolation: isolate;
+    background: var(--glass-bg);
+    -webkit-backdrop-filter: blur(24px) saturate(150%);
+    backdrop-filter: blur(24px) saturate(150%);
+    box-shadow: var(--edge), var(--shadow);
+  }
+  .glass::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    z-index: -1;
+    background: radial-gradient(420px circle at var(--mx, 20%) var(--my, -10%), var(--glass-hi), transparent 45%);
+  }
+  .inset-panel {
+    background: var(--field-bg);
+    box-shadow: var(--field-in);
+  }
+  /* A small glass pebble that holds an icon. */
+  .tile {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    color: var(--accent);
+    background: var(--knob);
+    box-shadow: var(--edge-sm);
+  }
+  .tile.is-on {
+    color: var(--accent-ink);
+    background: var(--accent-fill);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.45),
+      0 8px 20px -8px rgba(51, 102, 238, 0.5);
+  }
+
+  /* Glass with a lit rim: the top nav. */
+  .lgx {
+    position: relative;
+    background: rgba(5, 7, 12, 0.88);
+    -webkit-backdrop-filter: blur(22px) saturate(160%);
+    backdrop-filter: blur(22px) saturate(160%);
+    box-shadow:
+      inset 0 1px 0 var(--rim),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.04),
+      inset 0 14px 22px -16px var(--glass-hi),
+      inset 0 -14px 22px -16px rgba(0, 0, 0, 0.35),
+      0 24px 50px -24px rgba(0, 0, 0, 0.6);
+  }
+  .lgx::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background: radial-gradient(260px 60px at var(--mx, 30%) -20%, var(--glass-hi), transparent 70%);
+  }
+  html.svgref .lgx.nav {
+    -webkit-backdrop-filter: url(#lgnav) saturate(1.5);
+    backdrop-filter: url(#lgnav) saturate(1.5);
+  }
+
+  /* A spring-driven glass highlight under the current link ("drop"). */
+  .drop {
+    position: absolute;
+    left: 0;
+    border-radius: 999px;
+    pointer-events: none;
+    z-index: 0;
+    background: var(--knob);
+    will-change: transform, width, height;
+    box-shadow:
+      var(--edge-sm),
+      0 6px 14px -8px rgba(0, 0, 0, 0.5);
+  }
+
+  /* Buttons: glass pebbles; the primary one is bright ink. */
+  .btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 46px;
+    padding: 0 22px;
+    border-radius: 999px;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    white-space: nowrap;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    color: var(--fg);
+    background: var(--knob);
+    box-shadow:
+      var(--edge-sm),
+      0 12px 26px -14px rgba(0, 0, 0, 0.6);
+    transition:
+      transform 0.15s var(--ease-out),
+      box-shadow 0.25s,
+      background-color 0.25s,
+      filter 0.25s,
+      color 0.25s;
+  }
+  .btn:hover {
+    filter: brightness(1.08);
+  }
+  .btn:active {
+    transform: translateY(1px);
+  }
+  .btn-sm {
+    height: 38px;
+    padding: 0 16px;
+    font-size: 14px;
+  }
+  .btn-lg {
+    height: 56px;
+    padding: 0 28px;
+    font-size: 16px;
+  }
+  .btn-white {
+    background: var(--fg);
+    color: var(--bg);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.6),
+      inset 0 -2px 0 rgba(0, 0, 0, 0.12),
+      0 14px 30px -14px rgba(20, 40, 110, 0.45);
+  }
+  .btn-ghost {
+    background: var(--steel);
+  }
+  .btn-ghost:hover {
+    background: var(--steel-2);
+  }
+  .btn-accent {
+    background: var(--accent-fill);
+    color: var(--accent-ink);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.45),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.18),
+      0 14px 30px -14px rgba(51, 102, 238, 0.5);
+  }
+
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: 32px;
+    padding: 0 14px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--fg);
+    background: var(--steel);
+    box-shadow: inset 0 1px 0 var(--rim);
+  }
+  .pill-accent {
+    color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 12%, transparent);
+  }
+
+  .overflow-x-auto::-webkit-scrollbar {
+    height: 6px;
+  }
+  .overflow-x-auto::-webkit-scrollbar-track {
+    border-radius: 100px;
+    background-color: rgba(0, 0, 0, 0.1);
+  }
+  .overflow-x-auto::-webkit-scrollbar-thumb {
+    border-radius: 100px;
+    background-color: rgba(255, 255, 255, 0.12);
+  }
+}
+
+/* ── Header ───────────────────────────────────────────────────── */
+.heading {
+  position: fixed;
+  z-index: 50;
+  top: calc(env(safe-area-inset-top, 0px) + 16px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(1200px, calc(100% - 24px));
+  transition: top 0.6s var(--ease-spring);
+}
+/* Once the page is scrolled the bar tucks closer to the top edge. */
+.heading.position-fixed {
+  top: calc(env(safe-area-inset-top, 0px) + 10px);
+}
+.heading-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: var(--nav-h);
+  padding: 6px 6px 6px 20px;
+  border-radius: 999px;
+}
+.nav-links {
+  position: relative;
+  display: none;
+  align-items: center;
+  gap: 2px;
+  margin: 0 auto;
+  height: 100%;
+}
+@media (min-width: 992px) {
+  .nav-links {
+    display: flex;
+  }
+}
+.nav-links a {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  height: 44px;
+  padding: 0 14px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--dim);
+  transition: color 0.3s;
+}
+@media (min-width: 1240px) {
+  .nav-links a {
+    padding: 0 18px;
+  }
+}
+.nav-links a:hover,
+.nav-links a.active {
+  color: var(--fg);
+}
+.nav-links .drop {
+  top: 50%;
+  height: 44px;
+  margin-top: -22px;
+}
+
+/* Phones and tablets: the links open in a glass sheet under the bar. */
+.heading-menu {
+  position: fixed;
+  z-index: 49;
+  inset: 0;
+  padding: calc(env(safe-area-inset-top, 0px) + 96px) 16px 24px;
+  background: rgba(3, 5, 9, 0.72);
+  -webkit-backdrop-filter: blur(28px) saturate(150%);
+  backdrop-filter: blur(28px) saturate(150%);
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 0.35s var(--ease-out),
+    visibility 0s 0.35s;
+}
+.heading-menu.show-menu {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.35s var(--ease-out);
+}
+.heading-menu ul {
+  transform: translateY(16px) scale(0.98);
+  transition: transform 0.7s var(--ease-spring);
+}
+.heading-menu.show-menu ul {
+  transform: none;
+}
+.heading-menu a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-radius: 20px;
+  font-family: var(--font-display);
+  font-size: 24px;
+  color: var(--dim);
+}
+.heading-menu a.active {
+  color: var(--fg);
+  background: var(--knob);
+  box-shadow: var(--edge-sm);
+}
+@media (min-width: 992px) {
+  .heading-menu {
+    display: none;
+  }
+}
+
+/* ── Motion ───────────────────────────────────────────────────── */
+.rise {
+  animation: rise 0.9s var(--ease-spring) both;
+}
+@keyframes rise {
+  0% {
+    opacity: 0;
+    transform: translateY(22px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

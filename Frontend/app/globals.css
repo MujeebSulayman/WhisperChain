@@ -1,6 +1,8 @@
 @import 'tailwindcss';
+@import './landing.css';
 
-* {
+/* Unlayered, so it beats Tailwind spacing utilities; the landing page (.wc) relies on those. */
+*:not(.wc, .wc *) {
 	margin: 0;
 	padding: 0;
 	box-sizing: border-box;
@@ -23,12 +25,6 @@ body {
 	height: 100vh;
 	width: 100vw;
 	overflow: hidden;
-}
-
-html.landing-scroll,
-body.landing-scroll {
-	height: auto;
-	overflow: auto;
 }
 
 @keyframes fadeIn {
