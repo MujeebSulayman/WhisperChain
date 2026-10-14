@@ -113,7 +113,7 @@ export function Banner() {
   return (
     <section
       id="banner"
-      className="relative mx-auto grid w-full max-w-[1200px] items-center gap-16 px-4 pb-24 pt-36 md:px-6 md:pt-44 lg:grid-cols-[1.05fr_1fr] lg:gap-12 lg:pb-32"
+      className="relative mx-auto grid w-full max-w-[1200px] grid-cols-1 items-center gap-16 px-4 pb-24 pt-36 md:px-6 md:pt-44 lg:grid-cols-[1.05fr_1fr] lg:gap-12 lg:pb-32"
     >
       <div>
         <p className="pill rise" style={{ animationDelay: "40ms" }}>
@@ -122,7 +122,7 @@ export function Banner() {
         </p>
 
         <h1 className="display rise mt-7 max-w-[14ch] text-[clamp(40px,5.6vw,76px)]" style={{ animationDelay: "100ms" }}>
-          Wallet-native messaging, <span className="text-accent">settled on-chain.</span>
+          Wallet-native messaging, <span className="text-accent">settled <span className="whitespace-nowrap">on-chain.</span></span>
         </h1>
 
         <p
