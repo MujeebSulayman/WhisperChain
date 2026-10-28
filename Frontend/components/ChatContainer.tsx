@@ -95,7 +95,22 @@ export function ChatContainer() {
 		setActiveThreadId('');
 	};
 
-	const activeThread = threads.find((t) => t.id === activeThreadId);
+	// A new direct chat has nothing on-chain until its first message, and its placeholder is lost
+	// on a refresh or wallet reconnect, so rebuild it from the address in the URL.
+	const activeThread = useMemo<Thread | undefined>(() => {
+		const found = threads.find((t) => t.id === activeThreadId);
+		if (found || !connectedAddress || !ethers.isAddress(activeThreadId)) return found;
+		if (activeThreadId.toLowerCase() === connectedAddress.toLowerCase()) return undefined;
+		return {
+			id: activeThreadId,
+			kind: 'direct',
+			title: shortAddress(activeThreadId),
+			participants: [connectedAddress, activeThreadId],
+			lastMessage: 'No messages yet',
+			lastAt: Math.floor(Date.now() / 1000),
+			unreadCount: 0,
+		};
+	}, [threads, activeThreadId, connectedAddress]);
 	const peerAddress = useMemo(() => {
 		if (activeThread?.kind !== 'direct') return undefined;
 		return activeThread.participants.find((p) => p.toLowerCase() !== connectedAddress?.toLowerCase());
