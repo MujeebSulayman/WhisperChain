@@ -51,7 +51,7 @@ export function ConversationsSidebar({
         // Collapsed rail (desktop only): one avatar per recent conversation.
         return (
             <aside className={`glass flex flex-col items-center gap-2 rounded-[var(--r-card)] py-4 ${frame}`}>
-                <button onClick={onToggle} className="icon-btn" aria-label="Show conversations" title="Show conversations">
+                <button onClick={onToggle} className="icon-btn" aria-label="Show recent chats" title="Show recent chats">
                     <MessagesSquare size={18} strokeWidth={1.8} />
                 </button>
                 <span className="my-2 h-px w-8 bg-line" />
@@ -91,7 +91,7 @@ export function ConversationsSidebar({
                 <div className="flex items-center justify-between gap-2">
                     <div>
                         <p className="label">Inbox{totalUnread > 0 ? ` · ${totalUnread} unread` : ''}</p>
-                        <h2 className="mt-1 font-display text-[22px] font-medium">Conversations</h2>
+                        <h2 className="mt-1 font-display text-[22px] font-medium">Recent chats</h2>
                     </div>
                     <div className="flex items-center gap-1">
                         {connectedAddress && onNewConversation && (
@@ -99,7 +99,7 @@ export function ConversationsSidebar({
                                 <MessageSquarePlus size={18} strokeWidth={1.8} />
                             </button>
                         )}
-                        <button onClick={onToggle} className="icon-btn" aria-label="Hide conversations">
+                        <button onClick={onToggle} className="icon-btn" aria-label="Hide recent chats">
                             <PanelRightClose size={18} strokeWidth={1.8} />
                         </button>
                     </div>

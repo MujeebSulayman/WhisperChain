@@ -71,7 +71,8 @@ export function ChatContainer() {
 	const [showProfileSettings, setShowProfileSettings] = useState(false);
 	const [showBatchMessaging, setShowBatchMessaging] = useState(false);
 	const [sidebarOpen, setSidebarOpen] = useState(!isMobile);
-	const [conversationsSidebarOpen, setConversationsSidebarOpen] = useState(!isMobile || (isMobile && !!connectedAddress));
+	// Recent chats stay open beside the chat on desktop; on mobile they open only when asked.
+	const [conversationsSidebarOpen, setConversationsSidebarOpen] = useState(!isMobile);
 	const [userPublicKey, setUserPublicKey] = useState<string>('');
 	const [paymentNotification, setPaymentNotification] = useState<{
 		amount: bigint;
@@ -119,10 +120,6 @@ export function ChatContainer() {
 		[connectedAddress, addPlaceholder, setActiveThreadId]
 	);
 
-	// On desktop, land in the most recent conversation instead of an empty pane.
-	useEffect(() => {
-		if (!isMobile && !activeThreadId && !cFromUrl && threads.length > 0) setActiveThreadId(threads[0].id);
-	}, [isMobile, activeThreadId, cFromUrl, threads, setActiveThreadId]);
 
 	// Chat invite links (/app?to=0x…): open that chat, or prefill a new one, once we can act on it.
 	const toFromUrl = searchParams.get('to');
@@ -159,12 +156,6 @@ export function ChatContainer() {
 			setConversationsSidebarOpen(false);
 		}
 	}, [isMobile, activeThreadId]);
-
-	useEffect(() => {
-		if (isMobile && connectedAddress && !activeThreadId) {
-			setConversationsSidebarOpen(true);
-		}
-	}, [isMobile, connectedAddress, activeThreadId]);
 
 	useEffect(() => {
 		if (isMobile && sidebarOpen && conversationsSidebarOpen) {
@@ -489,6 +480,11 @@ export function ChatContainer() {
 					) : (
 						<EmptyState
 							connected={Boolean(connectedAddress)}
+							recentCount={isMobile ? threads.length : 0}
+							onOpenRecent={() => {
+								setSidebarOpen(false);
+								setConversationsSidebarOpen(true);
+							}}
 							onShareAddress={() => setWalletTab('receive')}
 							onNewConversation={() => {
 								if (!connectedAddress) {

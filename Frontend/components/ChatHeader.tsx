@@ -127,8 +127,8 @@ export function ChatHeader({
                 <button
                     onClick={onConversationsClick}
                     className={`icon-btn ${showConversations ? 'is-on' : ''}`}
-                    title={showConversations ? 'Hide conversations' : 'Show conversations'}
-                    aria-label={showConversations ? 'Hide conversations' : 'Show conversations'}
+                    title={showConversations ? 'Hide recent chats' : 'Show recent chats'}
+                    aria-label={showConversations ? 'Hide recent chats' : 'Show recent chats'}
                 >
                     <MessagesSquare size={20} strokeWidth={1.8} />
                 </button>

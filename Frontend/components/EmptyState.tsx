@@ -1,11 +1,14 @@
 'use client';
 
-import { KeyRound, MessageSquarePlus, QrCode, Send, ShieldCheck } from 'lucide-react';
+import { KeyRound, MessagesSquare, MessageSquarePlus, QrCode, Send, ShieldCheck } from 'lucide-react';
 
 type EmptyStateProps = {
     onNewConversation: () => void;
     /** Opens the receive/share sheet so others can find you. */
     onShareAddress?: () => void;
+    /** Mobile only: how many recent chats there are, and how to open that list. */
+    recentCount?: number;
+    onOpenRecent?: () => void;
     /** Whether a wallet is connected; changes the copy and the call to action. */
     connected?: boolean;
 };
@@ -26,7 +29,7 @@ function Orb() {
     );
 }
 
-export function EmptyState({ onNewConversation, onShareAddress, connected = false }: EmptyStateProps) {
+export function EmptyState({ onNewConversation, onShareAddress, recentCount = 0, onOpenRecent, connected = false }: EmptyStateProps) {
     return (
         <div className="flex flex-1 items-center justify-center overflow-y-auto p-6 md:p-10">
             <div className="w-full max-w-3xl text-center">
@@ -44,11 +47,17 @@ export function EmptyState({ onNewConversation, onShareAddress, connected = fals
                 </h2>
                 <p className="rise mx-auto mt-4 max-w-md text-[15px] leading-relaxed text-dim" style={{ animationDelay: '0.08s' }}>
                     {connected
-                        ? 'Pick a conversation, open a new one with any registered wallet address, or share yours so people can reach you.'
+                        ? 'Open a chat from Recent chats, start a new one with any wallet address, or share yours so people can reach you.'
                         : 'Your address is your account, so there is nothing else to sign up for. Connect from the menu to begin.'}
                 </p>
                 <div className="rise mt-8 flex flex-wrap justify-center gap-3" style={{ animationDelay: '0.12s' }}>
-                    <button onClick={onNewConversation} className="btn btn-lg btn-white">
+                    {connected && recentCount > 0 && onOpenRecent && (
+                        <button onClick={onOpenRecent} className="btn btn-lg btn-white">
+                            <MessagesSquare size={18} strokeWidth={2} />
+                            Recent chats ({recentCount})
+                        </button>
+                    )}
+                    <button onClick={onNewConversation} className={`btn btn-lg ${connected && recentCount > 0 ? 'btn-ghost' : 'btn-white'}`}>
                         <MessageSquarePlus size={18} strokeWidth={2} />
                         New conversation
                     </button>
