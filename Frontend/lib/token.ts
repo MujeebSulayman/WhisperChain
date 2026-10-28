@@ -1,6 +1,6 @@
 'use client';
 
-import { Contract, JsonRpcProvider, ZeroAddress } from 'ethers';
+import { Contract, JsonRpcProvider, ZeroAddress, formatUnits } from 'ethers';
 import { BASE_CHAIN } from './blockchain';
 
 const ERC20_ABI = [
@@ -42,4 +42,13 @@ export function formatTokenAmount(amountRaw: bigint, decimals: number): string {
 	const frac = amountRaw % BigInt(divisor);
 	const fracStr = frac.toString().padStart(decimals, '0').replace(/0+$/, '') || '0';
 	return fracStr ? `${whole}.${fracStr}` : String(whole);
+}
+
+/** A balance for display: grouped, at most `maxDecimals` places, "<0.000001" for dust. */
+export function formatDisplayAmount(amountRaw: bigint, decimals: number, maxDecimals = 6): string {
+	if (amountRaw === BigInt(0)) return '0';
+	const value = Number(formatUnits(amountRaw, decimals));
+	const floor = 10 ** -maxDecimals;
+	if (value > 0 && value < floor) return `<${floor.toFixed(maxDecimals)}`;
+	return value.toLocaleString(undefined, { maximumFractionDigits: maxDecimals });
 }

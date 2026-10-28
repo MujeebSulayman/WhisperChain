@@ -1,9 +1,11 @@
 'use client';
 
-import { KeyRound, MessageSquarePlus, Send, ShieldCheck } from 'lucide-react';
+import { KeyRound, MessageSquarePlus, QrCode, Send, ShieldCheck } from 'lucide-react';
 
 type EmptyStateProps = {
     onNewConversation: () => void;
+    /** Opens the receive/share sheet so others can find you. */
+    onShareAddress?: () => void;
     /** Whether a wallet is connected; changes the copy and the call to action. */
     connected?: boolean;
 };
@@ -24,7 +26,7 @@ function Orb() {
     );
 }
 
-export function EmptyState({ onNewConversation, connected = false }: EmptyStateProps) {
+export function EmptyState({ onNewConversation, onShareAddress, connected = false }: EmptyStateProps) {
     return (
         <div className="flex flex-1 items-center justify-center overflow-y-auto p-6 md:p-10">
             <div className="w-full max-w-3xl text-center">
@@ -42,13 +44,21 @@ export function EmptyState({ onNewConversation, connected = false }: EmptyStateP
                 </h2>
                 <p className="rise mx-auto mt-4 max-w-md text-[15px] leading-relaxed text-dim" style={{ animationDelay: '0.08s' }}>
                     {connected
-                        ? 'Pick a conversation, or open a new one with any registered wallet address.'
+                        ? 'Pick a conversation, open a new one with any registered wallet address, or share yours so people can reach you.'
                         : 'Your address is your account, so there is nothing else to sign up for. Connect from the menu to begin.'}
                 </p>
-                <button onClick={onNewConversation} className="rise btn btn-lg btn-white mt-8" style={{ animationDelay: '0.12s' }}>
-                    <MessageSquarePlus size={18} strokeWidth={2} />
-                    New conversation
-                </button>
+                <div className="rise mt-8 flex flex-wrap justify-center gap-3" style={{ animationDelay: '0.12s' }}>
+                    <button onClick={onNewConversation} className="btn btn-lg btn-white">
+                        <MessageSquarePlus size={18} strokeWidth={2} />
+                        New conversation
+                    </button>
+                    {connected && onShareAddress && (
+                        <button onClick={onShareAddress} className="btn btn-lg btn-ghost">
+                            <QrCode size={18} strokeWidth={1.8} />
+                            Share my address
+                        </button>
+                    )}
+                </div>
 
                 <ol className="rise mt-10 grid gap-3 text-left sm:grid-cols-3" style={{ animationDelay: '0.16s' }}>
                     {STEPS.map(({ icon: Icon, title, description }, i) => (

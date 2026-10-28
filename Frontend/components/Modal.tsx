@@ -1,6 +1,7 @@
 'use client';
 
-import type { ReactNode } from 'react';
+import { useEffect, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 
 type ModalProps = {
 	children: ReactNode;
@@ -9,14 +10,27 @@ type ModalProps = {
 	onDismiss?: () => void;
 };
 
-/** A centered dialog over a dimmed, blurred scrim. Clicking the scrim calls `onDismiss`. */
+/**
+ * A centered dialog over a dimmed, blurred scrim. Clicking the scrim or pressing Escape calls
+ * `onDismiss`. Portaled to <body> so a transformed ancestor (the sidebar sheet) can't trap it.
+ */
 export function Modal({ children, maxWidth = '28rem', onDismiss }: ModalProps) {
-	return (
-		<div className="fixed inset-0 z-50 grid place-items-center overflow-y-auto p-4">
+	useEffect(() => {
+		if (!onDismiss) return;
+		const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onDismiss();
+		window.addEventListener('keydown', onKey);
+		return () => window.removeEventListener('keydown', onKey);
+	}, [onDismiss]);
+
+	if (typeof document === 'undefined') return null;
+
+	return createPortal(
+		<div className="fixed inset-0 z-[70] grid place-items-center overflow-y-auto p-4">
 			<div className="scrim" aria-hidden onClick={onDismiss} />
 			<div className="rise relative w-full" style={{ maxWidth }} role="dialog" aria-modal="true">
 				{children}
 			</div>
-		</div>
+		</div>,
+		document.body,
 	);
 }

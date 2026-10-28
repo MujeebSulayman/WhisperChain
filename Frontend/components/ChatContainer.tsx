@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { Sidebar } from './Sidebar';
 import { ConversationsSidebar } from './ConversationsSidebar';
@@ -16,6 +16,7 @@ import { BatchMessaging } from './BatchMessaging';
 import { PaymentNotification } from './PaymentNotification';
 import { PaymentHistory } from './PaymentHistory';
 import { Modal } from './Modal';
+import { WalletHub, type WalletTab } from './WalletHub';
 import {
 	sendChatMessage,
 	sendChatMessageGasless,
@@ -34,6 +35,7 @@ import { isGaslessConfigured } from '@/lib/gasless';
 import { getErrorMessage, REQUEST_CANCELLED_MESSAGE } from '@/lib/errors';
 import { useScarf } from '../hooks/useScarf';
 import { useWallet } from '../hooks/useWallet';
+import { useWalletBalance } from '../hooks/useWalletBalance';
 import { useIsMobile } from '../hooks/useMediaQuery';
 import { ethers } from 'ethers';
 import { formatDistanceToNow } from 'date-fns';
@@ -112,8 +114,62 @@ export function ChatContainer() {
 		to?: string;
 	} | null>(null);
 	const [showPaymentHistory, setShowPaymentHistory] = useState(false);
+	const [walletTab, setWalletTab] = useState<WalletTab | null>(null);
+	const [invitedParticipant, setInvitedParticipant] = useState<string | null>(null);
 
 	const { profile, isRegistered, refresh } = useScarf(connectedAddress);
+
+	// Track balances of every token this wallet has been paid in, not just ETH.
+	const receivedTokens = useMemo(() => {
+		const me = connectedAddress?.toLowerCase();
+		const tokens = new Set<string>();
+		Object.values(messages).flat().forEach((m) => {
+			if (m.paymentToken && m.paymentToken !== ethers.ZeroAddress && m.recipient?.toLowerCase() === me) {
+				tokens.add(m.paymentToken.toLowerCase());
+			}
+		});
+		return [...tokens];
+	}, [messages, connectedAddress]);
+	const balance = useWalletBalance(connectedAddress, receivedTokens);
+
+	const handleDisconnect = () => {
+		disconnect();
+		setActiveThreadId('');
+		setMessages({});
+		setThreads([]);
+	};
+
+	const activeThread = threads.find((t) => t.id === activeThreadId);
+	const peerAddress = useMemo(() => {
+		const others = activeThread?.participants?.filter((p) => p.toLowerCase() !== connectedAddress?.toLowerCase()) ?? [];
+		return others.length === 1 ? others[0] : undefined;
+	}, [activeThread, connectedAddress]);
+
+	// Chat invite links (/app?to=0x…): open that chat, or prefill a new one, once we can act on it.
+	const toFromUrl = searchParams.get('to');
+	useEffect(() => {
+		if (!toFromUrl || !connectedAddress || !isRegistered) return;
+		const params = new URLSearchParams(searchParams.toString());
+		params.delete('to');
+
+		const other = toFromUrl.toLowerCase();
+		if (ethers.isAddress(other) && other !== connectedAddress.toLowerCase()) {
+			const existing = threads.find((t) => {
+				const p = t.participants?.map((a) => a.toLowerCase()) ?? [];
+				return p.length === 2 && p.includes(other);
+			});
+			if (existing) {
+				setActiveThreadIdState(existing.id);
+				params.set(CHAT_PARAM, existing.id);
+			} else {
+				setInvitedParticipant(other);
+				setShowCreateConversation(true);
+			}
+		}
+
+		const qs = params.toString();
+		router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+	}, [toFromUrl, connectedAddress, isRegistered, threads, searchParams, pathname, router]);
 
 	useEffect(() => {
 		if (isMobile && activeThreadId) {
@@ -532,6 +588,7 @@ export function ChatContainer() {
 			}
 
 			if (args.paymentAmount && args.paymentAmount > BigInt(0)) {
+				balance.refresh();
 				setPaymentNotification({
 					amount: args.paymentAmount,
 					token: args.paymentToken,
@@ -607,11 +664,10 @@ export function ChatContainer() {
 						} catch (error) {
 						}
 					}}
-					onDisconnect={() => {
-						disconnect();
-						setActiveThreadId('');
-						setMessages({});
-						setThreads([]);
+					balance={balance}
+					onOpenWallet={(tab) => {
+						setWalletTab(tab);
+						if (isMobile) setSidebarOpen(false);
 					}}
 					profile={profile ? { ...profile, publicKey: userPublicKey } : undefined}
 					onNewChat={() => {
@@ -649,7 +705,8 @@ export function ChatContainer() {
 
 					{(isMobile || activeThreadId) && (
 						<ChatHeader
-							threadTitle={activeThreadId ? threads.find((t) => t.id === activeThreadId)?.title : undefined}
+							threadTitle={activeThreadId ? activeThread?.title : undefined}
+							peerAddress={activeThreadId ? peerAddress : undefined}
 							onMenuClick={() => {
 								if (isMobile && conversationsSidebarOpen) {
 									setConversationsSidebarOpen(false);
@@ -689,6 +746,7 @@ export function ChatContainer() {
 					) : (
 						<EmptyState
 							connected={Boolean(connectedAddress)}
+							onShareAddress={() => setWalletTab('receive')}
 							onNewConversation={() => {
 								if (!connectedAddress) {
 									setError('Please connect your wallet to create a new conversation');
@@ -735,9 +793,10 @@ export function ChatContainer() {
 			)}
 
 			{showCreateConversation && connectedAddress && (
-				<Modal onDismiss={() => setShowCreateConversation(false)}>
+				<Modal onDismiss={() => { setShowCreateConversation(false); setInvitedParticipant(null); }}>
 					<CreateConversation
 						currentUser={connectedAddress}
+						initialParticipants={invitedParticipant ? [invitedParticipant] : undefined}
 						findExisting1on1Thread={(otherAddress) => {
 							const other = otherAddress.toLowerCase();
 							const me = connectedAddress?.toLowerCase() ?? '';
@@ -749,6 +808,7 @@ export function ChatContainer() {
 						}}
 						onCreated={(conversationId, participants) => {
 							setShowCreateConversation(false);
+							setInvitedParticipant(null);
 							const isExisting = threads.some((t) => t.id === conversationId);
 							if (!isExisting) {
 								const other = participants.filter((p) => p.toLowerCase() !== connectedAddress?.toLowerCase());
@@ -762,9 +822,28 @@ export function ChatContainer() {
 							setActiveThreadId(conversationId);
 							loadUserData();
 						}}
-						onCancel={() => setShowCreateConversation(false)}
+						onCancel={() => { setShowCreateConversation(false); setInvitedParticipant(null); }}
 					/>
 				</Modal>
+			)}
+
+			{walletTab && connectedAddress && (
+				<WalletHub
+					address={connectedAddress}
+					balance={balance}
+					tab={walletTab}
+					onTabChange={setWalletTab}
+					defaultRecipient={peerAddress}
+					onPaymentHistory={() => {
+						setWalletTab(null);
+						setShowPaymentHistory(true);
+					}}
+					onDisconnect={() => {
+						setWalletTab(null);
+						handleDisconnect();
+					}}
+					onClose={() => setWalletTab(null)}
+				/>
 			)}
 
 			{showProfileSettings && (

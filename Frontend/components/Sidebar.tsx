@@ -1,16 +1,20 @@
 'use client';
 
-import { MessageSquarePlus, Settings, Send, PanelLeftClose, PanelLeftOpen, Coins } from 'lucide-react';
+import { MessageSquarePlus, Settings, Send, PanelLeftClose, PanelLeftOpen, Coins, Wallet } from 'lucide-react';
 import { WalletConnect } from './WalletConnect';
+import { CopyAddress } from './CopyAddress';
 import { UserStats } from './UserStats';
 import { StorageManagement } from './StorageManagement';
+import type { WalletBalance } from '@/hooks/useWalletBalance';
+import type { WalletTab } from './WalletHub';
 
 type SidebarProps = {
     isOpen: boolean;
     onToggle: () => void;
     connectedAddress?: string;
     onConnect: () => void | Promise<void>;
-    onDisconnect?: () => void;
+    balance?: WalletBalance;
+    onOpenWallet?: (tab: WalletTab) => void;
     profile?: {
         username?: string;
         publicKey?: string;
@@ -28,7 +32,8 @@ export function Sidebar({
     onToggle,
     connectedAddress,
     onConnect,
-    onDisconnect,
+    balance,
+    onOpenWallet,
     profile,
     onNewChat,
     onBatchSend,
@@ -62,6 +67,11 @@ export function Sidebar({
                 <button onClick={onPaymentHistory} className="icon-btn" title="Payment history" aria-label="Payment history">
                     <Coins size={18} strokeWidth={1.8} />
                 </button>
+                {connectedAddress && onOpenWallet && (
+                    <button onClick={() => onOpenWallet('receive')} className="icon-btn" title="Wallet" aria-label="Open wallet">
+                        <Wallet size={18} strokeWidth={1.8} />
+                    </button>
+                )}
                 {profile && connectedAddress && (
                     <div className="mt-auto flex flex-col items-center gap-2">
                         <button onClick={onSettings} className="icon-btn" title="Settings" aria-label="Settings">
@@ -90,14 +100,22 @@ export function Sidebar({
             </div>
 
             <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto px-3 pb-4">
-                <WalletConnect connectedAddress={connectedAddress} onConnect={onConnect} onDisconnect={onDisconnect} />
+                <WalletConnect
+                    connectedAddress={connectedAddress}
+                    onConnect={onConnect}
+                    balance={balance}
+                    onOpenWallet={onOpenWallet && (() => onOpenWallet('receive'))}
+                />
 
                 {profile && connectedAddress && (
                     <div className="card flex items-center gap-3 p-3">
                         <span className="avatar is-on h-10 w-10 text-[14px]">{initial}</span>
                         <div className="min-w-0 flex-1">
                             <p className="truncate text-[14px] font-semibold">{profile.username || 'User'}</p>
-                            <p className="truncate font-mono text-[11px] text-mute">{shortAddress}</p>
+                            <p className="flex items-center font-mono text-[11px] text-mute">
+                                <span className="truncate">{shortAddress}</span>
+                                <CopyAddress text={connectedAddress} size={11} className="p-1!" />
+                            </p>
                         </div>
                         <button onClick={onSettings} className="icon-btn h-9! w-9!" title="Settings" aria-label="Settings">
                             <Settings size={16} strokeWidth={1.8} />

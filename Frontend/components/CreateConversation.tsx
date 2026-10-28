@@ -19,6 +19,8 @@ type CreateConversationProps = {
     onCancel: () => void;
     currentUser: string;
     findExisting1on1Thread?: (otherAddress: string) => string | null;
+    /** Prefilled participants, e.g. from a shared chat invite link. */
+    initialParticipants?: string[];
 };
 
 export function CreateConversation({
@@ -26,8 +28,9 @@ export function CreateConversation({
     onCancel,
     currentUser,
     findExisting1on1Thread,
+    initialParticipants = [],
 }: CreateConversationProps) {
-    const [participants, setParticipants] = useState<string[]>([]);
+    const [participants, setParticipants] = useState<string[]>(() => initialParticipants.map((p) => p.toLowerCase()));
     const [newParticipant, setNewParticipant] = useState('');
     const [isCreating, setIsCreating] = useState(false);
     const [error, setError] = useState<string | null>(null);

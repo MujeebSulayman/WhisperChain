@@ -1,11 +1,15 @@
 'use client';
 
-import { Menu, MessagesSquare, Zap } from 'lucide-react';
+import { Menu, MessagesSquare, Zap, ExternalLink } from 'lucide-react';
+import { explorerAddress } from '@/lib/links';
+import { CopyAddress, shortAddress } from './CopyAddress';
 import { isGaslessConfigured } from '@/lib/gasless';
 import { BASE_CHAIN } from '@/lib/deployments';
 
 type ChatHeaderProps = {
     threadTitle?: string;
+    /** The other person in a 1:1 chat, so their address can be copied. */
+    peerAddress?: string;
     onMenuClick?: () => void;
     showMenu?: boolean;
     onConversationsClick?: () => void;
@@ -13,7 +17,7 @@ type ChatHeaderProps = {
     isMobile?: boolean;
 };
 
-export function ChatHeader({ threadTitle, onMenuClick, showMenu = false, onConversationsClick, showConversations = true, isMobile = false }: ChatHeaderProps) {
+export function ChatHeader({ threadTitle, peerAddress, onMenuClick, showMenu = false, onConversationsClick, showConversations = true, isMobile = false }: ChatHeaderProps) {
     const getInitials = (title?: string) => {
         if (!title) return 'C';
         const parts = title.split(' ');
@@ -38,9 +42,24 @@ export function ChatHeader({ threadTitle, onMenuClick, showMenu = false, onConve
                         <h2 className="truncate text-[15px] font-semibold tracking-[-0.02em]">{threadTitle}</h2>
                         <p className="flex items-center gap-1.5 font-mono text-[11px] text-mute">
                             <span className="h-1.5 w-1.5 rounded-full bg-good" />
-                            {BASE_CHAIN.name}
+                            {peerAddress ? <span title={peerAddress}>{shortAddress(peerAddress)} · {BASE_CHAIN.name}</span> : BASE_CHAIN.name}
                         </p>
                     </div>
+                    {peerAddress && (
+                        <div className="flex shrink-0 items-center">
+                            <CopyAddress text={peerAddress} label="their address" size={15} />
+                            <a
+                                href={explorerAddress(peerAddress)}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="grid place-items-center rounded-full p-1.5 text-mute transition-colors hover:bg-[color-mix(in_srgb,var(--fg)_8%,transparent)] hover:text-fg"
+                                title="View on explorer"
+                                aria-label="View their address on explorer"
+                            >
+                                <ExternalLink size={15} strokeWidth={1.8} />
+                            </a>
+                        </div>
+                    )}
                 </div>
             ) : (
                 <p className="label flex-1">Scarf</p>
