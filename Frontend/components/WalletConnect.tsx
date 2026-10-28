@@ -1,10 +1,8 @@
 'use client';
 
-import { Wallet, Loader2, AlertCircle, Mail, ChevronRight, ArrowDownLeft } from 'lucide-react';
+import { Wallet, Loader2, AlertCircle, ChevronRight, ArrowDownLeft } from 'lucide-react';
 import { useState } from 'react';
 import { ZeroAddress } from 'ethers';
-import { usePrivy } from '@privy-io/react-auth';
-import { BASE_CHAIN } from '@/lib/blockchain';
 import { getErrorMessage } from '@/lib/errors';
 import { useActiveWallet, useWallet } from '@/hooks/useWallet';
 import type { WalletBalance } from '@/hooks/useWalletBalance';
@@ -31,17 +29,14 @@ const WALLET_NAMES: Record<string, string> = {
 	wallet_connect_v2: 'WalletConnect',
 };
 
-/** How to name the signed-in wallet: the email for Scarf (embedded) wallets, else the wallet app. */
+/** How to name the signed-in wallet: by the wallet app, never by the login (email etc.) behind it. */
 export function useWalletIdentity() {
-	const { user } = usePrivy();
 	const wallet = useActiveWallet();
 	const isEmbedded = wallet?.walletClientType === 'privy' || wallet?.walletClientType === 'privy-v2';
 	const walletName = wallet ? WALLET_NAMES[wallet.walletClientType] ?? wallet.walletClientType.replace(/_/g, ' ') : 'Wallet';
-	const login = user?.email?.address ?? user?.google?.email;
 	return {
 		isEmbedded,
 		title: walletName,
-		subtitle: isEmbedded ? login : undefined,
 	};
 }
 
@@ -50,7 +45,7 @@ export function WalletConnect({ onConnect, connectedAddress, balance, onOpenWall
 	const [isConnecting, setIsConnecting] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const { isConnecting: privyLoading, error: loginError } = useWallet();
-	const { isEmbedded, title, subtitle } = useWalletIdentity();
+	const { title } = useWalletIdentity();
 
 	const handleConnect = async () => {
 		setIsConnecting(true);
@@ -72,13 +67,11 @@ export function WalletConnect({ onConnect, connectedAddress, balance, onOpenWall
 			<div className="card p-3">
 				<div className="flex items-center gap-3">
 					<span className="relative grid h-9 w-9 shrink-0 place-items-center rounded-full bg-good/15 text-good">
-						{isEmbedded ? <Mail size={16} strokeWidth={1.8} /> : <Wallet size={16} strokeWidth={1.8} />}
+						<Wallet size={16} strokeWidth={1.8} />
 						<span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full border-2 border-[var(--card-bg)] bg-good" />
 					</span>
 					<div className="min-w-0 flex-1">
-						<p className="label truncate text-[10px]!" title={subtitle}>
-							{subtitle ?? title}
-						</p>
+						<p className="label truncate text-[10px]!">{title}</p>
 						<div className="flex items-center gap-0.5">
 							<p className="truncate font-mono text-[13px]" title={connectedAddress}>
 								{shortAddress(connectedAddress)}
@@ -86,7 +79,6 @@ export function WalletConnect({ onConnect, connectedAddress, balance, onOpenWall
 							<CopyAddress text={connectedAddress} size={13} />
 						</div>
 					</div>
-					<span className="pill h-6! shrink-0 px-2.5! font-mono text-[10px] text-dim">{BASE_CHAIN.name}</span>
 				</div>
 
 				<button
@@ -105,6 +97,11 @@ export function WalletConnect({ onConnect, connectedAddress, balance, onOpenWall
 							<span className="mt-1 flex items-baseline gap-1.5">
 								<span className="font-mono text-[14px]">{usdc.formatted}</span>
 								<span className="text-[12px] text-dim">{usdc.symbol}</span>
+							</span>
+						)}
+						{balance && balance.elsewhere.length > 0 && (
+							<span className="mt-1.5 block text-[11px] text-warn">
+								+ funds on {balance.elsewhere.length === 1 ? balance.elsewhere[0].chain.name : `${balance.elsewhere.length} other networks`}
 							</span>
 						)}
 						{balance?.lastIncrease && (

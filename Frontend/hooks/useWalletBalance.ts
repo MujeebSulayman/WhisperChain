@@ -1,9 +1,9 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Contract, JsonRpcProvider, ZeroAddress } from 'ethers';
+import { Contract, JsonRpcProvider, Network, ZeroAddress } from 'ethers';
 import { BASE_CHAIN } from '@/lib/blockchain';
-import { PAYMENT_ASSETS } from '@/lib/deployments';
+import { OTHER_CHAINS, PAYMENT_ASSETS, type OtherChain } from '@/lib/deployments';
 import { formatDisplayAmount } from '@/lib/token';
 
 export type WalletAsset = {
@@ -17,7 +17,11 @@ export type WalletAsset = {
 
 export type BalanceIncrease = { symbol: string; formatted: string; at: number };
 
+/** Funds the same address holds on a network Scarf doesn't run on. */
+export type ChainHoldings = { chain: OtherChain; assets: WalletAsset[] };
+
 const POLL_MS = 15_000;
+const OTHER_CHAINS_POLL_MS = 60_000;
 const BALANCE_ABI = ['function balanceOf(address owner) view returns (uint256)'];
 
 /*
@@ -31,13 +35,50 @@ export function useWalletBalance(address?: string) {
 	const [lastIncrease, setLastIncrease] = useState<BalanceIncrease | null>(null);
 	const previous = useRef<Map<string, bigint>>(new Map());
 
+	const [elsewhere, setElsewhere] = useState<ChainHoldings[]>([]);
 	const clearIncrease = useCallback(() => setLastIncrease(null), []);
 
 	useEffect(() => {
 		previous.current = new Map();
 		setAssets([]);
 		setLastIncrease(null);
+		setElsewhere([]);
 	}, [address]);
+
+	// ETH and USDC on the other networks, keeping only the ones that hold something.
+	// A network whose RPC fails is skipped rather than shown as empty.
+	const refreshElsewhere = useCallback(async () => {
+		if (!address) return;
+		const results = await Promise.allSettled(
+			OTHER_CHAINS.map(async (chain): Promise<ChainHoldings> => {
+				const provider = new JsonRpcProvider(chain.rpcUrl, chain.id, { staticNetwork: Network.from(chain.id) });
+				const [eth, usdc] = await Promise.all([
+					provider.getBalance(address),
+					new Contract(chain.usdc, BALANCE_ABI, provider).balanceOf(address) as Promise<bigint>,
+				]);
+				const held: WalletAsset[] = [
+					{ token: ZeroAddress, symbol: 'ETH', decimals: 18, raw: eth, formatted: formatDisplayAmount(eth, 18) },
+					{ token: chain.usdc, symbol: 'USDC', decimals: 6, raw: usdc, formatted: formatDisplayAmount(usdc, 6) },
+				];
+				return { chain, assets: held.filter((a) => a.raw > BigInt(0)) };
+			}),
+		);
+		setElsewhere(
+			results
+				.filter((r): r is PromiseFulfilledResult<ChainHoldings> => r.status === 'fulfilled')
+				.map((r) => r.value)
+				.filter((h) => h.assets.length > 0),
+		);
+	}, [address]);
+
+	useEffect(() => {
+		if (!address) return;
+		refreshElsewhere();
+		const timer = setInterval(() => {
+			if (document.visibilityState === 'visible') refreshElsewhere();
+		}, OTHER_CHAINS_POLL_MS);
+		return () => clearInterval(timer);
+	}, [address, refreshElsewhere]);
 
 	const refresh = useCallback(async () => {
 		if (!address) return;
@@ -97,6 +138,8 @@ export function useWalletBalance(address?: string) {
 		lastIncrease,
 		clearIncrease,
 		refresh,
+		elsewhere,
+		refreshElsewhere,
 	};
 }
 

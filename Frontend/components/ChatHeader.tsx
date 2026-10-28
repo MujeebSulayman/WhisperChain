@@ -2,9 +2,8 @@
 
 import { Menu, MessagesSquare, Zap, ExternalLink } from 'lucide-react';
 import { explorerAddress } from '@/lib/links';
-import { CopyAddress, shortAddress } from './CopyAddress';
+import { CopyAddress } from './CopyAddress';
 import { isGaslessConfigured } from '@/lib/gasless';
-import { BASE_CHAIN } from '@/lib/deployments';
 
 type ChatHeaderProps = {
     threadTitle?: string;
@@ -39,11 +38,7 @@ export function ChatHeader({ threadTitle, peerAddress, onMenuClick, showMenu = f
                 <div className="flex min-w-0 flex-1 items-center gap-3">
                     <span className="avatar h-10 w-10">{getInitials(threadTitle)}</span>
                     <div className="min-w-0">
-                        <h2 className="truncate text-[15px] font-semibold tracking-[-0.02em]">{threadTitle}</h2>
-                        <p className="flex items-center gap-1.5 font-mono text-[11px] text-mute">
-                            <span className="h-1.5 w-1.5 rounded-full bg-good" />
-                            {peerAddress ? <span title={peerAddress}>{shortAddress(peerAddress)} · {BASE_CHAIN.name}</span> : BASE_CHAIN.name}
-                        </p>
+                        <h2 className="truncate text-[15px] font-semibold tracking-[-0.02em]" title={peerAddress}>{threadTitle}</h2>
                     </div>
                     {peerAddress && (
                         <div className="flex shrink-0 items-center">

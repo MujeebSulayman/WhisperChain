@@ -70,7 +70,9 @@ export function ReceivePanel({ address }: { address: string }) {
 
 						<p className="mt-3 flex items-start gap-2 text-[12px] leading-relaxed text-dim">
 							<AlertTriangle size={14} strokeWidth={1.8} className="mt-0.5 shrink-0 text-warn" />
-							Only send assets on {BASE_CHAIN.name}. Funds sent on another network won&apos;t show up here.
+							Send on {BASE_CHAIN.name} to use funds in Scarf. Funds sent on other EVM networks (Ethereum, Arbitrum,
+							Optimism) still reach this address and show under &ldquo;On other networks&rdquo;, but can&apos;t be spent here.
+							Never send from Bitcoin, Solana or other non-EVM chains.
 						</p>
 					</>
 				) : (

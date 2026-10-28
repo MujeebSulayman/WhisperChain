@@ -9,6 +9,7 @@ import {
 	ChevronRight,
 	Coins,
 	ExternalLink,
+	Info,
 	KeyRound,
 	LogOut,
 	RefreshCw,
@@ -58,7 +59,7 @@ export function WalletHub({
 	onClose,
 }: WalletHubProps) {
 	const [sending, setSending] = useState(false);
-	const { title, subtitle } = useWalletIdentity();
+	const { title } = useWalletIdentity();
 	const tokens = balance.assets.filter((a) => a.token !== ZeroAddress);
 
 	return (
@@ -75,7 +76,6 @@ export function WalletHub({
 								</p>
 								<CopyAddress text={address} size={13} />
 							</div>
-							{subtitle && <p className="truncate text-[11.5px] text-mute">{subtitle}</p>}
 						</div>
 						<button onClick={onClose} disabled={sending} className="icon-btn h-9! w-9! shrink-0 disabled:opacity-40" aria-label="Close">
 							<X size={16} strokeWidth={1.8} />
@@ -90,12 +90,15 @@ export function WalletHub({
 							<span className="text-[15px] text-dim">ETH</span>
 						</p>
 						<button
-							onClick={balance.refresh}
-							className="pill h-7! shrink-0 gap-1.5 px-2.5! text-[11px] text-dim"
+							onClick={() => {
+								balance.refresh();
+								balance.refreshElsewhere();
+							}}
+							className="icon-btn h-8! w-8! shrink-0"
 							title="Refresh balance"
+							aria-label="Refresh balance"
 						>
-							<RefreshCw size={11} strokeWidth={1.8} className={balance.loading ? 'animate-spin' : ''} />
-							{BASE_CHAIN.name}
+							<RefreshCw size={14} strokeWidth={1.8} className={balance.loading ? 'animate-spin' : ''} />
 						</button>
 					</div>
 					{tokens.length > 0 && (
@@ -113,6 +116,7 @@ export function WalletHub({
 							<ArrowDownLeft size={13} strokeWidth={2} />+{balance.lastIncrease.formatted} {balance.lastIncrease.symbol} just arrived
 						</p>
 					)}
+					{balance.elsewhere.length > 0 && <OtherNetworks holdings={balance.elsewhere} address={address} />}
 				</div>
 
 				{/* Sections */}
@@ -148,6 +152,42 @@ export function WalletHub({
 				</div>
 			</div>
 		</Modal>
+	);
+}
+
+/** Funds this address holds on networks Scarf doesn't run on: visible, but not spendable here. */
+function OtherNetworks({ holdings, address }: { holdings: WalletBalance['elsewhere']; address: string }) {
+	return (
+		<div className="inset-panel mt-4 rounded-[var(--r-inset)] p-3">
+			<p className="label text-[10px]!">On other networks</p>
+			<ul className="mt-2 grid gap-1.5">
+				{holdings.map(({ chain, assets }) => (
+					<li key={chain.id} className="flex items-center justify-between gap-3 text-[13px]">
+						<a
+							href={`${chain.explorer}/address/${address}`}
+							target="_blank"
+							rel="noreferrer"
+							className="flex items-center gap-1 text-dim hover:text-fg"
+						>
+							{chain.name}
+							<ExternalLink size={11} strokeWidth={1.8} />
+						</a>
+						<span className="flex flex-wrap justify-end gap-x-3 font-mono text-[12.5px]">
+							{assets.map((a) => (
+								<span key={a.token}>
+									{a.formatted} <span className="text-dim">{a.symbol}</span>
+								</span>
+							))}
+						</span>
+					</li>
+				))}
+			</ul>
+			<p className="mt-2.5 flex items-start gap-1.5 border-t border-line pt-2.5 text-[11.5px] leading-relaxed text-mute">
+				<Info size={12} strokeWidth={1.8} className="mt-0.5 shrink-0" />
+				These are safe in your wallet, but Scarf runs on {BASE_CHAIN.name}. Bridge them to {BASE_CHAIN.name} to use them in
+				chats.
+			</p>
+		</div>
 	);
 }
 
