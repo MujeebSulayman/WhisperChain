@@ -51,6 +51,9 @@ export function WalletProvider({ children }: { children: ReactNode }) {
 				supportedChains: [scarfChain],
 				embeddedWallets: {
 					ethereum: { createOnLogin: 'users-without-wallets' },
+					// No Privy confirm popup: Scarf's own Send / Attach / Approve buttons are the confirmation.
+					// External wallets (MetaMask etc.) still prompt; sites can't turn that off.
+					showWalletUIs: false,
 				},
 				appearance: {
 					theme: 'dark',
