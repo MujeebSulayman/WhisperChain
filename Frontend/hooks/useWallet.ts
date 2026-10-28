@@ -1,127 +1,60 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { connectScarf } from '@/lib/blockchain';
+import { useState, useCallback } from 'react';
+import { usePrivy, useWallets, useLogin, type ConnectedWallet } from '@privy-io/react-auth';
+import { isUserRejectedError } from '@/lib/errors';
 
-const WALLET_STORAGE_KEY = 'scarf_connected_wallet';
+/*
+ * The wallet Scarf signs with: the user's primary linked wallet if it is connected in this
+ * browser, otherwise the first one Privy has (an embedded wallet for email/social logins).
+ */
+export function useActiveWallet(): ConnectedWallet | undefined {
+	const { authenticated, user } = usePrivy();
+	const { wallets } = useWallets();
+	if (!authenticated) return undefined;
+
+	const primary = user?.wallet?.address?.toLowerCase();
+	return wallets.find((w) => w.address.toLowerCase() === primary) ?? wallets[0];
+}
 
 export function useWallet() {
-	const [connectedAddress, setConnectedAddress] = useState<
-		string | undefined
-	>();
-	const [isConnecting, setIsConnecting] = useState(false);
+	const { ready, authenticated, logout, connectWallet } = usePrivy();
+	const wallet = useActiveWallet();
 	const [error, setError] = useState<string | null>(null);
 
-	useEffect(() => {
-		const loadSavedWallet = async () => {
-			if (typeof window === 'undefined') return;
-
-			const savedAddress = localStorage.getItem(WALLET_STORAGE_KEY);
-			if (!savedAddress) return;
-
-			const ethereum = (window as typeof window & { ethereum?: any }).ethereum;
-			if (!ethereum) {
-				localStorage.removeItem(WALLET_STORAGE_KEY);
-				return;
+	const { login } = useLogin({
+		onError: (err) => {
+			if (!isUserRejectedError(err) && err !== 'exited_auth_flow') {
+				setError(String(err));
 			}
-
-			try {
-				const accounts = await ethereum.request({ method: 'eth_accounts' });
-				if (
-					accounts.length > 0 &&
-					accounts[0].toLowerCase() === savedAddress.toLowerCase()
-				) {
-					setConnectedAddress(accounts[0]);
-				} else {
-					localStorage.removeItem(WALLET_STORAGE_KEY);
-				}
-			} catch (error) {
-				localStorage.removeItem(WALLET_STORAGE_KEY);
-			}
-		};
-
-		loadSavedWallet();
-	}, []);
-
-	useEffect(() => {
-		if (typeof window === 'undefined') return;
-
-		const ethereum = (window as typeof window & { ethereum?: any }).ethereum;
-		if (!ethereum) return;
-
-		const handleAccountsChanged = (accounts: string[]) => {
-			if (accounts.length > 0) {
-				const address = accounts[0];
-				setConnectedAddress(address);
-				localStorage.setItem(WALLET_STORAGE_KEY, address);
-			} else {
-				setConnectedAddress(undefined);
-				localStorage.removeItem(WALLET_STORAGE_KEY);
-			}
-		};
-
-		const handleChainChanged = () => {
-			window.location.reload();
-		};
-
-		ethereum.on('accountsChanged', handleAccountsChanged);
-		ethereum.on('chainChanged', handleChainChanged);
-
-		return () => {
-			ethereum.removeListener('accountsChanged', handleAccountsChanged);
-			ethereum.removeListener('chainChanged', handleChainChanged);
-		};
-	}, []);
+		},
+	});
 
 	const connect = useCallback(async () => {
-		setIsConnecting(true);
 		setError(null);
-
-		try {
-			const { signer } = await connectScarf();
-			let address: string;
-			try {
-				address = await signer.getAddress();
-			} catch (ensError: any) {
-				if (
-					ensError.code === 'UNSUPPORTED_OPERATION' &&
-					ensError.operation === 'getEnsAddress'
-				) {
-					const provider = signer.provider;
-					if (provider) {
-						const accounts = await (provider as any).send('eth_accounts', []);
-						if (accounts && accounts.length > 0) {
-							address = accounts[0];
-						} else {
-							throw new Error('No accounts found');
-						}
-					} else {
-						throw new Error('Provider not available');
-					}
-				} else {
-					throw ensError;
-				}
-			}
-			setConnectedAddress(address);
-			localStorage.setItem(WALLET_STORAGE_KEY, address);
-		} catch (err: any) {
-			setError(err.message || 'Failed to connect wallet');
-			throw err;
-		} finally {
-			setIsConnecting(false);
+		// Logged in but no wallet connected in this browser (e.g. an external wallet after a reload).
+		if (authenticated) {
+			connectWallet();
+		} else {
+			login();
 		}
-	}, []);
+	}, [authenticated, connectWallet, login]);
 
-	const disconnect = useCallback(() => {
-		setConnectedAddress(undefined);
-		localStorage.removeItem(WALLET_STORAGE_KEY);
-	}, []);
+	const disconnect = useCallback(async () => {
+		await logout();
+	}, [logout]);
+
+	const switchAccount = useCallback(async () => {
+		await logout();
+		login();
+	}, [logout, login]);
 
 	return {
-		connectedAddress,
-		isConnecting,
+		connectedAddress: wallet?.address,
+		isConnecting: !ready,
 		error,
 		connect,
 		disconnect,
+		switchAccount,
 	};
 }

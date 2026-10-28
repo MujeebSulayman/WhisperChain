@@ -1,9 +1,10 @@
 'use client';
 
-import { Wallet, Loader2, AlertCircle, RefreshCw, LogOut, ExternalLink } from 'lucide-react';
-import { useState, useEffect } from 'react';
-import { connectScarf, BASE_CHAIN, isMobileDevice, openMetaMaskMobile } from '@/lib/blockchain';
+import { Wallet, Loader2, AlertCircle, RefreshCw, LogOut } from 'lucide-react';
+import { useState } from 'react';
+import { BASE_CHAIN } from '@/lib/blockchain';
 import { getErrorMessage, isUserRejectedError } from '@/lib/errors';
+import { useWallet } from '@/hooks/useWallet';
 
 type WalletConnectProps = {
 	onConnect: () => void | Promise<void>;
@@ -15,22 +16,13 @@ export function WalletConnect({ onConnect, onDisconnect, connectedAddress }: Wal
 	const [isConnecting, setIsConnecting] = useState(false);
 	const [isSwitching, setIsSwitching] = useState(false);
 	const [error, setError] = useState<string | null>(null);
+	const { switchAccount, isConnecting: privyLoading, error: loginError } = useWallet();
 
 	const handleConnect = async () => {
 		setIsConnecting(true);
 		setError(null);
 
 		try {
-			if (isMobileDevice()) {
-				const ethereum = (window as typeof window & { ethereum?: any }).ethereum;
-				if (!ethereum) {
-					openMetaMaskMobile();
-					setError('Opening MetaMask... Please open this page in MetaMask browser or install MetaMask.');
-					setIsConnecting(false);
-					return;
-				}
-			}
-
 			await onConnect();
 		} catch (err: any) {
 			setError(getErrorMessage(err, 'Failed to connect wallet'));
@@ -44,20 +36,7 @@ export function WalletConnect({ onConnect, onDisconnect, connectedAddress }: Wal
 		setError(null);
 
 		try {
-			const ethereum = (window as typeof window & { ethereum?: any }).ethereum;
-			if (!ethereum) {
-				throw new Error('No wallet detected');
-			}
-
-			await ethereum.request({
-				method: 'wallet_requestPermissions',
-				params: [{ eth_accounts: {} }],
-			});
-
-			const accounts = await ethereum.request({ method: 'eth_accounts' });
-			if (accounts.length > 0) {
-				await onConnect();
-			}
+			await switchAccount();
 		} catch (err: any) {
 			if (!isUserRejectedError(err)) {
 				setError(getErrorMessage(err, 'Failed to switch account'));
@@ -112,8 +91,8 @@ export function WalletConnect({ onConnect, onDisconnect, connectedAddress }: Wal
 
 	return (
 		<div>
-			<button onClick={handleConnect} disabled={isConnecting} className="btn btn-accent w-full disabled:opacity-60">
-				{isConnecting ? (
+			<button onClick={handleConnect} disabled={isConnecting || privyLoading} className="btn btn-accent w-full disabled:opacity-60">
+				{isConnecting || privyLoading ? (
 					<>
 						<Loader2 size={16} className="animate-spin" />
 						Connecting…
@@ -121,29 +100,16 @@ export function WalletConnect({ onConnect, onDisconnect, connectedAddress }: Wal
 				) : (
 					<>
 						<Wallet size={16} strokeWidth={2} />
-						Connect wallet
+						Log in or connect wallet
 					</>
 				)}
 			</button>
-			{error && (
+			{(error || loginError) && (
 				<div className="inset-panel mt-2 rounded-[var(--r-inset)] p-3">
 					<div className="flex items-start gap-2">
 						<AlertCircle size={15} strokeWidth={1.8} className="mt-0.5 shrink-0 text-bad" />
-						<p className="flex-1 text-[12px] leading-relaxed text-dim">{error}</p>
+						<p className="flex-1 text-[12px] leading-relaxed text-dim">{error || loginError}</p>
 					</div>
-					{isMobileDevice() && !(window as typeof window & { ethereum?: any }).ethereum && (
-						<div className="mt-3 border-t border-line pt-3">
-							<p className="label text-[10px]!">To connect on mobile</p>
-							<ol className="mt-2 list-decimal pl-4 text-[12px] leading-relaxed text-dim">
-								<li>Open this page in the MetaMask browser</li>
-								<li>Or tap below to open it in the MetaMask app</li>
-							</ol>
-							<button onClick={() => openMetaMaskMobile()} className="btn btn-sm btn-ghost mt-3 w-full">
-								<ExternalLink size={14} strokeWidth={1.8} />
-								Open in MetaMask
-							</button>
-						</div>
-					)}
 				</div>
 			)}
 		</div>
