@@ -2,8 +2,8 @@ import { Icon, type IconName } from "../site/Icons";
 import { Reveal } from "../site/Reveal";
 
 const STEPS: { icon: IconName; title: string; body: string }[] = [
-  { icon: "wallet", title: "Connect your wallet", body: "MetaMask or any injected wallet. Your address is your account, so there is no sign-up form." },
-  { icon: "user", title: "Pick a username", body: "Choose the name people will see. It is saved on-chain with your address in one signature." },
+  { icon: "wallet", title: "Connect your wallet", body: "Any wallet, or sign in with email to get one. Your address is your account: no names, no sign-up form." },
+  { icon: "user", title: "Activate your address", body: "Sign once to record your address on-chain so others can reach you. It costs no gas." },
   { icon: "chat", title: "Say hello", body: "Start a chat or a group and send your first message. A relayer submits it, so you pay no gas." },
 ];
 

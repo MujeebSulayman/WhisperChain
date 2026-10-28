@@ -85,13 +85,13 @@ export const DOCS: DocPage[] = [
             "Share images, video, audio and documents up to 50 MB each.",
             "Send one message to up to 10 people with a single signature.",
             "Attach ETH or any ERC-20 token to a message.",
-            "Pick a username that lives on-chain with your address.",
+            "No usernames or profiles: your wallet address is your identity.",
           ]}
         />
         <H2 id="next">Where to go next</H2>
         <Cards
           items={[
-            { href: "/docs/quickstart", title: "Quickstart", body: "Connect a wallet, pick a username and send your first message." },
+            { href: "/docs/quickstart", title: "Quickstart", body: "Connect a wallet, activate your address and send your first message." },
             { href: "/docs/conversations", title: "Using the app", body: "Chats, groups, media, batch send and payments." },
             { href: "/docs/gasless", title: "How it works", body: "Signatures, the relayer, the paymaster and the contracts." },
             { href: "/docs/run-locally", title: "Developers", body: "Run the app, deploy the contracts and call the relayer." },
@@ -115,7 +115,7 @@ export const DOCS: DocPage[] = [
         <H2 id="need">What you need</H2>
         <List
           items={[
-            <>A browser wallet such as MetaMask. On a phone, open the app inside the MetaMask browser.</>,
+            <>Any wallet (MetaMask, Coinbase Wallet, WalletConnect on mobile), or an email or Google account: signing in with one creates a wallet for you.</>,
             <>
               The {BASE_CHAIN.name} network (chain ID {BASE_CHAIN.id}) in your wallet.
             </>,
@@ -127,10 +127,10 @@ export const DOCS: DocPage[] = [
         <H2 id="steps">Send your first message</H2>
         <Steps
           items={[
-            { title: "Open the app", body: <>Go to <A href={APP_URL}>the app</A> and press <C>Connect wallet</C> in the left panel.</> },
+            { title: "Open the app", body: <>Go to <A href={APP_URL}>the app</A> and press <C>Log in or connect wallet</C> in the left panel.</> },
             {
-              title: "Register a username",
-              body: "The first time you connect, choose a username and sign. It is saved on-chain with your address, and a unique public key is generated for you.",
+              title: "Activate your address",
+              body: "The first time you connect, sign once to record your address on-chain. There is nothing to fill in, and a unique public key is generated for you.",
             },
             { title: "Start a conversation", body: <>Press <C>New conversation</C> and paste the other person&apos;s wallet address.</> },
             { title: "Say hello", body: "Type a message and press Send, then approve the signature request in your wallet." },
@@ -141,7 +141,7 @@ export const DOCS: DocPage[] = [
         <Table
           head={["Message", "What it means"]}
           rows={[
-            ["Recipient not registered", "The address you messaged hasn't registered a username yet. Ask them to open the app and register."],
+            ["Recipient not registered", "The address you messaged hasn't activated Scarf yet. Send them your chat link so they can open the app and sign in."],
             ["Relayer not configured", "The app's relayer key isn't set, so it can't submit your message. See Run locally."],
             ["Request cancelled", "You rejected the signature in your wallet. Nothing was sent."],
           ]}
@@ -278,7 +278,8 @@ export const DOCS: DocPage[] = [
           recipient in the same transaction and emits <C>PaymentSettled</C>. There is nothing to claim later.
         </P>
         <Callout title="Payments need funds">
-          Messages are gasless, but a payment is real money: the ETH or tokens you attach come from your wallet.
+          A payment is real money: the ETH or tokens you attach come from your wallet. Token payments stay gasless, but a message that
+          pays ETH is sent from your wallet directly (the paymaster never relays ETH), so you also pay a small network fee.
         </Callout>
         <H2 id="tokens">Sending tokens</H2>
         <Steps
@@ -298,18 +299,19 @@ export const DOCS: DocPage[] = [
   {
     slug: "profile",
     group: "Using the app",
-    title: "Profile and storage",
-    description: "Your username, your public key, and how storage is counted.",
+    title: "Identity and storage",
+    description: "Your address, your public key, and how storage is counted.",
     toc: [
-      { id: "username", label: "Username" },
+      { id: "identity", label: "Identity" },
       { id: "key", label: "Public key" },
       { id: "storage", label: "Storage and activity" },
     ],
     body: () => (
       <>
-        <H2 id="username">Username</H2>
+        <H2 id="identity">Identity</H2>
         <P>
-          You pick a username when you register. It is stored in the contract with your address and shown to people you chat with.
+          Scarf has no usernames or profiles. Your wallet address is your identity: people find you by your address or the chat link
+          under <C>Open wallet</C>, <C>Receive</C>. Activating stores your address and a public key in the contract, and nothing else.
         </P>
         <H2 id="key">Public key</H2>
         <P>
@@ -357,7 +359,7 @@ export const DOCS: DocPage[] = [
           rows={[
             [<C key="f">from</C>, "Your address."],
             [<C key="t">to</C>, "The Scarf contract."],
-            [<C key="v">value</C>, "ETH sent with the call (for ETH payments)."],
+            [<C key="v">value</C>, "Always 0: the relayer refuses requests that carry ETH."],
             [<C key="g">gas</C>, "Gas limit: an estimate plus 80,000."],
             [<C key="n">nonce</C>, "Your next Forwarder nonce. A request can only run once."],
             [<C key="d">data</C>, "The encoded call, such as sendMessage(…)."],
@@ -406,7 +408,7 @@ export const DOCS: DocPage[] = [
         <Table
           head={["Function", "What it does"]}
           rows={[
-            [<C key="1">registerUser(publicKey, username)</C>, "Creates your profile."],
+            [<C key="1">registerUser(publicKey, username)</C>, "Activates your address. The app always leaves username empty."],
             [<C key="2">createConversation(participants, keyHash)</C>, "Creates a conversation with 2+ registered participants."],
             [<C key="3">sendMessage(recipient, hash, token, amount, ipfsHash, mediaType, size, text)</C>, "Sends a message, file and/or payment."],
             [<C key="4">sendBatchMessages(…)</C>, "Sends up to 10 messages in one call."],

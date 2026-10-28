@@ -17,7 +17,7 @@ export function CtaBand() {
             <div>
               <h2 className="display text-[clamp(38px,5.4vw,72px)]">Say hello from your wallet.</h2>
               <p className="mt-4 max-w-[46ch] text-[17px] opacity-75">
-                Connect, pick a username and start your first conversation. It takes a minute and costs no gas.
+                Connect a wallet, sign once and start your first conversation. It takes a minute and costs no gas.
               </p>
             </div>
             <div className="flex flex-wrap gap-3">

@@ -558,8 +558,17 @@ export function ChatContainer() {
 			[activeThreadId]: [...(prev[activeThreadId] ?? []), optimisticWithMeta],
 		}));
 
+		// The paymaster can't relay ETH, so a message that pays ETH goes straight from the wallet.
+		const paysEth =
+			(!args.paymentToken || args.paymentToken === ethers.ZeroAddress) &&
+			Boolean(args.paymentAmount) &&
+			BigInt(args.paymentAmount) > BigInt(0);
+
 		try {
-			if (isGaslessConfigured()) {
+			if (paysEth && balance.eth && balance.eth.raw < BigInt(args.paymentAmount)) {
+				throw new Error(`Not enough ETH: you have ${balance.eth.formatted} ETH, and the network fee comes on top`);
+			}
+			if (isGaslessConfigured() && !paysEth) {
 				const { request, signature } = await sendChatMessageGasless({
 					recipient,
 					messageHash,
@@ -568,7 +577,6 @@ export function ChatContainer() {
 					fileSize,
 					paymentToken: args.paymentToken,
 					paymentAmount: args.paymentAmount,
-					value: args.paymentToken === '0x0000000000000000000000000000000000000000' ? args.paymentAmount : undefined,
 					textContent,
 				});
 				await submitSignedForwardRequest(request, signature);
@@ -581,7 +589,7 @@ export function ChatContainer() {
 					fileSize,
 					paymentToken: args.paymentToken,
 					paymentAmount: args.paymentAmount,
-					value: args.paymentToken === '0x0000000000000000000000000000000000000000' ? args.paymentAmount : undefined,
+					value: paysEth ? args.paymentAmount : undefined,
 					textContent,
 				});
 				await waitForTransaction(Promise.resolve(tx));

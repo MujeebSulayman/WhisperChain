@@ -1,12 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { HardDrive, MessageSquare, RefreshCw, Loader2, AlertCircle, Wallet } from 'lucide-react';
+import { HardDrive, MessageSquare, RefreshCw, Loader2, AlertCircle } from 'lucide-react';
 import {
     fetchStorageUsage,
     getUserMessageCount,
     fetchContractStats,
-    getUserBalance,
 } from '@/lib/scarfActions';
 import type { AddressLike } from 'ethers';
 
@@ -21,7 +20,6 @@ type UserStatsProps = {
 export function UserStats({ userAddress }: UserStatsProps) {
     const [storage, setStorage] = useState<{ used: bigint; remaining: bigint } | null>(null);
     const [messageCount, setMessageCount] = useState<bigint | null>(null);
-    const [userBalance, setUserBalance] = useState<bigint | null>(null);
     const [contractStats, setContractStats] = useState<{
         pendingPayments: bigint;
         processedMessages: bigint;
@@ -32,15 +30,13 @@ export function UserStats({ userAddress }: UserStatsProps) {
     const loadStats = async () => {
         setIsLoading(true);
         try {
-            const [storageData, msgCount, balance, contractData] = await Promise.all([
+            const [storageData, msgCount, contractData] = await Promise.all([
                 fetchStorageUsage(userAddress),
                 getUserMessageCount(userAddress),
-                getUserBalance(userAddress),
                 fetchContractStats(),
             ]);
             setStorage(storageData);
             setMessageCount(msgCount);
-            setUserBalance(balance);
             setContractStats(contractData);
         } catch (error) {
             console.error('Failed to load stats:', error);
@@ -111,27 +107,6 @@ export function UserStats({ userAddress }: UserStatsProps) {
                     )}
                 </button>
             </div>
-
-            {userBalance !== null && (
-                <div
-                    style={{
-                        borderRadius: '0.875rem',
-                        border: '1px solid color-mix(in srgb, var(--fg) 8%, transparent)',
-                        background: 'color-mix(in srgb, var(--fg) 3%, transparent)',
-                        padding: '0.75rem',
-                    }}
-                >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                        <Wallet style={{ width: '1rem', height: '1rem', color: 'color-mix(in srgb, var(--fg) 70%, transparent)' }} />
-                        <span style={{ fontSize: '0.75rem', fontWeight: 500, color: 'color-mix(in srgb, var(--fg) 70%, transparent)' }}>Your Balance</span>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
-                        <p style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--fg)' }}>
-                            {(Number(userBalance) / 1e18).toFixed(6)} ETH
-                        </p>
-                    </div>
-                </div>
-            )}
 
             {messageCount !== null && (
                 <div

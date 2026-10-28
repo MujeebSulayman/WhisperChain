@@ -188,6 +188,11 @@ export function PaymentOptions({ onPaymentSet, onCancel }: PaymentOptionsProps) 
                             e.currentTarget.style.borderColor = 'color-mix(in srgb, var(--fg) 10%, transparent)';
                         }}
                     />
+                    {!useToken && (
+                        <p style={{ marginTop: '0.375rem', fontSize: '0.6875rem', lineHeight: 1.5, color: 'var(--mute)' }}>
+                            Messages that pay ETH are sent from your wallet, not gaslessly, so you also pay a small network fee.
+                        </p>
+                    )}
                 </div>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>

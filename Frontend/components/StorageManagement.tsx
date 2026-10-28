@@ -1,12 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { HardDrive, Trash2, Loader2, AlertTriangle, Wallet } from 'lucide-react';
+import { HardDrive, Trash2, Loader2, AlertTriangle } from 'lucide-react';
 import {
 	clearStorage,
 	clearStorageGasless,
-	withdrawBalance,
-	withdrawBalanceGasless,
 	submitSignedForwardRequest,
 	waitForTransaction,
 } from '@/lib/scarfActions';
@@ -23,7 +21,6 @@ type StorageManagementProps = {
 
 export function StorageManagement({ userAddress, onUpdate }: StorageManagementProps) {
     const [isClearing, setIsClearing] = useState(false);
-    const [isWithdrawing, setIsWithdrawing] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     const handleClearStorage = async () => {
@@ -47,26 +44,6 @@ export function StorageManagement({ userAddress, onUpdate }: StorageManagementPr
             setError(getErrorMessage(err, 'Failed to clear storage'));
         } finally {
             setIsClearing(false);
-        }
-    };
-
-    const handleWithdraw = async () => {
-        setIsWithdrawing(true);
-        setError(null);
-
-        try {
-            if (isGaslessConfigured()) {
-                const { request, signature } = await withdrawBalanceGasless();
-                await submitSignedForwardRequest(request, signature);
-            } else {
-                const tx = await withdrawBalance();
-                await waitForTransaction(Promise.resolve(tx));
-            }
-            onUpdate();
-        } catch (err: any) {
-            setError(getErrorMessage(err, 'Failed to withdraw balance'));
-        } finally {
-            setIsWithdrawing(false);
         }
     };
 
@@ -160,47 +137,6 @@ export function StorageManagement({ userAddress, onUpdate }: StorageManagementPr
                         <Trash2 style={{ width: '1rem', height: '1rem' }} />
                     )}
                     Clear Storage
-                </button>
-
-                <button
-                    onClick={handleWithdraw}
-                    disabled={isWithdrawing}
-                    style={{
-                        width: '100%',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '0.5rem',
-                        padding: '0.625rem 1rem',
-                        borderRadius: '0.875rem',
-                        border: '1px solid color-mix(in srgb, var(--fg) 10%, transparent)',
-                        background: 'color-mix(in srgb, var(--fg) 5%, transparent)',
-                        color: 'color-mix(in srgb, var(--fg) 70%, transparent)',
-                        cursor: isWithdrawing ? 'not-allowed' : 'pointer',
-                        fontSize: '0.875rem',
-                        fontWeight: 500,
-                        opacity: isWithdrawing ? 0.5 : 1,
-                        transition: 'all 0.2s',
-                    }}
-                    onMouseEnter={(e) => {
-                        if (!isWithdrawing) {
-                            e.currentTarget.style.background = 'color-mix(in srgb, var(--fg) 8%, transparent)';
-                            e.currentTarget.style.color = 'var(--fg)';
-                        }
-                    }}
-                    onMouseLeave={(e) => {
-                        if (!isWithdrawing) {
-                            e.currentTarget.style.background = 'color-mix(in srgb, var(--fg) 5%, transparent)';
-                            e.currentTarget.style.color = 'color-mix(in srgb, var(--fg) 70%, transparent)';
-                        }
-                    }}
-                >
-                    {isWithdrawing ? (
-                        <Loader2 style={{ width: '1rem', height: '1rem', animation: 'spin 1s linear infinite' }} />
-                    ) : (
-                        <Wallet style={{ width: '1rem', height: '1rem' }} />
-                    )}
-                    Withdraw Balance
                 </button>
             </div>
         </div>

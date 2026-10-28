@@ -25,7 +25,6 @@ type UserProfile = {
 	publicKey: string;
 	isActive: boolean;
 	lastSeen: bigint;
-	username: string;
 };
 
 type Message = {
@@ -68,7 +67,6 @@ export function useScarf(userAddress?: string) {
 				publicKey: profileData.publicKey,
 				isActive: profileData.isActive,
 				lastSeen: profileData.lastSeen,
-				username: profileData.username,
 			});
 			setIsRegistered(profileData.isActive);
 		} catch (err: any) {

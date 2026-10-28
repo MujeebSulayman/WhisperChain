@@ -175,11 +175,11 @@ export function encodeSendMessageCalldata(params: {
 	]);
 }
 
-export function encodeRegisterUserCalldata(publicKey: string, username: string): string {
+export function encodeRegisterUserCalldata(publicKey: string): string {
 	const iface = new Interface([
 		'function registerUser(bytes32 publicKey, string username)',
 	]);
-	return iface.encodeFunctionData('registerUser', [publicKey, username]);
+	return iface.encodeFunctionData('registerUser', [publicKey, '']);
 }
 
 export function encodeUpdateLastSeenCalldata(): string {
@@ -212,11 +212,6 @@ export function encodeUpdatePublicKeyCalldata(newPublicKey: string): string {
 		'function updatePublicKey(bytes32 newPublicKey)',
 	]);
 	return iface.encodeFunctionData('updatePublicKey', [newPublicKey]);
-}
-
-export function encodeWithdrawBalanceCalldata(): string {
-	const iface = new Interface(['function withdrawBalance()']);
-	return iface.encodeFunctionData('withdrawBalance', []);
 }
 
 export function encodeClearStorageCalldata(): string {

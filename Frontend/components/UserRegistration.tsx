@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { UserPlus, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Loader2, CheckCircle2, AlertCircle, PenLine } from 'lucide-react';
 import { Logo } from './site/Icons';
 import {
 	registerUserGasless,
@@ -17,17 +17,11 @@ type UserRegistrationProps = {
 };
 
 export function UserRegistration({ onRegistered, address }: UserRegistrationProps) {
-    const [username, setUsername] = useState('');
     const [isRegistering, setIsRegistering] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
 
     const handleRegister = async () => {
-        if (!username.trim()) {
-            setError('Username is required');
-            return;
-        }
-
         setIsRegistering(true);
         setError(null);
 
@@ -36,21 +30,18 @@ export function UserRegistration({ onRegistered, address }: UserRegistrationProp
             const publicKeyBytes = ethers.keccak256(ethers.toUtf8Bytes(uniqueKey));
 
             if (isGaslessConfigured()) {
-                const { request, signature } = await registerUserGasless({
-                    publicKey: publicKeyBytes,
-                    username: username.trim(),
-                });
+                const { request, signature } = await registerUserGasless({ publicKey: publicKeyBytes });
                 await submitSignedForwardRequest(request, signature);
             } else {
                 const { registerUser, waitForTransaction } = await import('@/lib/scarfActions');
-                const tx = await registerUser({ publicKey: publicKeyBytes, username: username.trim() });
+                const tx = await registerUser({ publicKey: publicKeyBytes });
                 await waitForTransaction(Promise.resolve(tx));
             }
             setSuccess(true);
             setTimeout(() => {
                 onRegistered();
             }, 1500);
-        } catch (err: any) {
+        } catch (err) {
             setError(getErrorMessage(err, 'Registration failed'));
         } finally {
             setIsRegistering(false);
@@ -63,7 +54,7 @@ export function UserRegistration({ onRegistered, address }: UserRegistrationProp
                 <span className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-good/15 text-good">
                     <CheckCircle2 size={30} strokeWidth={1.8} />
                 </span>
-                <h2 className="display mt-6 text-[30px]">You&apos;re registered.</h2>
+                <h2 className="display mt-6 text-[30px]">You&apos;re on Scarf.</h2>
                 <p className="mt-2 text-[15px] text-dim">Welcome to Scarf. Opening your inbox…</p>
             </div>
         );
@@ -73,29 +64,13 @@ export function UserRegistration({ onRegistered, address }: UserRegistrationProp
         <div className="glass rise rounded-[var(--r-panel)] p-6 sm:p-8">
             <Logo size={44} wordmark={false} />
             <p className="eyebrow mt-6">One-time setup</p>
-            <h2 className="display mt-2 text-[clamp(28px,4vw,36px)]">Create your profile.</h2>
+            <h2 className="display mt-2 text-[clamp(28px,4vw,36px)]">Activate your address.</h2>
             <p className="mt-3 text-[15px] leading-relaxed text-dim">
-                Pick a username people will see. It&apos;s stored on-chain against your address, and it takes one signature.
+                Your wallet address is your identity: no name, email or profile to fill in. Sign once to record it
+                on-chain so others can message you. It costs no gas.
             </p>
 
             <div className="mt-7 grid gap-4">
-                <label className="grid gap-2">
-                    <span className="label">Username</span>
-                    <input
-                        type="text"
-                        value={username}
-                        onChange={(e) => setUsername(e.target.value)}
-                        onKeyDown={(e) => {
-                            if (e.key === 'Enter') handleRegister();
-                        }}
-                        placeholder="e.g. satoshi"
-                        disabled={isRegistering}
-                        autoFocus
-                        className="input"
-                    />
-                    <span className="text-[12px] text-mute">A unique public key is generated for you automatically.</span>
-                </label>
-
                 <div className="inset-panel flex items-center gap-3 rounded-[var(--r-inset)] px-4 py-3">
                     <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-good/15 text-good">
                         <CheckCircle2 size={15} strokeWidth={2} />
@@ -113,16 +88,16 @@ export function UserRegistration({ onRegistered, address }: UserRegistrationProp
                     </p>
                 )}
 
-                <button onClick={handleRegister} disabled={isRegistering || !username.trim()} className="btn btn-lg btn-white mt-1 w-full disabled:opacity-50">
+                <button onClick={handleRegister} disabled={isRegistering} className="btn btn-lg btn-white mt-1 w-full disabled:opacity-50">
                     {isRegistering ? (
                         <>
                             <Loader2 size={18} className="animate-spin" />
-                            Registering…
+                            Activating…
                         </>
                     ) : (
                         <>
-                            <UserPlus size={18} strokeWidth={2} />
-                            Register
+                            <PenLine size={18} strokeWidth={2} />
+                            Sign to activate
                         </>
                     )}
                 </button>

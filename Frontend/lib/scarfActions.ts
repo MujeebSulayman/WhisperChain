@@ -1,7 +1,7 @@
 'use client';
 
 import type { AddressLike, BigNumberish, BytesLike } from 'ethers';
-import { Interface, JsonRpcProvider, ZeroAddress } from 'ethers';
+import { Interface, JsonRpcProvider, ZeroAddress, toBigInt } from 'ethers';
 
 import {
 	BASE_CHAIN,
@@ -21,7 +21,6 @@ import {
 	encodeSendBatchMessagesCalldata,
 	encodeUpdateLastSeenCalldata,
 	encodeUpdatePublicKeyCalldata,
-	encodeWithdrawBalanceCalldata,
 	type ForwardRequest,
 	signForwardRequest,
 	submitViaForwarder,
@@ -58,17 +57,14 @@ export async function waitForTransaction(
 	}
 }
 
-export async function registerUser(args: {
-	publicKey: BytesLike;
-	username: string;
-}) {
+// Scarf identities are just addresses: the contract's username field is always left empty.
+export async function registerUser(args: { publicKey: BytesLike }) {
 	const contract = await getSignerContract();
-	return contract.registerUser(args.publicKey, args.username);
+	return contract.registerUser(args.publicKey, '');
 }
 
 export async function registerUserGasless(args: {
 	publicKey: BytesLike;
-	username: string;
 }): Promise<{ request: ForwardRequest; signature: string }> {
 	const { signer } = await connectScarf();
 	const from = await signer.getAddress();
@@ -78,7 +74,7 @@ export async function registerUserGasless(args: {
 			: (args.publicKey as Uint8Array).length
 				? '0x' + Buffer.from(args.publicKey as Uint8Array).toString('hex').padStart(64, '0').slice(-64)
 				: String(args.publicKey);
-	const data = encodeRegisterUserCalldata(pkHex, args.username);
+	const data = encodeRegisterUserCalldata(pkHex);
 	const request = await buildForwardRequest({ from, data });
 	const signature = await signForwardRequest(signer, request);
 	return { request, signature };
@@ -171,7 +167,7 @@ export async function sendChatMessageGasless(args: {
 			: (args.messageHash as Uint8Array).length
 				? '0x' + Buffer.from(args.messageHash as Uint8Array).toString('hex').padStart(64, '0').slice(-64)
 				: String(args.messageHash);
-	const paymentAmountBigInt = BigInt(Number(paymentAmount));
+	const paymentAmountBigInt = toBigInt(paymentAmount);
 	const data = encodeSendMessageCalldata({
 		recipient: recipientAddr,
 		messageHash: msgHashHex,
@@ -179,10 +175,14 @@ export async function sendChatMessageGasless(args: {
 		paymentAmount: paymentAmountBigInt,
 		ipfsHash: args.ipfsHash,
 		mediaType: Number(mediaType),
-		fileSize: BigInt(Number(args.fileSize)),
+		fileSize: toBigInt(args.fileSize),
 		textContent,
 	});
-	const value = args.value !== undefined ? BigInt(Number(args.value)) : (paymentToken === ZeroAddress && paymentAmount ? paymentAmountBigInt : BigInt(0));
+	const value = args.value !== undefined ? toBigInt(args.value) : (paymentToken === ZeroAddress && paymentAmount ? paymentAmountBigInt : BigInt(0));
+	if (value > BigInt(0)) {
+		// The paymaster refuses requests that carry ETH; send these with sendChatMessage instead.
+		throw new Error('ETH payments must be sent from your wallet, not gaslessly');
+	}
 	const request = await buildForwardRequest({ from, value, data });
 	const signature = await signForwardRequest(signer, request);
 	return { request, signature };
@@ -213,8 +213,8 @@ export async function sendBatchMessagesGasless(args: {
 	const msgHashesStr = args.messageHashes.map((m) =>
 		typeof m === 'string' ? m : '0x' + Buffer.from(m as Uint8Array).toString('hex').padStart(64, '0').slice(-64)
 	);
-	const paymentAmountsBigInt = paymentAmounts.map((a) => BigInt(Number(a)));
-	const fileSizesBigInt = args.fileSizes.map((f) => BigInt(Number(f)));
+	const paymentAmountsBigInt = paymentAmounts.map((a) => toBigInt(a));
+	const fileSizesBigInt = args.fileSizes.map((f) => toBigInt(f));
 	const data = encodeSendBatchMessagesCalldata({
 		recipients: recipientsStr,
 		messageHashes: msgHashesStr,
@@ -225,7 +225,7 @@ export async function sendBatchMessagesGasless(args: {
 		fileSizes: fileSizesBigInt,
 		textContents,
 	});
-	const value = args.value !== undefined ? BigInt(Number(args.value)) : BigInt(0);
+	const value = args.value !== undefined ? toBigInt(args.value) : BigInt(0);
 	const request = await buildForwardRequest({ from, value, data });
 	const signature = await signForwardRequest(signer, request);
 	return { request, signature };
@@ -449,23 +449,6 @@ export async function updatePublicKeyGasless(newKey: BytesLike): Promise<{
 	return { request, signature };
 }
 
-export async function withdrawBalance() {
-	const contract = await getSignerContract();
-	return contract.withdrawBalance();
-}
-
-export async function withdrawBalanceGasless(): Promise<{
-	request: ForwardRequest;
-	signature: string;
-}> {
-	const { signer } = await connectScarf();
-	const from = await signer.getAddress();
-	const data = encodeWithdrawBalanceCalldata();
-	const request = await buildForwardRequest({ from, data });
-	const signature = await signForwardRequest(signer, request);
-	return { request, signature };
-}
-
 export async function clearStorage() {
 	const contract = await getSignerContract();
 	return contract.clearStorage();
@@ -609,15 +592,6 @@ export async function isIPFSHashUsed(ipfsHash: string) {
 		return await contract.isIPFSHashUsed(ipfsHash);
 	} catch (error: any) {
 		throw new Error(`Failed to check IPFS hash: ${error.message}`);
-	}
-}
-
-export async function getUserBalance(user: AddressLike) {
-	try {
-		const contract = getReadOnlyContract();
-		return await contract.userBalances(user);
-	} catch (error: any) {
-		throw new Error(`Failed to fetch user balance: ${error.message}`);
 	}
 }
 

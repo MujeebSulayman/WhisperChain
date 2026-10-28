@@ -2,7 +2,6 @@
 
 import { MessageSquarePlus, Settings, Send, PanelLeftClose, PanelLeftOpen, Coins, Wallet } from 'lucide-react';
 import { WalletConnect } from './WalletConnect';
-import { CopyAddress } from './CopyAddress';
 import { UserStats } from './UserStats';
 import { StorageManagement } from './StorageManagement';
 import type { WalletBalance } from '@/hooks/useWalletBalance';
@@ -16,7 +15,6 @@ type SidebarProps = {
     balance?: WalletBalance;
     onOpenWallet?: (tab: WalletTab) => void;
     profile?: {
-        username?: string;
         publicKey?: string;
         lastSeen?: bigint;
     };
@@ -43,7 +41,8 @@ export function Sidebar({
 }: SidebarProps) {
     if (isMobile && !isOpen) return null;
 
-    const initial = profile?.username?.[0]?.toUpperCase() || 'U';
+    // No names in Scarf: the avatar is the first two hex characters of the address.
+    const initial = connectedAddress ? connectedAddress.slice(2, 4).toUpperCase() : '';
     const shortAddress = connectedAddress ? `${connectedAddress.slice(0, 6)}…${connectedAddress.slice(-4)}` : '';
 
     const frame = isMobile
@@ -77,7 +76,7 @@ export function Sidebar({
                         <button onClick={onSettings} className="icon-btn" title="Settings" aria-label="Settings">
                             <Settings size={18} strokeWidth={1.8} />
                         </button>
-                        <button onClick={onToggle} className="avatar is-on h-10 w-10" title={profile.username || 'Profile'}>
+                        <button onClick={onToggle} className="avatar is-on h-10 w-10" title={shortAddress}>
                             {initial}
                         </button>
                     </div>
@@ -107,22 +106,6 @@ export function Sidebar({
                     onOpenWallet={onOpenWallet && (() => onOpenWallet('receive'))}
                 />
 
-                {profile && connectedAddress && (
-                    <div className="card flex items-center gap-3 p-3">
-                        <span className="avatar is-on h-10 w-10 text-[14px]">{initial}</span>
-                        <div className="min-w-0 flex-1">
-                            <p className="truncate text-[14px] font-semibold">{profile.username || 'User'}</p>
-                            <p className="flex items-center font-mono text-[11px] text-mute">
-                                <span className="truncate">{shortAddress}</span>
-                                <CopyAddress text={connectedAddress} size={11} className="p-1!" />
-                            </p>
-                        </div>
-                        <button onClick={onSettings} className="icon-btn h-9! w-9!" title="Settings" aria-label="Settings">
-                            <Settings size={16} strokeWidth={1.8} />
-                        </button>
-                    </div>
-                )}
-
                 <nav aria-label="Actions" className="grid gap-1">
                     <button onClick={onNewChat} className="btn btn-white mb-2 w-full">
                         <MessageSquarePlus size={17} strokeWidth={2} />
@@ -136,6 +119,12 @@ export function Sidebar({
                         <Coins size={17} strokeWidth={1.8} className="text-accent" />
                         <span className="text-[14px] font-medium">Payment history</span>
                     </button>
+                    {profile && connectedAddress && (
+                        <button onClick={onSettings} className="row">
+                            <Settings size={17} strokeWidth={1.8} className="text-accent" />
+                            <span className="text-[14px] font-medium">Settings</span>
+                        </button>
+                    )}
                 </nav>
 
                 {connectedAddress && (
