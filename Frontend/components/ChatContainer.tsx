@@ -119,18 +119,7 @@ export function ChatContainer() {
 
 	const { profile, isRegistered, refresh } = useScarf(connectedAddress);
 
-	// Track balances of every token this wallet has been paid in, not just ETH.
-	const receivedTokens = useMemo(() => {
-		const me = connectedAddress?.toLowerCase();
-		const tokens = new Set<string>();
-		Object.values(messages).flat().forEach((m) => {
-			if (m.paymentToken && m.paymentToken !== ethers.ZeroAddress && m.recipient?.toLowerCase() === me) {
-				tokens.add(m.paymentToken.toLowerCase());
-			}
-		});
-		return [...tokens];
-	}, [messages, connectedAddress]);
-	const balance = useWalletBalance(connectedAddress, receivedTokens);
+	const balance = useWalletBalance(connectedAddress);
 
 	const handleDisconnect = () => {
 		disconnect();

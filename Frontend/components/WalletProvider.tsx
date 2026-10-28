@@ -2,15 +2,16 @@
 
 import { useEffect, type ReactNode } from 'react';
 import { PrivyProvider, addRpcUrlOverrideToChain } from '@privy-io/react-auth';
-import { baseSepolia } from 'viem/chains';
+import { base, baseSepolia } from 'viem/chains';
 import { BASE_CHAIN, registerActiveWallet } from '@/lib/blockchain';
 import { useActiveWallet } from '@/hooks/useWallet';
 
 const PRIVY_APP_ID = process.env.NEXT_PUBLIC_PRIVY_APP_ID;
 
+const viemChain = BASE_CHAIN.id === base.id ? base : baseSepolia;
 const scarfChain = BASE_CHAIN.rpcUrl
-	? addRpcUrlOverrideToChain(baseSepolia, BASE_CHAIN.rpcUrl)
-	: baseSepolia;
+	? addRpcUrlOverrideToChain(viemChain, BASE_CHAIN.rpcUrl)
+	: viemChain;
 
 // Hands the active Privy wallet to lib/blockchain so connectScarf() can sign with it.
 function PrivyWalletBridge() {

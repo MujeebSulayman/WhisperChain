@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { FORWARDER_ADDRESS, PAYMASTER_ADDRESS, SCARF_ADDRESS } from "@/lib/deployments";
+import { BASE_CHAIN, FORWARDER_ADDRESS, PAYMASTER_ADDRESS, SCARF_ADDRESS } from "@/lib/deployments";
 import { explorerAddress } from "@/lib/links";
 import { Icon } from "../site/Icons";
 import { Reveal } from "../site/Reveal";
@@ -45,7 +45,7 @@ export function Contracts() {
           </span>
           <h2 className="h2 mt-5">Three contracts run the whole app.</h2>
           <p className="mt-4 max-w-[40ch] text-[16px] leading-relaxed text-dim">
-            There is no Scarf server holding your messages. The app reads and writes these contracts on Base Sepolia, and you
+            There is no Scarf server holding your messages. The app reads and writes these contracts on {BASE_CHAIN.name}, and you
             can inspect each one yourself.
           </p>
         </Reveal>

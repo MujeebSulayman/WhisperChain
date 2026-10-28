@@ -2,6 +2,7 @@
 
 import { Contract, JsonRpcProvider, ZeroAddress, formatUnits } from 'ethers';
 import { BASE_CHAIN } from './blockchain';
+import { findPaymentAsset } from './deployments';
 
 const ERC20_ABI = [
 	'function symbol() external view returns (string)',
@@ -18,6 +19,8 @@ export async function getTokenInfo(tokenAddress: string): Promise<TokenInfo> {
 	}
 	const key = tokenAddress.toLowerCase();
 	if (cache.has(key)) return cache.get(key)!;
+	const known = findPaymentAsset(key);
+	if (known) return { symbol: known.symbol, decimals: known.decimals };
 	const provider = new JsonRpcProvider(BASE_CHAIN.rpcUrl);
 	const contract = new Contract(tokenAddress, ERC20_ABI, provider);
 	try {

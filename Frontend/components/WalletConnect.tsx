@@ -66,7 +66,7 @@ export function WalletConnect({ onConnect, connectedAddress, balance, onOpenWall
 	};
 
 	if (connectedAddress) {
-		const tokenCount = balance?.assets.filter((a) => a.token !== ZeroAddress).length ?? 0;
+		const usdc = balance?.assets.find((a) => a.token !== ZeroAddress);
 
 		return (
 			<div className="card p-3">
@@ -100,8 +100,13 @@ export function WalletConnect({ onConnect, connectedAddress, balance, onOpenWall
 								{balance?.eth ? balance.eth.formatted : '—'}
 							</span>
 							<span className="text-[12.5px] text-dim">ETH</span>
-							{tokenCount > 0 && <span className="text-[11.5px] text-mute">+{tokenCount} token{tokenCount > 1 ? 's' : ''}</span>}
 						</span>
+						{usdc && (
+							<span className="mt-1 flex items-baseline gap-1.5">
+								<span className="font-mono text-[14px]">{usdc.formatted}</span>
+								<span className="text-[12px] text-dim">{usdc.symbol}</span>
+							</span>
+						)}
 						{balance?.lastIncrease && (
 							<span className="pop mt-1.5 flex items-center gap-1 text-[11.5px] text-good">
 								<ArrowDownLeft size={12} strokeWidth={2} />+{balance.lastIncrease.formatted} {balance.lastIncrease.symbol} received

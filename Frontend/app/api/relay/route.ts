@@ -3,7 +3,7 @@ import { Contract, Interface, JsonRpcProvider, Wallet, getAddress, isAddress, is
 import paymasterAbi from '@/blockchain/ScarfPaymaster.json';
 import forwarderAbi from '@/blockchain/ScarfForwarder.json';
 import type { InterfaceAbi } from 'ethers';
-import { FORWARDER_ADDRESS, PAYMASTER_ADDRESS, SCARF_ADDRESS } from '@/lib/deployments';
+import { FORWARDER_ADDRESS, PAYMASTER_ADDRESS, SCARF_ADDRESS, findPaymentAsset } from '@/lib/deployments';
 
 const RPC_URL = process.env.NEXT_PUBLIC_BASE_RPC ?? '';
 const RELAYER_PRIVATE_KEY = process.env.RELAYER_PRIVATE_KEY ?? '';
@@ -115,11 +115,24 @@ export async function POST(req: Request) {
 	if (getAddress(request.to) !== getAddress(SCARF_ADDRESS)) {
 		return fail('Only Scarf calls can be relayed', 400);
 	}
-	let fn: string;
+	let call: ReturnType<typeof RELAYABLE.parseTransaction>;
 	try {
-		fn = RELAYABLE.parseTransaction({ data: request.data })!.name;
+		call = RELAYABLE.parseTransaction({ data: request.data });
 	} catch {
+		call = null;
+	}
+	if (!call) {
 		return fail('This call is not relayable', 400);
+	}
+	const fn = call.name;
+
+	// Payments are ETH or USDC only (and ETH never comes through here, see above).
+	const tokens: string[] =
+		fn === 'sendMessage' ? [call.args.paymentToken] : fn === 'sendBatchMessages' ? [...call.args.paymentTokens] : [];
+	const amounts: bigint[] =
+		fn === 'sendMessage' ? [call.args.paymentAmount] : fn === 'sendBatchMessages' ? [...call.args.paymentAmounts] : [];
+	if (tokens.some((t, i) => amounts[i] > BigInt(0) && !findPaymentAsset(t))) {
+		return fail('Only ETH and USDC payments are supported', 400);
 	}
 
 	const gas = toUint(request.gas);

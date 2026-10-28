@@ -147,8 +147,8 @@ const ROWS: { tag: string; title: string; body: string; points: string[]; icon: 
   {
     tag: "Payments",
     title: "Settle up without leaving the chat.",
-    body: "Attach ETH or any ERC-20 to a message. It goes straight to the other person in the same send, with nothing to claim later.",
-    points: ["ETH or any ERC-20 token", "Paid directly to the recipient", "A full payment history"],
+    body: "Attach ETH or USDC to a message. It goes straight to the other person in the same send, with nothing to claim later.",
+    points: ["ETH or USDC", "Paid directly to the recipient", "A full payment history"],
     icon: "coin",
     Visual: PaymentVisual,
   },

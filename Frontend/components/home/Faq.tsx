@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { TELEGRAM_URL } from "@/lib/links";
+import { BASE_CHAIN } from "@/lib/deployments";
 import { Icon } from "../site/Icons";
 
 const FAQS: [string, string][] = [
@@ -35,7 +36,7 @@ const FAQS: [string, string][] = [
   ],
   [
     "Which network is it on?",
-    "Base Sepolia, Base's test network (chain ID 84532). The contract addresses are on this page and can be checked on BaseScan.",
+    `${BASE_CHAIN.testnet ? `${BASE_CHAIN.name}, Base's test network` : BASE_CHAIN.name} (chain ID ${BASE_CHAIN.id}). The contract addresses are on this page and can be checked on BaseScan.`,
   ],
 ];
 

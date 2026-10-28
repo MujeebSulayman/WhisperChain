@@ -18,8 +18,13 @@ export const DOC_GROUPS = ["Getting started", "Using the app", "How it works", "
 const short = (a: string) => `${a.slice(0, 6)}…${a.slice(-4)}`;
 const Addr = ({ a }: { a: string }) => <A href={explorerAddress(a)}>{short(a)}</A>;
 
-const ENV_FRONTEND = `# Base Sepolia RPC, used for reads and by the relayer
+const ENV_FRONTEND = `# Base network: base-sepolia (default) or base (mainnet)
+NEXT_PUBLIC_NETWORK=base-sepolia
+# RPC for that same network, used for reads and by the relayer
 NEXT_PUBLIC_BASE_RPC=https://sepolia.base.org
+
+# Login (Privy app ID from dashboard.privy.io)
+NEXT_PUBLIC_PRIVY_APP_ID=yourPrivyAppId
 
 # Relayer (server only, never prefix with NEXT_PUBLIC_)
 RELAYER_PRIVATE_KEY=0xYourRelayerKey
@@ -30,7 +35,7 @@ NEXT_PUBLIC_PINATA_API_KEY=yourPinataKey
 NEXT_PUBLIC_PINATA_SECRET_KEY=yourPinataSecret
 NEXT_PUBLIC_IPFS_GATEWAY=https://gateway.pinata.cloud/ipfs
 
-# Optional: only to use your own contracts
+# Optional on base-sepolia, required on base: your contracts
 # NEXT_PUBLIC_SCARF_ADDRESS=0x…
 # NEXT_PUBLIC_FORWARDER_ADDRESS=0x…
 # NEXT_PUBLIC_PAYMASTER_ADDRESS=0x…`;
@@ -84,7 +89,7 @@ export const DOCS: DocPage[] = [
             "Start group conversations with several people.",
             "Share images, video, audio and documents up to 50 MB each.",
             "Send one message to up to 10 people with a single signature.",
-            "Attach ETH or any ERC-20 token to a message.",
+            "Attach ETH or USDC to a message.",
             "No usernames or profiles: your wallet address is your identity.",
           ]}
         />
@@ -264,7 +269,7 @@ export const DOCS: DocPage[] = [
     slug: "payments",
     group: "Using the app",
     title: "Payments in chat",
-    description: "Attach ETH or any ERC-20 token to a message.",
+    description: "Attach ETH or USDC to a message.",
     toc: [
       { id: "eth", label: "Sending ETH" },
       { id: "tokens", label: "Sending tokens" },
@@ -284,7 +289,7 @@ export const DOCS: DocPage[] = [
         <H2 id="tokens">Sending tokens</H2>
         <Steps
           items={[
-            { title: "Choose the token", body: "Switch to token mode and paste the ERC-20 contract address." },
+            { title: "Choose USDC", body: "Pick USDC in the payment panel. Scarf only supports ETH and Circle's USDC on Base." },
             { title: "Approve once", body: "Approve Scarf to spend that amount. The app checks your allowance and asks only when needed." },
             { title: "Send", body: "The contract moves the tokens from you to the recipient with transferFrom." },
           ]}

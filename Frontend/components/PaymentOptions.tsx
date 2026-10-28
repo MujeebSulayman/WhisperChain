@@ -1,10 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Coins, X, Loader2, CheckCircle2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Coins, X, Loader2, CheckCircle2, AlertCircle, ShieldCheck } from 'lucide-react';
 import type { AddressLike, BigNumberish } from 'ethers';
-import { parseEther, parseUnits, Contract, ZeroAddress } from 'ethers';
+import { parseUnits, Contract, ZeroAddress } from 'ethers';
 import { connectScarf, SCARF_ADDRESS } from '@/lib/blockchain';
+import { BASE_CHAIN, PAYMENT_ASSETS, type PaymentAsset } from '@/lib/deployments';
+import { getErrorMessage } from '@/lib/errors';
 
 type PaymentOptionsProps = {
     onPaymentSet: (amount: BigNumberish, token: AddressLike) => void;
@@ -14,349 +16,171 @@ type PaymentOptionsProps = {
 const ERC20_ABI = [
     'function approve(address spender, uint256 amount) external returns (bool)',
     'function allowance(address owner, address spender) external view returns (uint256)',
-    'function decimals() external view returns (uint8)',
 ];
 
-async function getTokenAmountRaw(tokenAddress: string, amountHuman: string, signer: import('ethers').Signer): Promise<bigint> {
-    const tokenContract = new Contract(tokenAddress, ERC20_ABI, signer);
-    const decimals = await tokenContract.decimals();
-    return parseUnits(amountHuman, Number(decimals));
-}
+type Approval = 'idle' | 'checking' | 'approved' | 'needed' | 'approving';
 
+/** Attach ETH or USDC to a message. USDC needs an allowance for the Scarf contract first. */
 export function PaymentOptions({ onPaymentSet, onCancel }: PaymentOptionsProps) {
+    const [asset, setAsset] = useState<PaymentAsset>(PAYMENT_ASSETS[0]);
     const [amount, setAmount] = useState('');
-    const [useToken, setUseToken] = useState(false);
-    const [tokenAddress, setTokenAddress] = useState('');
     const [error, setError] = useState<string | null>(null);
-    const [isCheckingApproval, setIsCheckingApproval] = useState(false);
-    const [isApproving, setIsApproving] = useState(false);
-    const [approvalStatus, setApprovalStatus] = useState<'none' | 'checking' | 'approved' | 'needs-approval'>('none');
+    const [approval, setApproval] = useState<Approval>('idle');
 
-    const checkApproval = async () => {
-        if (!useToken || !tokenAddress.trim() || !amount) return;
+    const isEth = asset.token === ZeroAddress;
 
+    const amountRaw = (() => {
         try {
-            setIsCheckingApproval(true);
-            setError(null);
-            const { signer } = await connectScarf();
-            const userAddress = await signer.getAddress();
-            const tokenContract = new Contract(tokenAddress, ERC20_ABI, signer);
-            const amountRaw = await getTokenAmountRaw(tokenAddress, amount, signer);
-            const allowance = await tokenContract.allowance(userAddress, SCARF_ADDRESS);
-
-            if (allowance >= amountRaw) {
-                setApprovalStatus('approved');
-            } else {
-                setApprovalStatus('needs-approval');
-            }
-        } catch (error: any) {
-            setError(`Failed to check approval: ${error.message}`);
-            setApprovalStatus('none');
-        } finally {
-            setIsCheckingApproval(false);
+            const raw = parseUnits(amount.trim() || '0', asset.decimals);
+            return raw > BigInt(0) ? raw : null;
+        } catch {
+            return null;
         }
-    };
+    })();
 
-    const handleApprove = async () => {
-        if (!useToken || !tokenAddress.trim() || !amount) return;
-
-        try {
-            setIsApproving(true);
-            setError(null);
-            const { signer } = await connectScarf();
-            const tokenContract = new Contract(tokenAddress, ERC20_ABI, signer);
-            const amountRaw = await getTokenAmountRaw(tokenAddress, amount, signer);
-            const tx = await tokenContract.approve(SCARF_ADDRESS, amountRaw);
-            await tx.wait();
-            setApprovalStatus('approved');
-        } catch (error: any) {
-            setError(`Approval failed: ${error.message}`);
-        } finally {
-            setIsApproving(false);
-        }
-    };
-
-    const handleSet = async () => {
-        setError(null);
-
-        if (!amount || parseFloat(amount) <= 0) {
-            setError('Please enter a valid amount');
-            return;
-        }
-
-        if (useToken && !tokenAddress.trim()) {
-            setError('Token address is required when using ERC20');
-            return;
-        }
-
-        if (useToken && approvalStatus !== 'approved') {
-            setError('Please approve token spending first');
-            return;
-        }
-
-        try {
-            let amountRaw: bigint;
-            if (useToken && tokenAddress.trim()) {
-                const { signer } = await connectScarf();
-                amountRaw = await getTokenAmountRaw(tokenAddress, amount, signer);
-            } else {
-                amountRaw = parseEther(amount);
-            }
-            const token = useToken && tokenAddress ? tokenAddress : ZeroAddress;
-            onPaymentSet(amountRaw, token);
-        } catch (error) {
-            setError('Invalid amount format');
-        }
-    };
-
+    // Check the USDC allowance whenever the amount settles.
     useEffect(() => {
-        if (useToken && tokenAddress.trim() && amount) {
-            const timer = setTimeout(() => {
-                checkApproval();
-            }, 500);
-            return () => clearTimeout(timer);
-        } else {
-            setApprovalStatus('none');
+        if (isEth || amountRaw === null) {
+            setApproval('idle');
+            return;
         }
-    }, [useToken, tokenAddress, amount]);
+        let cancelled = false;
+        const timer = setTimeout(async () => {
+            setApproval('checking');
+            try {
+                const { signer } = await connectScarf();
+                const owner = await signer.getAddress();
+                const allowance: bigint = await new Contract(asset.token, ERC20_ABI, signer).allowance(owner, SCARF_ADDRESS);
+                if (!cancelled) setApproval(allowance >= amountRaw ? 'approved' : 'needed');
+            } catch (err) {
+                if (!cancelled) {
+                    setApproval('idle');
+                    setError(getErrorMessage(err, 'Couldn’t check your USDC allowance'));
+                }
+            }
+        }, 400);
+        return () => {
+            cancelled = true;
+            clearTimeout(timer);
+        };
+    }, [isEth, asset.token, amountRaw]);
+
+    const approve = async () => {
+        if (amountRaw === null) return;
+        setError(null);
+        setApproval('approving');
+        try {
+            const { signer } = await connectScarf();
+            const tx = await new Contract(asset.token, ERC20_ABI, signer).approve(SCARF_ADDRESS, amountRaw);
+            await tx.wait();
+            setApproval('approved');
+        } catch (err) {
+            setError(getErrorMessage(err, 'Approval failed'));
+            setApproval('needed');
+        }
+    };
+
+    const attach = () => {
+        setError(null);
+        if (amountRaw === null) {
+            setError('Enter an amount above 0');
+            return;
+        }
+        if (!isEth && approval !== 'approved') {
+            setError('Approve USDC first');
+            return;
+        }
+        onPaymentSet(amountRaw, asset.token);
+    };
 
     return (
-        <div
-            style={{
-                borderRadius: '0.875rem',
-                border: '1px solid color-mix(in srgb, var(--fg) 8%, transparent)',
-                background: 'var(--surface)',
-                padding: '1rem',
-                backdropFilter: 'blur(10px)',
-            }}
-        >
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <Coins style={{ width: '1rem', height: '1rem', color: 'color-mix(in srgb, var(--fg) 70%, transparent)' }} />
-                    <h3 style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--fg)' }}>Payment Options</h3>
-                </div>
-                <button
-                    onClick={onCancel}
-                    style={{
-                        padding: '0.375rem',
-                        borderRadius: '0.875rem',
-                        background: 'transparent',
-                        border: 'none',
-                        color: 'color-mix(in srgb, var(--fg) 70%, transparent)',
-                        cursor: 'pointer',
-                        transition: 'all 0.2s',
-                    }}
-                    onMouseEnter={(e) => {
-                        e.currentTarget.style.background = 'color-mix(in srgb, var(--fg) 5%, transparent)';
-                        e.currentTarget.style.color = 'var(--fg)';
-                    }}
-                    onMouseLeave={(e) => {
-                        e.currentTarget.style.background = 'transparent';
-                        e.currentTarget.style.color = 'color-mix(in srgb, var(--fg) 70%, transparent)';
-                    }}
-                >
-                    <X style={{ width: '1rem', height: '1rem' }} />
+        <div className="card p-4">
+            <div className="mb-3 flex items-center justify-between">
+                <p className="flex items-center gap-2 text-[14px] font-semibold">
+                    <Coins size={16} strokeWidth={1.8} className="text-accent" />
+                    Attach a payment
+                </p>
+                <button onClick={onCancel} className="icon-btn h-8! w-8!" aria-label="Close payment options">
+                    <X size={15} strokeWidth={1.8} />
                 </button>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                <div>
-                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 500, color: 'color-mix(in srgb, var(--fg) 70%, transparent)', marginBottom: '0.5rem' }}>
-                        Amount {useToken ? '(token units)' : '(Base ETH)'}
-                    </label>
+            <div className="grid gap-3">
+                <div className="seg w-full">
+                    {PAYMENT_ASSETS.map((a) => (
+                        <button
+                            key={a.token}
+                            className="flex-1"
+                            aria-pressed={a.token === asset.token}
+                            onClick={() => {
+                                setAsset(a);
+                                setError(null);
+                            }}
+                        >
+                            {a.symbol}
+                        </button>
+                    ))}
+                </div>
+
+                <div className="field">
+                    <span className="text-[11px]">Amount</span>
                     <input
-                        type="number"
-                        step="0.0001"
                         value={amount}
-                        onChange={(e) => setAmount(e.target.value)}
-                        placeholder="0.0"
-                        style={{
-                            width: '100%',
-                            borderRadius: '0.875rem',
-                            border: '1px solid color-mix(in srgb, var(--fg) 10%, transparent)',
-                            background: 'color-mix(in srgb, var(--fg) 3%, transparent)',
-                            padding: '0.625rem 0.75rem',
-                            fontSize: '0.875rem',
-                            color: 'var(--fg)',
-                            outline: 'none',
-                            transition: 'all 0.2s',
-                        }}
-                        onFocus={(e) => {
-                            e.currentTarget.style.borderColor = 'color-mix(in srgb, var(--fg) 20%, transparent)';
-                        }}
-                        onBlur={(e) => {
-                            e.currentTarget.style.borderColor = 'color-mix(in srgb, var(--fg) 10%, transparent)';
-                        }}
+                        onChange={(e) => setAmount(e.target.value.replace(',', '.'))}
+                        onKeyDown={(e) => e.key === 'Enter' && attach()}
+                        placeholder="0.00"
+                        inputMode="decimal"
+                        autoComplete="off"
+                        autoFocus
+                        className="pr-16!"
                     />
-                    {!useToken && (
-                        <p style={{ marginTop: '0.375rem', fontSize: '0.6875rem', lineHeight: 1.5, color: 'var(--mute)' }}>
-                            Messages that pay ETH are sent from your wallet, not gaslessly, so you also pay a small network fee.
-                        </p>
-                    )}
+                    <span className="absolute! left-auto! right-4 top-1/2! -translate-y-1/2 text-[13px] text-dim">{asset.symbol}</span>
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <input
-                        type="checkbox"
-                        id="useToken"
-                        checked={useToken}
-                        onChange={(e) => setUseToken(e.target.checked)}
-                        style={{
-                            width: '1rem',
-                            height: '1rem',
-                            borderRadius: '0.25rem',
-                            border: '1px solid color-mix(in srgb, var(--fg) 20%, transparent)',
-                            background: useToken ? 'var(--btn-white-bg)' : 'transparent',
-                            cursor: 'pointer',
-                        }}
-                    />
-                    <label htmlFor="useToken" style={{ fontSize: '0.75rem', color: 'color-mix(in srgb, var(--fg) 70%, transparent)', cursor: 'pointer' }}>
-                        Use ERC20 token instead
-                    </label>
-                </div>
+                <p className="px-1 text-[11.5px] leading-relaxed text-mute">
+                    {isEth
+                        ? `Sent from your wallet with the message, so you pay a small ${BASE_CHAIN.name} network fee.`
+                        : `Circle's USDC on ${BASE_CHAIN.name}. The message stays gasless; approving USDC needs a little ETH for gas.`}
+                </p>
 
-                {useToken && (
-                    <>
-                        <div>
-                            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 500, color: 'color-mix(in srgb, var(--fg) 70%, transparent)', marginBottom: '0.5rem' }}>
-                                Token Address (Base Network)
-                            </label>
-                            <input
-                                type="text"
-                                value={tokenAddress}
-                                onChange={(e) => setTokenAddress(e.target.value)}
-                                placeholder="0x..."
-                                style={{
-                                    width: '100%',
-                                    borderRadius: '0.875rem',
-                                    border: '1px solid color-mix(in srgb, var(--fg) 10%, transparent)',
-                                    background: 'color-mix(in srgb, var(--fg) 3%, transparent)',
-                                    padding: '0.625rem 0.75rem',
-                                    fontSize: '0.875rem',
-                                    color: 'var(--fg)',
-                                    fontFamily: 'var(--font-mono)',
-                                    outline: 'none',
-                                    transition: 'all 0.2s',
-                                }}
-                                onFocus={(e) => {
-                                    e.currentTarget.style.borderColor = 'color-mix(in srgb, var(--fg) 20%, transparent)';
-                                }}
-                                onBlur={(e) => {
-                                    e.currentTarget.style.borderColor = 'color-mix(in srgb, var(--fg) 10%, transparent)';
-                                }}
-                            />
-                        </div>
-                        {tokenAddress.trim() && amount && (
-                            <div
-                                style={{
-                                    padding: '0.75rem',
-                                    borderRadius: '0.875rem',
-                                    background:
-                                        approvalStatus === 'approved'
-                                            ? 'color-mix(in srgb, var(--good) 10%, transparent)'
-                                            : approvalStatus === 'needs-approval'
-                                                ? 'color-mix(in srgb, var(--warn) 10%, transparent)'
-                                                : 'color-mix(in srgb, var(--fg) 3%, transparent)',
-                                    border: `1px solid ${approvalStatus === 'approved'
-                                            ? 'color-mix(in srgb, var(--good) 20%, transparent)'
-                                            : approvalStatus === 'needs-approval'
-                                                ? 'color-mix(in srgb, var(--warn) 20%, transparent)'
-                                                : 'color-mix(in srgb, var(--fg) 10%, transparent)'
-                                        }`,
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'space-between',
-                                    gap: '0.75rem',
-                                }}
-                            >
-                                <div style={{ flex: 1 }}>
-                                    {isCheckingApproval ? (
-                                        <div style={{ fontSize: '0.75rem', color: 'color-mix(in srgb, var(--fg) 60%, transparent)' }}>
-                                            Checking approval...
-                                        </div>
-                                    ) : approvalStatus === 'approved' ? (
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                            <CheckCircle2 style={{ width: '1rem', height: '1rem', color: 'var(--good)' }} />
-                                            <span style={{ fontSize: '0.75rem', color: 'var(--good)', fontWeight: 500 }}>
-                                                Token approved
-                                            </span>
-                                        </div>
-                                    ) : approvalStatus === 'needs-approval' ? (
-                                        <div style={{ fontSize: '0.75rem', color: 'var(--warn)' }}>
-                                            Approval required before sending
-                                        </div>
-                                    ) : null}
-                                </div>
-                                {approvalStatus === 'needs-approval' && (
-                                    <button
-                                        onClick={handleApprove}
-                                        disabled={isApproving}
-                                        style={{
-                                            padding: '0.5rem 1rem',
-                                            borderRadius: '0.875rem',
-                                            background: 'var(--warn)',
-                                            border: 'none',
-                                            color: 'var(--btn-white-fg)',
-                                            fontSize: '0.75rem',
-                                            fontWeight: 600,
-                                            cursor: isApproving ? 'not-allowed' : 'pointer',
-                                            opacity: isApproving ? 0.6 : 1,
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: '0.5rem',
-                                            transition: 'opacity 0.2s',
-                                        }}
-                                    >
-                                        {isApproving ? (
-                                            <>
-                                                <Loader2 style={{ width: '0.875rem', height: '0.875rem', animation: 'spin 1s linear infinite' }} />
-                                                Approving...
-                                            </>
-                                        ) : (
-                                            'Approve Token'
-                                        )}
-                                    </button>
-                                )}
-                            </div>
+                {!isEth && amountRaw !== null && (
+                    <div className="inset-panel flex items-center gap-3 rounded-[var(--r-inset)] p-3">
+                        {approval === 'approved' ? (
+                            <>
+                                <CheckCircle2 size={16} strokeWidth={1.8} className="shrink-0 text-good" />
+                                <p className="flex-1 text-[12.5px]">USDC approved for this amount</p>
+                            </>
+                        ) : approval === 'checking' ? (
+                            <>
+                                <Loader2 size={16} className="shrink-0 animate-spin text-mute" />
+                                <p className="flex-1 text-[12.5px] text-dim">Checking your USDC allowance…</p>
+                            </>
+                        ) : (
+                            <>
+                                <ShieldCheck size={16} strokeWidth={1.8} className="shrink-0 text-accent" />
+                                <p className="flex-1 text-[12.5px] text-dim">Let Scarf move this much USDC when the message sends.</p>
+                                <button onClick={approve} disabled={approval === 'approving'} className="btn btn-sm btn-accent h-8! shrink-0 disabled:opacity-60">
+                                    {approval === 'approving' && <Loader2 size={14} className="animate-spin" />}
+                                    {approval === 'approving' ? 'Approving…' : 'Approve'}
+                                </button>
+                            </>
                         )}
-                    </>
-                )}
-
-                {error && (
-                    <div
-                        style={{
-                            borderRadius: '0.875rem',
-                            background: 'color-mix(in srgb, var(--bad) 10%, transparent)',
-                            border: '1px solid color-mix(in srgb, var(--bad) 20%, transparent)',
-                            padding: '0.75rem',
-                        }}
-                    >
-                        <p style={{ fontSize: '0.75rem', color: 'var(--bad)' }}>{error}</p>
                     </div>
                 )}
 
+                {error && (
+                    <p className="flex items-start gap-2 text-[12.5px] leading-relaxed text-bad">
+                        <AlertCircle size={14} strokeWidth={1.8} className="mt-0.5 shrink-0" />
+                        {error}
+                    </p>
+                )}
+
                 <button
-                    onClick={handleSet}
-                    style={{
-                        width: '100%',
-                        borderRadius: '0.875rem',
-                        background: 'var(--btn-white-bg)',
-                        border: 'none',
-                        padding: '0.75rem 1rem',
-                        fontSize: '0.875rem',
-                        fontWeight: 600,
-                        color: 'var(--btn-white-fg)',
-                        cursor: 'pointer',
-                        transition: 'opacity 0.2s',
-                    }}
-                    onMouseEnter={(e) => {
-                        e.currentTarget.style.opacity = '0.9';
-                    }}
-                    onMouseLeave={(e) => {
-                        e.currentTarget.style.opacity = '1';
-                    }}
+                    onClick={attach}
+                    disabled={amountRaw === null || (!isEth && approval !== 'approved')}
+                    className="btn btn-white w-full disabled:opacity-50"
                 >
-                    Set Payment
+                    Attach {amountRaw !== null ? `${amount.trim()} ${asset.symbol}` : 'payment'}
                 </button>
             </div>
         </div>
