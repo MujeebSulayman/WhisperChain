@@ -5,6 +5,7 @@ import {
 	BrowserProvider,
 	Contract,
 	JsonRpcProvider,
+	Network,
 	type ContractRunner,
 	type Eip1193Provider,
 } from 'ethers';
@@ -35,9 +36,19 @@ export function getPaymasterContract(runner: ContractRunner) {
 	return new Contract(PAYMASTER_ADDRESS, PAYMASTER_ABI, runner);
 }
 
+// One shared read-only provider: creating one per call re-detects the network every time.
+let readOnlyProvider: JsonRpcProvider | null = null;
+
+export function getReadOnlyProvider() {
+	readOnlyProvider ??= new JsonRpcProvider(BASE_CHAIN.rpcUrl, BASE_CHAIN.id, {
+		staticNetwork: Network.from(BASE_CHAIN.id),
+	});
+	return readOnlyProvider;
+}
+
 export function getReadOnlyContract(rpcUrl = BASE_CHAIN.rpcUrl) {
-	const provider = new JsonRpcProvider(rpcUrl);
-	return getScarfContract(provider);
+	if (rpcUrl !== BASE_CHAIN.rpcUrl) return getScarfContract(new JsonRpcProvider(rpcUrl));
+	return getScarfContract(getReadOnlyProvider());
 }
 
 type ConnectResult = {

@@ -1,6 +1,9 @@
 'use client';
 
-import { CheckCheck, Image, Video, Music, FileText, ExternalLink, Coins } from 'lucide-react';
+import { Check, CheckCheck, Clock, Image, Video, Music, FileText, ExternalLink, Coins } from 'lucide-react';
+import type { ReactNode } from 'react';
+import type { ChatMessage } from '@/lib/inbox';
+import { AddressAvatar } from './AddressAvatar';
 import { format } from 'date-fns';
 import { useState, useEffect } from 'react';
 import { getIPFSUrl, getMediaTypeName } from '@/lib/ipfs';
@@ -8,30 +11,15 @@ import { formatTokenAmount } from '@/lib/token';
 import { ZeroAddress } from 'ethers';
 import { useTokenInfo } from '../hooks/useTokenInfo';
 
-type Message = {
-    id: string;
-    author: string;
-    timestamp: number | string;
-    body: string;
-    isSelf: boolean;
-    status: 'pending' | 'delivered' | 'read';
-    messageHash?: string;
-    messageId?: string;
-    ipfsHash?: string;
-    mediaType?: number;
-    fileSize?: bigint;
-    sender?: string;
-    recipient?: string;
-    paymentAmount?: bigint;
-    paymentToken?: string;
-    paymentSettled?: boolean;
-};
-
 type MessageBubbleProps = {
-    message: Message;
+    message: ChatMessage & { paymentSettled?: boolean };
     index?: number;
     showAvatar?: boolean;
     isGrouped?: boolean;
+    /** Label others' messages with their address (group chats). */
+    showAuthor?: boolean;
+    /** Hover actions (copy, delete) shown beside the bubble. */
+    actions?: ReactNode;
 };
 
 const mediaIconProps = { size: 20, strokeWidth: 1.8 } as const;
@@ -59,19 +47,17 @@ const formatFileSize = (bytes?: bigint) => {
     return `${(num / 1024 / 1024).toFixed(2)} MB`;
 };
 
-export function MessageBubble({ message, index = 0, showAvatar = true, isGrouped = false }: MessageBubbleProps) {
+export function MessageBubble({ message, index = 0, showAvatar = true, isGrouped = false, showAuthor = false, actions }: MessageBubbleProps) {
     const [isVisible, setIsVisible] = useState(false);
     const isSelf = message.isSelf;
 
-    const timestamp = typeof message.timestamp === 'number' ? message.timestamp * 1000 : new Date(message.timestamp).getTime();
-    const exactTime = format(new Date(timestamp), 'HH:mm');
+    const exactTime = format(new Date(message.timestamp * 1000), 'HH:mm');
 
     useEffect(() => {
         const timer = setTimeout(() => setIsVisible(true), index * 30);
         return () => clearTimeout(timer);
     }, [index]);
 
-    const showReadStatus = isSelf && message.status === 'read';
     const hasMedia = Boolean(message.ipfsHash && (message.mediaType ?? 0) > 0);
     const isImage = message.mediaType === 1;
     const imageOnly = isImage && Boolean(message.ipfsHash);
@@ -82,8 +68,6 @@ export function MessageBubble({ message, index = 0, showAvatar = true, isGrouped
         ? formatTokenAmount(BigInt(message.paymentAmount), paymentTokenInfo.decimals)
         : '';
 
-    const who = message.sender ?? message.author ?? '';
-    const initials = (who.startsWith('0x') ? who.slice(2, 4) : who.slice(0, 2)).toUpperCase() || 'U';
 
     // Your messages are a solid ink pill (as in the Prinet chat); theirs are glass cards.
     const bubble = isSelf
@@ -97,15 +81,15 @@ export function MessageBubble({ message, index = 0, showAvatar = true, isGrouped
 
     return (
         <div
-            className={`animate-slide-up flex items-end gap-2.5 transition-opacity duration-200 ${isSelf ? 'justify-end pl-8 md:pl-16' : 'justify-start pr-8 md:pr-16'} ${isGrouped ? 'mb-1' : 'mb-4'}`}
+            className={`group/msg animate-slide-up flex items-end gap-2.5 transition-opacity duration-200 ${isSelf ? 'flex-row-reverse pl-8 md:pl-16' : 'justify-start pr-8 md:pr-16'} ${isGrouped ? 'mb-1' : 'mb-4'}`}
             style={{ opacity: isVisible ? 1 : 0 }}
         >
             {!isSelf && (showAvatar && !isGrouped
-                ? <span className="avatar h-8 w-8 text-[11px]">{initials}</span>
+                ? <AddressAvatar address={message.sender} className="h-8 w-8 text-[11px]" />
                 : <span className="w-8 shrink-0" />)}
 
             <div className="flex min-w-[6rem] max-w-[85%] flex-col gap-1.5 md:max-w-[75%]">
-                {!isSelf && !isGrouped && <span className="pl-1 font-mono text-[11px] text-mute">{message.author}</span>}
+                {!isSelf && !isGrouped && showAuthor && <span className="pl-1 font-mono text-[11px] text-mute">{message.author}</span>}
 
                 <div className={`flex flex-col overflow-hidden ${bubble} ${imageOnly ? '' : 'px-4 py-3'}`}>
                     {message.body && (
@@ -156,7 +140,7 @@ export function MessageBubble({ message, index = 0, showAvatar = true, isGrouped
                                         <span className={`flex items-center gap-1.5 font-mono text-[11px] ${subtle}`}>
                                             {message.fileSize ? <span>{formatFileSize(message.fileSize)} ·</span> : null}
                                             <span className="truncate">
-                                                ipfs://{message.ipfsHash.slice(0, 8)}…{message.ipfsHash.slice(-4)}
+                                                ipfs://{message.ipfsHash.split('#')[0].slice(0, 8)}…{message.ipfsHash.split('#')[0].slice(-4)}
                                             </span>
                                         </span>
                                     </span>
@@ -182,12 +166,30 @@ export function MessageBubble({ message, index = 0, showAvatar = true, isGrouped
                     )}
 
                     <div className={`flex items-center justify-end gap-1.5 font-mono text-[10px] ${subtle} ${imageOnly ? 'px-4 pb-3 pt-2' : 'pt-1.5'}`}>
-                        {isSelf && message.status === 'pending' && <span>Sending ·</span>}
-                        <span>{exactTime}</span>
-                        {showReadStatus && <CheckCheck size={12} className="shrink-0 text-good" />}
+                        {isSelf && message.status === 'pending' ? (
+                            <span className="flex items-center gap-1" title="Sending to Base">
+                                <Clock size={11} className="shrink-0 animate-pulse" />
+                                Sending…
+                            </span>
+                        ) : (
+                            <>
+                                <span>{exactTime}</span>
+                                {isSelf && (
+                                    <span title="Delivered: recorded on Base">
+                                        <Check size={12} className="shrink-0" />
+                                    </span>
+                                )}
+                            </>
+                        )}
                     </div>
                 </div>
             </div>
+
+            {actions && (
+                <div className="mb-1 shrink-0 opacity-100 transition-opacity md:opacity-0 md:group-hover/msg:opacity-100 md:focus-within:opacity-100">
+                    {actions}
+                </div>
+            )}
         </div>
     );
 }

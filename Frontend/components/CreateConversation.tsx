@@ -6,19 +6,19 @@ import {
 	createConversation,
 	createConversationGasless,
 	getConversationIdFromTxHash,
+	isUserRegistered,
 	submitSignedForwardRequest,
 	waitForTransaction,
 } from '@/lib/scarfActions';
+import { MAX_GROUP_RECIPIENTS } from '@/lib/inbox';
 import { isGaslessConfigured } from '@/lib/gasless';
 import { getErrorMessage } from '@/lib/errors';
 import { ethers } from 'ethers';
-import type { AddressLike } from 'ethers';
 
 type CreateConversationProps = {
     onCreated: (conversationId: string, participants: string[]) => void;
     onCancel: () => void;
     currentUser: string;
-    findExisting1on1Thread?: (otherAddress: string) => string | null;
     /** Prefilled participants, e.g. from a shared chat invite link. */
     initialParticipants?: string[];
 };
@@ -27,7 +27,6 @@ export function CreateConversation({
     onCreated,
     onCancel,
     currentUser,
-    findExisting1on1Thread,
     initialParticipants = [],
 }: CreateConversationProps) {
     const [participants, setParticipants] = useState<string[]>(() => initialParticipants.map((p) => p.toLowerCase()));
@@ -53,18 +52,33 @@ export function CreateConversation({
             return;
         }
 
+        if (participants.length >= MAX_GROUP_RECIPIENTS) {
+            setError(`A group can have up to ${MAX_GROUP_RECIPIENTS} other people`);
+            return;
+        }
+
         setParticipants([...participants, newParticipant.toLowerCase()]);
         setNewParticipant('');
         setError(null);
     };
+
+    const typedValid = ethers.isAddress(newParticipant.trim()) && newParticipant.trim().toLowerCase() !== currentUser.toLowerCase();
+    const memberCount = participants.length + (typedValid && !participants.includes(newParticipant.trim().toLowerCase()) ? 1 : 0);
+    const canStart = memberCount > 0;
 
     const removeParticipant = (address: string) => {
         setParticipants(participants.filter((p) => p !== address));
     };
 
     const handleCreate = async () => {
-        if (participants.length < 1) {
-            setError('Add at least one participant (contract requires minimum 2 participants including you)');
+        // A typed but un-added address counts, so "paste and press Start" just works.
+        const pendingInput = newParticipant.trim().toLowerCase();
+        const others = [...participants];
+        if (pendingInput && ethers.isAddress(pendingInput) && pendingInput !== currentUser.toLowerCase() && !others.includes(pendingInput)) {
+            others.push(pendingInput);
+        }
+        if (others.length < 1) {
+            setError('Add at least one wallet address');
             return;
         }
 
@@ -72,17 +86,27 @@ export function CreateConversation({
         setError(null);
 
         try {
-            const allParticipants = [currentUser, ...participants] as AddressLike[];
-
-            if (participants.length === 1 && findExisting1on1Thread) {
-                const existingId = findExisting1on1Thread(participants[0]);
-                if (existingId) {
-                    onCreated(existingId, allParticipants as string[]);
-                    return;
-                }
+            // Everyone must have activated Scarf, or the contract rejects messages to them.
+            const registered = await Promise.all(others.map((p) => isUserRegistered(p)));
+            const missing = others.filter((_, i) => !registered[i]);
+            if (missing.length > 0) {
+                setError(
+                    missing.length === 1
+                        ? `${missing[0].slice(0, 6)}…${missing[0].slice(-4)} hasn't activated Scarf yet. Send them your chat link from Wallet → Receive.`
+                        : `${missing.length} of these addresses haven't activated Scarf yet.`
+                );
+                return;
             }
 
-            const keyToUse = `${currentUser}-${participants.join('-')}-${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;
+            const allParticipants = [currentUser, ...others];
+
+            // Direct chats need nothing on-chain: the thread is simply the other address.
+            if (others.length === 1) {
+                onCreated(others[0], allParticipants);
+                return;
+            }
+
+            const keyToUse = `${currentUser}-${others.join('-')}-${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;
             const keyHash = ethers.keccak256(ethers.toUtf8Bytes(keyToUse));
 
             let txHash: string;
@@ -102,9 +126,9 @@ export function CreateConversation({
                 txHash = receipt.hash;
             }
             const conversationId = await getConversationIdFromTxHash(txHash);
-            onCreated(conversationId, allParticipants as string[]);
-        } catch (err: any) {
-            setError(getErrorMessage(err, 'Failed to create conversation'));
+            onCreated(conversationId, allParticipants);
+        } catch (err) {
+            setError(getErrorMessage(err, 'Failed to start conversation'));
         } finally {
             setIsCreating(false);
         }
@@ -123,7 +147,7 @@ export function CreateConversation({
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                     <Users style={{ width: '1.25rem', height: '1.25rem', color: 'color-mix(in srgb, var(--fg) 70%, transparent)' }} />
-                    <h3 style={{ fontSize: '1.125rem', fontWeight: 600, color: 'var(--fg)' }}>Create Conversation</h3>
+                    <h3 style={{ fontSize: '1.125rem', fontWeight: 600, color: 'var(--fg)' }}>New conversation</h3>
                 </div>
                 <button
                     onClick={onCancel}
@@ -152,7 +176,7 @@ export function CreateConversation({
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 <div>
                     <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: 'color-mix(in srgb, var(--fg) 70%, transparent)', marginBottom: '0.5rem' }}>
-                        Participants (minimum 2 including you)
+                        One address for a direct chat, or several for a group
                     </label>
                     <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
                         <input
@@ -263,7 +287,7 @@ export function CreateConversation({
 
                 <button
                     onClick={handleCreate}
-                    disabled={isCreating || participants.length < 1}
+                    disabled={isCreating || !canStart}
                     style={{
                         width: '100%',
                         borderRadius: '0.875rem',
@@ -273,20 +297,20 @@ export function CreateConversation({
                         fontSize: '0.875rem',
                         fontWeight: 600,
                         color: 'var(--btn-white-fg)',
-                        cursor: isCreating || participants.length < 1 ? 'not-allowed' : 'pointer',
-                        opacity: isCreating || participants.length < 1 ? 0.6 : 1,
+                        cursor: isCreating || !canStart ? 'not-allowed' : 'pointer',
+                        opacity: isCreating || !canStart ? 0.6 : 1,
                         transition: 'opacity 0.2s',
                     }}
                 >
                     {isCreating ? (
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
                             <Loader2 style={{ width: '1rem', height: '1rem', animation: 'spin 1s linear infinite' }} />
-                            <span>Creating...</span>
+                            <span>{memberCount > 1 ? 'Creating group…' : 'Checking address…'}</span>
                         </div>
                     ) : (
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
                             <Users style={{ width: '1rem', height: '1rem' }} />
-                            <span>Create Conversation</span>
+                            <span>{memberCount > 1 ? `Create group (${memberCount + 1} people)` : 'Start chat'}</span>
                         </div>
                     )}
                 </button>

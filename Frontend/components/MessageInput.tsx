@@ -24,12 +24,15 @@ type MessageInputProps = {
     }) => Promise<void>;
     disabled?: boolean;
     placeholder?: string;
+    /** Payments go to one recipient, so groups hide the payment button. */
+    allowPayments?: boolean;
 };
 
 export function MessageInput({
     onSend,
     disabled = false,
     placeholder = 'Write a message…',
+    allowPayments = true,
 }: MessageInputProps) {
     const isMobile = useIsMobile();
     const [input, setInput] = useState('');
@@ -213,18 +216,20 @@ export function MessageInput({
                 >
                     <Paperclip size={18} strokeWidth={1.8} />
                 </button>
-                <button
-                    onClick={() => {
-                        setShowPayment(!showPayment);
-                        setShowFileUpload(false);
-                    }}
-                    disabled={disabled}
-                    className={`icon-btn ${showPayment ? 'is-on' : ''}`}
-                    title="Add payment"
-                    aria-label="Add payment"
-                >
-                    <Coins size={18} strokeWidth={1.8} />
-                </button>
+                {allowPayments && (
+                    <button
+                        onClick={() => {
+                            setShowPayment(!showPayment);
+                            setShowFileUpload(false);
+                        }}
+                        disabled={disabled}
+                        className={`icon-btn ${showPayment ? 'is-on' : ''}`}
+                        title="Add payment"
+                        aria-label="Add payment"
+                    >
+                        <Coins size={18} strokeWidth={1.8} />
+                    </button>
+                )}
 
                 <textarea
                     ref={textareaRef}

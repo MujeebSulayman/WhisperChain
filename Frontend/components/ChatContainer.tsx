@@ -20,53 +20,24 @@ import { WalletHub, type WalletTab } from './WalletHub';
 import {
 	sendChatMessage,
 	sendChatMessageGasless,
+	sendBatchMessages,
+	sendBatchMessagesGasless,
 	submitSignedForwardRequest,
 	waitForTransaction,
-	fetchUserMessages,
 	fetchMessage,
-	fetchConversation,
-	getIPFSHash,
-	getMediaType,
 	isUserRegistered,
-	getUserConversations,
 	getUserPublicKey,
 } from '@/lib/scarfActions';
+import { getReadOnlyContract } from '@/lib/blockchain';
+import { NO_CAPTION, groupTag, groupTitle, shortAddress, type Thread } from '@/lib/inbox';
 import { isGaslessConfigured } from '@/lib/gasless';
 import { getErrorMessage, REQUEST_CANCELLED_MESSAGE } from '@/lib/errors';
 import { useScarf } from '../hooks/useScarf';
 import { useWallet } from '../hooks/useWallet';
 import { useWalletBalance } from '../hooks/useWalletBalance';
+import { useInbox } from '../hooks/useInbox';
 import { useIsMobile } from '../hooks/useMediaQuery';
 import { ethers } from 'ethers';
-import { formatDistanceToNow } from 'date-fns';
-
-type Message = {
-	id: string;
-	author: string;
-	timestamp: number | string;
-	body: string;
-	isSelf: boolean;
-	status: 'pending' | 'delivered' | 'read';
-	messageHash?: string;
-	messageId?: string;
-	ipfsHash?: string;
-	mediaType?: number;
-	fileSize?: bigint;
-	paymentAmount?: bigint;
-	paymentToken?: string;
-	sender?: string;
-	recipient?: string;
-};
-
-type Thread = {
-	id: string;
-	title: string;
-	subtitle?: string;
-	unreadCount?: number;
-	lastMessage: string;
-	timestamp: string;
-	participants?: string[];
-};
 
 const CHAT_PARAM = 'c';
 
@@ -94,9 +65,6 @@ export function ChatContainer() {
 	useEffect(() => {
 		if (cFromUrl !== null && cFromUrl !== activeThreadId) setActiveThreadIdState(cFromUrl);
 	}, [cFromUrl, activeThreadId]);
-	const [messages, setMessages] = useState<Record<string, Message[]>>({});
-	const [threads, setThreads] = useState<Thread[]>([]);
-	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const [needsRegistration, setNeedsRegistration] = useState(false);
 	const [showCreateConversation, setShowCreateConversation] = useState(false);
@@ -105,7 +73,6 @@ export function ChatContainer() {
 	const [sidebarOpen, setSidebarOpen] = useState(!isMobile);
 	const [conversationsSidebarOpen, setConversationsSidebarOpen] = useState(!isMobile || (isMobile && !!connectedAddress));
 	const [userPublicKey, setUserPublicKey] = useState<string>('');
-	const [pendingTransactions, setPendingTransactions] = useState<Set<string>>(new Set());
 	const [paymentNotification, setPaymentNotification] = useState<{
 		amount: bigint;
 		token?: string;
@@ -115,24 +82,47 @@ export function ChatContainer() {
 	} | null>(null);
 	const [showPaymentHistory, setShowPaymentHistory] = useState(false);
 	const [walletTab, setWalletTab] = useState<WalletTab | null>(null);
-	const [invitedParticipant, setInvitedParticipant] = useState<string | null>(null);
 
 	const { profile, isRegistered, refresh } = useScarf(connectedAddress);
 
 	const balance = useWalletBalance(connectedAddress);
+	const inbox = useInbox(connectedAddress, activeThreadId);
+	const { threads, messagesByThread: messages, addPlaceholder } = inbox;
 
 	const handleDisconnect = () => {
 		disconnect();
 		setActiveThreadId('');
-		setMessages({});
-		setThreads([]);
 	};
 
 	const activeThread = threads.find((t) => t.id === activeThreadId);
 	const peerAddress = useMemo(() => {
-		const others = activeThread?.participants?.filter((p) => p.toLowerCase() !== connectedAddress?.toLowerCase()) ?? [];
-		return others.length === 1 ? others[0] : undefined;
+		if (activeThread?.kind !== 'direct') return undefined;
+		return activeThread.participants.find((p) => p.toLowerCase() !== connectedAddress?.toLowerCase());
 	}, [activeThread, connectedAddress]);
+
+	/** Opens the direct chat with `other`, listing it right away even before any message. */
+	const openDirectChat = useCallback(
+		(other: string) => {
+			if (!connectedAddress) return;
+			const id = other.toLowerCase();
+			addPlaceholder({
+				id,
+				kind: 'direct',
+				title: shortAddress(other),
+				participants: [connectedAddress, other],
+				lastMessage: 'No messages yet',
+				lastAt: Math.floor(Date.now() / 1000),
+				unreadCount: 0,
+			});
+			setActiveThreadId(id);
+		},
+		[connectedAddress, addPlaceholder, setActiveThreadId]
+	);
+
+	// On desktop, land in the most recent conversation instead of an empty pane.
+	useEffect(() => {
+		if (!isMobile && !activeThreadId && !cFromUrl && threads.length > 0) setActiveThreadId(threads[0].id);
+	}, [isMobile, activeThreadId, cFromUrl, threads, setActiveThreadId]);
 
 	// Chat invite links (/app?to=0x…): open that chat, or prefill a new one, once we can act on it.
 	const toFromUrl = searchParams.get('to');
@@ -143,22 +133,25 @@ export function ChatContainer() {
 
 		const other = toFromUrl.toLowerCase();
 		if (ethers.isAddress(other) && other !== connectedAddress.toLowerCase()) {
-			const existing = threads.find((t) => {
-				const p = t.participants?.map((a) => a.toLowerCase()) ?? [];
-				return p.length === 2 && p.includes(other);
+			addPlaceholder({
+				id: other,
+				kind: 'direct',
+				title: shortAddress(other),
+				participants: [connectedAddress, other],
+				lastMessage: 'No messages yet',
+				lastAt: Math.floor(Date.now() / 1000),
+				unreadCount: 0,
 			});
-			if (existing) {
-				setActiveThreadIdState(existing.id);
-				params.set(CHAT_PARAM, existing.id);
-			} else {
-				setInvitedParticipant(other);
-				setShowCreateConversation(true);
-			}
+			setActiveThreadIdState(other);
+			params.set(CHAT_PARAM, other);
+			isUserRegistered(other)
+				.then((ok) => !ok && setError('That address hasn’t activated Scarf yet, so it can’t receive messages.'))
+				.catch(() => {});
 		}
 
 		const qs = params.toString();
 		router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
-	}, [toFromUrl, connectedAddress, isRegistered, threads, searchParams, pathname, router]);
+	}, [toFromUrl, connectedAddress, isRegistered, searchParams, pathname, router, addPlaceholder]);
 
 	useEffect(() => {
 		if (isMobile && activeThreadId) {
@@ -208,91 +201,30 @@ export function ChatContainer() {
 	}, [error]);
 
 	useEffect(() => {
-		if (connectedAddress) {
-			checkRegistration();
-			loadUserData();
-		}
+		if (connectedAddress) checkRegistration();
 	}, [connectedAddress]);
 
+	// "Payment received" toasts. The inbox itself refreshes through useInbox.
 	useEffect(() => {
 		if (!connectedAddress) return;
-
-		let cleanup: (() => void) | undefined;
-
-		setupEventListeners().then((cleanupFn) => {
-			cleanup = cleanupFn;
-		});
-
-		return () => {
-			if (cleanup) {
-				cleanup();
+		const contract = getReadOnlyContract();
+		const me = connectedAddress.toLowerCase();
+		const onPayment = async (messageId: string, amount: bigint) => {
+			try {
+				const msg = await fetchMessage(messageId);
+				if (msg.recipient.toLowerCase() !== me) return;
+				setPaymentNotification({ amount, token: msg.paymentToken, isReceived: true, from: msg.sender });
+				balance.refresh();
+			} catch (error) {
+				console.error('Failed to load payment details:', error);
 			}
 		};
+		contract.on(contract.getEvent('PaymentSettled'), onPayment).catch(() => {});
+		return () => {
+			contract.off(contract.getEvent('PaymentSettled'), onPayment).catch(() => {});
+		};
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [connectedAddress]);
-
-	const setupEventListeners = async () => {
-		if (!connectedAddress) return;
-
-		try {
-			const { getReadOnlyContract } = await import('@/lib/blockchain');
-			const contract = getReadOnlyContract();
-
-			const handleMessageSent = async (messageId: string, sender: string, recipient: string) => {
-				const senderLower = sender.toLowerCase();
-				const recipientLower = recipient.toLowerCase();
-				const connectedLower = connectedAddress.toLowerCase();
-
-				if (senderLower === connectedLower || recipientLower === connectedLower) {
-					setTimeout(() => {
-						loadUserData();
-					}, 1000);
-				}
-			};
-
-			const messageSentEvent = contract.getEvent('MessageSent');
-			contract.on(messageSentEvent, (messageId, sender, recipient, timestamp, paymentAmount, event) => {
-				handleMessageSent(messageId, sender, recipient);
-			});
-
-			const paymentSettledEvent = contract.getEvent('PaymentSettled');
-			contract.on(paymentSettledEvent, async (messageId, amount, event) => {
-				try {
-					const msg = await fetchMessage(messageId);
-					const isReceived = msg.recipient.toLowerCase() === connectedAddress.toLowerCase();
-					if (isReceived) {
-						setPaymentNotification({
-							amount: amount,
-							token: msg.paymentToken,
-							isReceived: true,
-							from: msg.sender,
-						});
-					}
-					setTimeout(() => {
-						loadUserData();
-					}, 500);
-				} catch (error) {
-					console.error('Failed to load payment details:', error);
-				}
-			});
-
-			return () => {
-				contract.removeAllListeners(messageSentEvent);
-				contract.removeAllListeners(paymentSettledEvent);
-			};
-		} catch (error) {
-			console.error('Failed to setup event listeners:', error);
-		}
-	};
-
-	useEffect(() => {
-		if (!connectedAddress || !activeThreadId) return;
-
-		const pollInterval = setInterval(() => {
-			loadUserData();
-		}, 10000);
-
-		return () => clearInterval(pollInterval);
-	}, [connectedAddress, activeThreadId]);
 
 	const checkRegistration = async () => {
 		if (!connectedAddress) return;
@@ -304,316 +236,117 @@ export function ChatContainer() {
 		}
 	};
 
-	const loadUserData = async () => {
-		if (!connectedAddress) return;
-		setIsLoading(true);
-		try {
-			const messageIds = await fetchUserMessages(connectedAddress);
-			const conversationIds = await getUserConversations(connectedAddress);
-
-			const conversations = await Promise.all(
-				conversationIds.slice(0, 20).map(async (id) => {
-					try {
-						const conv = await fetchConversation(id);
-						const idStr = typeof id === 'string' ? id : ethers.hexlify(id);
-						return { id: idStr, conversation: conv };
-					} catch {
-						return null;
-					}
-				})
-			);
-
-			const validConversations = conversations.filter((c): c is { id: string; conversation: any } => c !== null);
-
-			const messageData = await Promise.all(
-				messageIds.slice(0, 100).map(async (id) => {
-					try {
-						const [msg, ipfsHash, mediaType] = await Promise.all([
-							fetchMessage(id),
-							getIPFSHash(id).catch(() => ''),
-							getMediaType(id).catch(() => 0),
-						]);
-						const hash = (typeof ipfsHash === 'string' ? ipfsHash : String(ipfsHash ?? '')).trim();
-						const media = Number(mediaType ?? 0);
-						const textContent = (typeof msg.textContent === 'string' ? msg.textContent : String((msg as any).textContent ?? '')).trim();
-						const isSelf = msg.sender.toLowerCase() === connectedAddress.toLowerCase();
-						const otherAddress = isSelf ? msg.recipient : msg.sender;
-
-						let conversationId: string | null = null;
-						for (const conv of validConversations) {
-							const participants = conv.conversation.participants.map((p: string) => p.toLowerCase());
-							if (participants.includes(msg.sender.toLowerCase()) && participants.includes(msg.recipient.toLowerCase())) {
-								conversationId = conv.id;
-								break;
-							}
-						}
-						if (!conversationId) conversationId = otherAddress.toLowerCase();
-
-						let body: string;
-						if (media === 0) {
-							body = textContent;
-							if (!body && hash && !hash.startsWith('text-')) {
-								try {
-									const { downloadTextFromIPFS } = await import('@/lib/ipfs');
-									body = await downloadTextFromIPFS(hash);
-								} catch {
-									body = `[IPFS ${hash.slice(0, 12)}...]`;
-								}
-							}
-							if (!body) {
-								try {
-									const { getTextContent } = await import('@/lib/scarfActions');
-									body = (await getTextContent(id)) || '[Text]';
-								} catch {
-									body = '[Text]';
-								}
-							}
-						} else {
-							body = '';
-						}
-
-						return {
-							id,
-							messageId: id,
-							author: isSelf ? 'You' : otherAddress.slice(0, 6) + '...' + otherAddress.slice(-4),
-							timestamp: Number(msg.timestamp),
-							body,
-							isSelf,
-							status: msg.read ? 'read' : msg.delivered ? 'delivered' : 'pending',
-							messageHash: msg.messageHash,
-							ipfsHash: hash || undefined,
-							mediaType: media,
-							fileSize: msg.fileSize,
-							conversationId,
-							sender: msg.sender,
-							recipient: msg.recipient,
-							paymentAmount: msg.paymentAmount,
-							paymentToken: msg.paymentToken,
-						} as Message & { conversationId: string; sender: string; recipient: string; paymentAmount?: bigint; paymentToken?: string };
-					} catch {
-						return null;
-					}
-				})
-			);
-
-			const validMessages = messageData.filter((m): m is Message & { conversationId: string; sender: string; recipient: string } => m !== null);
-			const messagesByThread: Record<string, Message[]> = {};
-
-			validMessages.forEach((msg) => {
-				const threadId = msg.conversationId;
-				if (!messagesByThread[threadId]) {
-					messagesByThread[threadId] = [];
-				}
-				messagesByThread[threadId].push(msg);
-			});
-
-			Object.keys(messagesByThread).forEach((threadId) => {
-				messagesByThread[threadId].sort((a, b) => {
-					const timeA = typeof a.timestamp === 'number' ? a.timestamp : 0;
-					const timeB = typeof b.timestamp === 'number' ? b.timestamp : 0;
-					return timeA - timeB;
-				});
-			});
-
-			setMessages(messagesByThread);
-
-			const threadData = validConversations.map((conv) => {
-				const idStr = conv.id;
-				const lastMsg = messagesByThread[idStr]?.[messagesByThread[idStr].length - 1];
-				const otherParticipants = conv.conversation.participants
-					.filter((p: string) => p.toLowerCase() !== connectedAddress.toLowerCase())
-					.map((p: string) => p.slice(0, 6) + '...' + p.slice(-4));
-
-				return {
-					id: idStr,
-					title: otherParticipants.length === 1
-						? otherParticipants[0]
-						: `${conv.conversation.participants.length} participants`,
-					subtitle: `${conv.conversation.participants.length} participants`,
-					unreadCount: 0,
-					lastMessage: lastMsg?.body || 'No messages yet',
-					timestamp: formatDistanceToNow(new Date(Number(conv.conversation.createdAt) * 1000), { addSuffix: true }),
-					participants: conv.conversation.participants,
-				} as Thread;
-			});
-
-			const oneOnOneThreads = new Map<string, { lastMsg: Message; otherAddress: string }>();
-			validMessages.forEach((msg) => {
-				if (!validConversations.find(c => c.id === msg.conversationId)) {
-					const otherAddress = msg.isSelf ? msg.recipient : msg.sender;
-					const existing = oneOnOneThreads.get(otherAddress);
-					if (!existing || (typeof msg.timestamp === 'number' && typeof existing.lastMsg.timestamp === 'number' && msg.timestamp > existing.lastMsg.timestamp)) {
-						oneOnOneThreads.set(otherAddress, { lastMsg: msg, otherAddress });
-					}
-				}
-			});
-
-			oneOnOneThreads.forEach((data, otherAddress) => {
-				threadData.push({
-					id: otherAddress.toLowerCase(),
-					title: otherAddress.slice(0, 6) + '...' + otherAddress.slice(-4),
-					unreadCount: 0,
-					lastMessage: data.lastMsg.body,
-					timestamp: typeof data.lastMsg.timestamp === 'number'
-						? formatDistanceToNow(new Date(data.lastMsg.timestamp * 1000), { addSuffix: true })
-						: 'Just now',
-					participants: [connectedAddress, otherAddress],
-				} as Thread);
-			});
-
-			threadData.sort((a, b) => {
-				const msgA = messagesByThread[a.id]?.[messagesByThread[a.id].length - 1];
-				const msgB = messagesByThread[b.id]?.[messagesByThread[b.id].length - 1];
-				const timeA = msgA && typeof msgA.timestamp === 'number' ? msgA.timestamp : 0;
-				const timeB = msgB && typeof msgB.timestamp === 'number' ? msgB.timestamp : 0;
-				return timeB - timeA;
-			});
-
-			setThreads(threadData);
-
-			if (threadData.length > 0 && !activeThreadId) {
-				setActiveThreadId(threadData[0].id);
-			}
-		} catch (err: any) {
-			setError(getErrorMessage(err, 'Failed to load data'));
-		} finally {
-			setIsLoading(false);
-		}
-	};
-
 	const handleSendMessage = async (args: {
 		text: string;
 		ipfsHash?: string;
 		mediaType?: number;
 		fileSize?: bigint;
-		paymentAmount?: any;
-		paymentToken?: any;
+		paymentAmount?: ethers.BigNumberish;
+		paymentToken?: ethers.AddressLike;
 	}) => {
 		if (!connectedAddress) {
 			setError('Please connect your wallet first');
 			throw new Error('Wallet not connected');
 		}
-
-		if (!activeThreadId) {
-			setError('Please select a conversation');
+		const thread = activeThread;
+		if (!thread) {
+			setError('Pick a conversation first');
 			throw new Error('No active thread');
 		}
-
-		setError(null);
-
-		const messageHash = ethers.keccak256(ethers.toUtf8Bytes(args.text));
-
-		const isTextMessage = !args.ipfsHash && (!args.mediaType || args.mediaType === 0);
-
-		const ipfsHash = args.ipfsHash || (isTextMessage ? '' : `ipfs-${Date.now()}`);
-		const mediaType = args.mediaType ?? 0;
-		const fileSize = isTextMessage ? BigInt(0) : (args.fileSize ?? BigInt(0));
-		const textContent = isTextMessage ? args.text : '';
-
-		const txHash = `pending-${Date.now()}`;
-		setPendingTransactions((prev) => new Set([...prev, txHash]));
-
-		const activeThread = threads.find((t) => t.id === activeThreadId);
-		if (!activeThread) {
-			setError('Conversation not found');
-			throw new Error('Conversation not found');
-		}
-		const otherParticipants = activeThread.participants?.filter(
-			(p: string) => p.toLowerCase() !== connectedAddress.toLowerCase()
-		) || [];
-		if (otherParticipants.length === 0) {
-			setError('No recipients in conversation');
+		const me = connectedAddress.toLowerCase();
+		const recipients = thread.participants.filter((p) => p.toLowerCase() !== me);
+		if (recipients.length === 0) {
+			setError('No recipients in this conversation');
 			throw new Error('No recipients in conversation');
 		}
-		const recipient = otherParticipants[0];
 
-		const optimisticId = `pending-msg-${Date.now()}`;
-		const optimisticMessage: Message = {
-			id: optimisticId,
-			messageId: optimisticId,
+		const isGroup = thread.kind === 'group';
+		const amount = args.paymentAmount ? BigInt(args.paymentAmount) : BigInt(0);
+		const paymentToken = args.paymentToken ? String(args.paymentToken) : ethers.ZeroAddress;
+		if (isGroup && amount > BigInt(0)) {
+			setError('Payments can only be sent in direct chats');
+			throw new Error('Payments are direct-only');
+		}
+
+		const isText = !args.ipfsHash;
+		const mediaType = isText ? 0 : (args.mediaType ?? 0);
+		const fileSize = isText ? BigInt(0) : (args.fileSize ?? BigInt(0));
+		// Captions travel with files too; the composer's "no caption" placeholder doesn't.
+		const textContent = args.text === NO_CAPTION ? '' : args.text;
+		// Group messages carry the group's tag so every member files them under the group.
+		const messageHash = isGroup ? groupTag(thread.id) : ethers.keccak256(ethers.toUtf8Bytes(args.text));
+		// The ETH payment check below; the paymaster can't relay ETH, so those go from the wallet.
+		const paysEth = paymentToken === ethers.ZeroAddress && amount > BigInt(0);
+
+		const pendingId = `pending-${Date.now()}`;
+		inbox.addPending(thread.id, {
+			id: pendingId,
+			messageId: pendingId,
 			author: 'You',
 			timestamp: Math.floor(Date.now() / 1000),
-			body: args.text,
+			body: textContent,
 			isSelf: true,
 			status: 'pending',
-			...(args.ipfsHash ? { ipfsHash: args.ipfsHash } : {}),
-			...(args.mediaType !== undefined && args.mediaType !== 0 ? { mediaType: args.mediaType } : {}),
-			...(args.fileSize !== undefined ? { fileSize: args.fileSize } : {}),
-			...(args.paymentAmount && args.paymentAmount > BigInt(0) ? { paymentAmount: args.paymentAmount, paymentToken: args.paymentToken } : {}),
-		};
-		const optimisticWithMeta: Message = { ...optimisticMessage, sender: connectedAddress, recipient };
-		setMessages((prev) => ({
-			...prev,
-			[activeThreadId]: [...(prev[activeThreadId] ?? []), optimisticWithMeta],
-		}));
-
-		// The paymaster can't relay ETH, so a message that pays ETH goes straight from the wallet.
-		const paysEth =
-			(!args.paymentToken || args.paymentToken === ethers.ZeroAddress) &&
-			Boolean(args.paymentAmount) &&
-			BigInt(args.paymentAmount) > BigInt(0);
+			ipfsHash: args.ipfsHash,
+			mediaType,
+			fileSize,
+			sender: connectedAddress,
+			recipient: recipients[0],
+			...(amount > BigInt(0) ? { paymentAmount: amount, paymentToken } : {}),
+		});
 
 		try {
-			if (paysEth && balance.eth && balance.eth.raw < BigInt(args.paymentAmount)) {
+			if (paysEth && balance.eth && balance.eth.raw < amount) {
 				throw new Error(`Not enough ETH: you have ${balance.eth.formatted} ETH, and the network fee comes on top`);
 			}
-			if (isGaslessConfigured() && !paysEth) {
-				const { request, signature } = await sendChatMessageGasless({
-					recipient,
-					messageHash,
-					ipfsHash,
-					mediaType,
-					fileSize,
-					paymentToken: args.paymentToken,
-					paymentAmount: args.paymentAmount,
-					textContent,
-				});
-				await submitSignedForwardRequest(request, signature);
+
+			if (isGroup) {
+				// One batch, one copy per member. Each copy of a file needs its own IPFS string.
+				const payload = {
+					recipients,
+					messageHashes: recipients.map(() => messageHash),
+					ipfsHashes: recipients.map((_, i) => (isText ? '' : i === 0 ? args.ipfsHash! : `${args.ipfsHash}#${i}`)),
+					mediaTypes: recipients.map(() => mediaType),
+					fileSizes: recipients.map(() => fileSize),
+					textContents: recipients.map(() => textContent),
+				};
+				if (isGaslessConfigured()) {
+					const { request, signature } = await sendBatchMessagesGasless(payload);
+					await submitSignedForwardRequest(request, signature);
+				} else {
+					await waitForTransaction(Promise.resolve(await sendBatchMessages(payload)));
+				}
 			} else {
-				const tx = await sendChatMessage({
-					recipient,
+				const message = {
+					recipient: recipients[0],
 					messageHash,
-					ipfsHash,
+					ipfsHash: args.ipfsHash ?? '',
 					mediaType,
 					fileSize,
-					paymentToken: args.paymentToken,
-					paymentAmount: args.paymentAmount,
-					value: paysEth ? args.paymentAmount : undefined,
+					paymentToken,
+					paymentAmount: amount,
 					textContent,
-				});
-				await waitForTransaction(Promise.resolve(tx));
+				};
+				if (isGaslessConfigured() && !paysEth) {
+					const { request, signature } = await sendChatMessageGasless(message);
+					await submitSignedForwardRequest(request, signature);
+				} else {
+					const tx = await sendChatMessage({ ...message, value: paysEth ? amount : undefined });
+					await waitForTransaction(Promise.resolve(tx));
+				}
 			}
 
-			if (args.paymentAmount && args.paymentAmount > BigInt(0)) {
+			if (amount > BigInt(0)) {
 				balance.refresh();
-				setPaymentNotification({
-					amount: args.paymentAmount,
-					token: args.paymentToken,
-					isReceived: false,
-					to: recipient,
-				});
+				setPaymentNotification({ amount, token: paymentToken, isReceived: false, to: recipients[0] });
 			}
-
-			setPendingTransactions((prev) => {
-				const next = new Set(prev);
-				next.delete(txHash);
-				return next;
-			});
-
-			await loadUserData();
+			await inbox.reload();
 			refresh();
-		} catch (error: any) {
+		} catch (error) {
 			setError(getErrorMessage(error, 'Failed to send message'));
-			setMessages((prev) => ({
-				...prev,
-				[activeThreadId]: (prev[activeThreadId] ?? []).filter((m) => m.id !== optimisticId),
-			}));
-			setPendingTransactions((prev) => {
-				const next = new Set(prev);
-				next.delete(txHash);
-				return next;
-			});
 			throw error;
+		} finally {
+			inbox.removePending(thread.id, pendingId);
 		}
 	};
 
@@ -632,7 +365,7 @@ export function ChatContainer() {
 						onRegistered={() => {
 							setNeedsRegistration(false);
 							checkRegistration();
-							loadUserData();
+							inbox.reload();
 						}}
 					/>
 				</div>
@@ -702,8 +435,9 @@ export function ChatContainer() {
 
 					{(isMobile || activeThreadId) && (
 						<ChatHeader
-							threadTitle={activeThreadId ? activeThread?.title : undefined}
-							peerAddress={activeThreadId ? peerAddress : undefined}
+							key={activeThreadId}
+							thread={activeThreadId ? activeThread : undefined}
+							connectedAddress={connectedAddress}
 							onMenuClick={() => {
 								if (isMobile && conversationsSidebarOpen) {
 									setConversationsSidebarOpen(false);
@@ -726,18 +460,30 @@ export function ChatContainer() {
 						<>
 							<div className='relative min-h-0 flex-1 overflow-y-auto'>
 								<MessageList
+									key={activeThreadId}
 									messages={messages[activeThreadId] ?? []}
-									isLoading={isLoading}
-									onMessageUpdate={() => {
-										loadUserData();
+									thread={activeThread}
+									isLoading={inbox.loading}
+									onDeleted={(id) => {
+										inbox.markDeleted(id);
 										refresh();
 									}}
+									onError={setError}
 									connectedAddress={connectedAddress}
 								/>
 							</div>
 							<MessageInput
+								key={activeThreadId}
 								onSend={handleSendMessage}
 								disabled={!connectedAddress || !isRegistered}
+								allowPayments={activeThread?.kind !== 'group'}
+								placeholder={
+									activeThread?.kind === 'group'
+										? `Message ${activeThread.participants.length} people…`
+										: activeThread
+											? `Message ${activeThread.title}…`
+											: undefined
+								}
 							/>
 						</>
 					) : (
@@ -771,6 +517,10 @@ export function ChatContainer() {
 					}}
 					connectedAddress={connectedAddress}
 					isMobile={isMobile}
+					onNewConversation={() => {
+						setShowCreateConversation(true);
+						if (isMobile) setConversationsSidebarOpen(false);
+					}}
 				/>
 			</div>
 
@@ -790,36 +540,30 @@ export function ChatContainer() {
 			)}
 
 			{showCreateConversation && connectedAddress && (
-				<Modal onDismiss={() => { setShowCreateConversation(false); setInvitedParticipant(null); }}>
+				<Modal onDismiss={() => setShowCreateConversation(false)}>
 					<CreateConversation
 						currentUser={connectedAddress}
-						initialParticipants={invitedParticipant ? [invitedParticipant] : undefined}
-						findExisting1on1Thread={(otherAddress) => {
-							const other = otherAddress.toLowerCase();
-							const me = connectedAddress?.toLowerCase() ?? '';
-							const found = threads.find((t) => {
-								const p = t.participants?.map((a) => a.toLowerCase()) ?? [];
-								return p.length === 2 && p.includes(me) && p.includes(other);
-							});
-							return found?.id ?? null;
-						}}
-						onCreated={(conversationId, participants) => {
+						onCreated={(threadId, participants) => {
 							setShowCreateConversation(false);
-							setInvitedParticipant(null);
-							const isExisting = threads.some((t) => t.id === conversationId);
-							if (!isExisting) {
-								const other = participants.filter((p) => p.toLowerCase() !== connectedAddress?.toLowerCase());
-								const title = other.length === 1 ? `${other[0].slice(0, 6)}...${other[0].slice(-4)}` : `${participants.length} participants`;
-								setThreads((prev) => [
-									{ id: conversationId, title, lastMessage: 'No messages yet', timestamp: 'Just now', participants },
-									...prev,
-								]);
-								setMessages((prev) => ({ ...prev, [conversationId]: [] }));
+							if (participants.length <= 2) {
+								const other = participants.find((p) => p.toLowerCase() !== connectedAddress.toLowerCase());
+								if (other) openDirectChat(other);
+								return;
 							}
-							setActiveThreadId(conversationId);
-							loadUserData();
+							const group: Thread = {
+								id: threadId,
+								kind: 'group',
+								title: groupTitle(connectedAddress, participants),
+								participants,
+								lastMessage: 'Group created',
+								lastAt: Math.floor(Date.now() / 1000),
+								unreadCount: 0,
+							};
+							inbox.addPlaceholder(group);
+							setActiveThreadId(threadId);
+							inbox.reload();
 						}}
-						onCancel={() => { setShowCreateConversation(false); setInvitedParticipant(null); }}
+						onCancel={() => setShowCreateConversation(false)}
 					/>
 				</Modal>
 			)}
@@ -848,7 +592,7 @@ export function ChatContainer() {
 					<ProfileSettings
 						onUpdate={() => {
 							refresh();
-							loadUserData();
+							inbox.reload();
 						}}
 						onClose={() => setShowProfileSettings(false)}
 					/>
@@ -860,7 +604,7 @@ export function ChatContainer() {
 					<BatchMessaging
 						onComplete={() => {
 							setShowBatchMessaging(false);
-							loadUserData();
+							inbox.reload();
 							refresh();
 						}}
 						onCancel={() => setShowBatchMessaging(false)}

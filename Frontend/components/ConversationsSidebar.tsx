@@ -1,18 +1,10 @@
 'use client';
 
-import { MessagesSquare, PanelRightClose, Search } from 'lucide-react';
+import { MessageSquarePlus, MessagesSquare, PanelRightClose, Search, Users } from 'lucide-react';
 import { ThreadList } from './ThreadList';
+import { AddressAvatar } from './AddressAvatar';
 import { useState } from 'react';
-
-type Thread = {
-    id: string;
-    title: string;
-    subtitle?: string;
-    unreadCount?: number;
-    lastMessage: string;
-    timestamp: string;
-    participants?: string[];
-};
+import type { Thread } from '@/lib/inbox';
 
 type ConversationsSidebarProps = {
     isOpen: boolean;
@@ -22,9 +14,8 @@ type ConversationsSidebarProps = {
     onSelectThread: (threadId: string) => void;
     connectedAddress?: string;
     isMobile?: boolean;
+    onNewConversation?: () => void;
 };
-
-const initials = (title: string) => (title.startsWith('0x') ? title.slice(2, 4) : title.slice(0, 2)).toUpperCase();
 
 export function ConversationsSidebar({
     isOpen,
@@ -34,15 +25,23 @@ export function ConversationsSidebar({
     onSelectThread,
     connectedAddress,
     isMobile = false,
+    onNewConversation,
 }: ConversationsSidebarProps) {
     const [searchQuery, setSearchQuery] = useState('');
 
     if (isMobile && !isOpen) return null;
 
-    const filteredThreads = threads.filter((thread) =>
-        thread.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        thread.lastMessage.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    // Matches a full or partial address of anyone in the chat, or the latest message.
+    const query = searchQuery.trim().toLowerCase();
+    const filteredThreads = query
+        ? threads.filter(
+              (thread) =>
+                  thread.participants.some((p) => p.toLowerCase().includes(query)) ||
+                  thread.lastMessage.toLowerCase().includes(query)
+          )
+        : threads;
+    const totalUnread = threads.reduce((n, t) => n + t.unreadCount, 0);
+    const me = connectedAddress?.toLowerCase();
 
     const frame = isMobile
         ? 'sheet fixed inset-y-3 right-3 z-[60] w-[20rem] max-w-[calc(100vw-1.5rem)] rise'
@@ -58,19 +57,28 @@ export function ConversationsSidebar({
                 <span className="my-2 h-px w-8 bg-line" />
                 {connectedAddress && (
                     <div className="flex min-h-0 flex-col items-center gap-2 overflow-y-auto">
-                        {threads.slice(0, 10).map((thread) => (
-                            <button
-                                key={thread.id}
-                                onClick={() => onSelectThread(thread.id)}
-                                className={`avatar relative h-10 w-10 ${activeThreadId === thread.id ? 'is-on' : ''}`}
-                                title={thread.title}
-                            >
-                                {initials(thread.title)}
-                                {(thread.unreadCount ?? 0) > 0 && (
-                                    <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full border-2 border-bg bg-accent" />
-                                )}
-                            </button>
-                        ))}
+                        {threads.slice(0, 10).map((thread) => {
+                            const peer = thread.kind === 'direct' ? thread.participants.find((p) => p.toLowerCase() !== me) : undefined;
+                            return (
+                                <button
+                                    key={thread.id}
+                                    onClick={() => onSelectThread(thread.id)}
+                                    className={`relative rounded-full ${activeThreadId === thread.id ? 'ring-2 ring-accent ring-offset-2 ring-offset-transparent' : ''}`}
+                                    title={thread.title}
+                                >
+                                    {peer ? (
+                                        <AddressAvatar address={peer} className="h-10 w-10 text-[12px]" />
+                                    ) : (
+                                        <span className="avatar h-10 w-10">
+                                            <Users size={16} strokeWidth={1.8} />
+                                        </span>
+                                    )}
+                                    {thread.unreadCount > 0 && (
+                                        <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full border-2 border-bg bg-accent" />
+                                    )}
+                                </button>
+                            );
+                        })}
                     </div>
                 )}
             </aside>
@@ -82,12 +90,19 @@ export function ConversationsSidebar({
             <div className="shrink-0 px-4 pb-3 pt-4">
                 <div className="flex items-center justify-between gap-2">
                     <div>
-                        <p className="label">Inbox</p>
+                        <p className="label">Inbox{totalUnread > 0 ? ` · ${totalUnread} unread` : ''}</p>
                         <h2 className="mt-1 font-display text-[22px] font-medium">Conversations</h2>
                     </div>
-                    <button onClick={onToggle} className="icon-btn" aria-label="Hide conversations">
-                        <PanelRightClose size={18} strokeWidth={1.8} />
-                    </button>
+                    <div className="flex items-center gap-1">
+                        {connectedAddress && onNewConversation && (
+                            <button onClick={onNewConversation} className="icon-btn" aria-label="New conversation" title="New conversation">
+                                <MessageSquarePlus size={18} strokeWidth={1.8} />
+                            </button>
+                        )}
+                        <button onClick={onToggle} className="icon-btn" aria-label="Hide conversations">
+                            <PanelRightClose size={18} strokeWidth={1.8} />
+                        </button>
+                    </div>
                 </div>
 
                 <label className="relative mt-4 block">
@@ -105,7 +120,14 @@ export function ConversationsSidebar({
 
             <div className="min-h-0 flex-1 overflow-y-auto px-2 pb-3">
                 {connectedAddress ? (
-                    <ThreadList threads={filteredThreads} activeThreadId={activeThreadId} onSelectThread={onSelectThread} />
+                    <ThreadList
+                        threads={filteredThreads}
+                        activeThreadId={activeThreadId}
+                        onSelectThread={onSelectThread}
+                        connectedAddress={connectedAddress}
+                        onNewConversation={onNewConversation}
+                        searching={Boolean(query)}
+                    />
                 ) : (
                     <p className="px-3 py-8 text-center text-[14px] text-mute">Connect your wallet to see your conversations.</p>
                 )}
