@@ -1,12 +1,14 @@
 'use client';
 
-import { Check, CheckCheck, Clock, Image, Video, Music, FileText, ExternalLink, Coins } from 'lucide-react';
+import { Check, CheckCheck, Clock, Image, Video, Music, FileText, ExternalLink, Coins, Lock, Download, Loader2 } from 'lucide-react';
 import type { ReactNode } from 'react';
 import type { ChatMessage } from '@/lib/inbox';
 import { AddressAvatar } from './AddressAvatar';
 import { format } from 'date-fns';
 import { useState, useEffect } from 'react';
-import { getIPFSUrl, getMediaTypeName } from '@/lib/ipfs';
+import { downloadDecryptedFile, getIPFSUrl, getMediaTypeName } from '@/lib/ipfs';
+import { baseIpfsHash } from '@/lib/inbox';
+import type { FileKey } from '@/lib/e2e';
 import { formatTokenAmount } from '@/lib/token';
 import { ZeroAddress } from 'ethers';
 import { useTokenInfo } from '../hooks/useTokenInfo';
@@ -47,6 +49,89 @@ const formatFileSize = (bytes?: bigint) => {
     return `${(num / 1024 / 1024).toFixed(2)} MB`;
 };
 
+// Decrypted attachments as object URLs, so scrolling back doesn't download and decrypt again.
+const decrypted = new Map<string, Promise<string>>();
+
+function decryptedUrl(ipfsHash: string, file: FileKey) {
+    const id = `${baseIpfsHash(ipfsHash)}:${file.k}`;
+    let url = decrypted.get(id);
+    if (!url) {
+        url = downloadDecryptedFile(baseIpfsHash(ipfsHash), file).then((blob) => URL.createObjectURL(blob));
+        url.catch(() => decrypted.delete(id));
+        decrypted.set(id, url);
+    }
+    return url;
+}
+
+type AttachmentStyle = { attachment: string; tile: string; subtle: string };
+
+/** An encrypted attachment: images decrypt and show inline, other files decrypt when clicked. */
+function EncryptedAttachment({ message, style }: { message: ChatMessage; style: AttachmentStyle }) {
+    const file = message.file!;
+    const ipfsHash = message.ipfsHash!;
+    const isImage = message.mediaType === 1;
+    const [url, setUrl] = useState<string | null>(null);
+    const [state, setState] = useState<'idle' | 'loading' | 'error'>(isImage ? 'loading' : 'idle');
+
+    useEffect(() => {
+        if (!isImage) return;
+        let cancelled = false;
+        decryptedUrl(ipfsHash, file)
+            .then((u) => !cancelled && (setUrl(u), setState('idle')))
+            .catch(() => !cancelled && setState('error'));
+        return () => {
+            cancelled = true;
+        };
+    }, [isImage, ipfsHash, file]);
+
+    const save = async () => {
+        setState('loading');
+        try {
+            const a = document.createElement('a');
+            a.href = await decryptedUrl(ipfsHash, file);
+            a.download = file.n || 'file';
+            a.click();
+            setState('idle');
+        } catch {
+            setState('error');
+        }
+    };
+
+    if (isImage && url) {
+        return (
+            <a href={url} target="_blank" rel="noopener noreferrer" className="relative block max-h-80 overflow-hidden bg-black/20">
+                <img src={url} alt={file.n || 'Shared image'} className="block h-auto max-h-80 w-full object-contain" />
+            </a>
+        );
+    }
+
+    return (
+        <button
+            type="button"
+            onClick={save}
+            disabled={state === 'loading' || (isImage && state !== 'error')}
+            className={`flex w-full items-center gap-3 rounded-[16px] p-3 text-left transition ${style.attachment} ${isImage ? 'mx-3 w-auto' : ''}`}
+        >
+            <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-[12px] ${style.tile}`}>
+                <MediaIcon type={message.mediaType} />
+            </span>
+            <span className="min-w-0 flex-1">
+                <span className="block truncate text-[14px] font-medium">{file.n || getMediaTypeName(message.mediaType ?? 0)}</span>
+                <span className={`flex items-center gap-1.5 font-mono text-[11px] ${style.subtle}`}>
+                    {state === 'error'
+                        ? "Couldn't download. Tap to retry"
+                        : state === 'loading'
+                            ? 'Decrypting…'
+                            : <>{message.fileSize ? `${formatFileSize(message.fileSize)} · ` : ''}End-to-end encrypted</>}
+                </span>
+            </span>
+            {state === 'loading'
+                ? <Loader2 size={15} className={`shrink-0 animate-spin ${style.subtle}`} />
+                : <Download size={15} strokeWidth={1.8} className={`shrink-0 ${style.subtle}`} />}
+        </button>
+    );
+}
+
 export function MessageBubble({ message, index = 0, showAvatar = true, isGrouped = false, showAuthor = false, actions }: MessageBubbleProps) {
     const [isVisible, setIsVisible] = useState(false);
     const isSelf = message.isSelf;
@@ -61,6 +146,7 @@ export function MessageBubble({ message, index = 0, showAvatar = true, isGrouped
     const hasMedia = Boolean(message.ipfsHash && (message.mediaType ?? 0) > 0);
     const isImage = message.mediaType === 1;
     const imageOnly = isImage && Boolean(message.ipfsHash);
+    const encryptedFile = hasMedia && Boolean(message.file);
     const hasPayment = message.paymentAmount != null && message.paymentAmount > BigInt(0);
     const paymentTokenInfo = useTokenInfo(message.paymentToken ?? ZeroAddress);
     const paymentLabel = message.paymentToken === ZeroAddress ? 'Base ETH' : paymentTokenInfo.symbol;
@@ -100,7 +186,9 @@ export function MessageBubble({ message, index = 0, showAvatar = true, isGrouped
 
                     {hasMedia && message.ipfsHash && (
                         <div className={`flex flex-col gap-2.5 ${message.body ? 'mt-3' : ''}`}>
-                            {isImage ? (
+                            {encryptedFile ? (
+                                <EncryptedAttachment message={message} style={{ attachment, tile: isSelf ? inner : 'tile', subtle }} />
+                            ) : isImage ? (
                                 <div
                                     className="relative max-h-80 cursor-pointer overflow-hidden bg-black/20"
                                     onClick={() => window.open(getIPFSUrl(message.ipfsHash!), '_blank')}
@@ -173,6 +261,11 @@ export function MessageBubble({ message, index = 0, showAvatar = true, isGrouped
                             </span>
                         ) : (
                             <>
+                                {message.encrypted && (
+                                    <span title="End-to-end encrypted: only you and the recipient can read this">
+                                        <Lock size={10} className="shrink-0" />
+                                    </span>
+                                )}
                                 <span>{exactTime}</span>
                                 {isSelf && (
                                     <span title="Delivered: recorded on Base">

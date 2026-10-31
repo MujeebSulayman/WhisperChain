@@ -30,9 +30,8 @@ NEXT_PUBLIC_PRIVY_APP_ID=yourPrivyAppId
 RELAYER_PRIVATE_KEY=0xYourRelayerKey
 RELAYER_REIMBURSEMENT_WEI=50000000000000
 
-# IPFS uploads through Pinata
-NEXT_PUBLIC_PINATA_API_KEY=yourPinataKey
-NEXT_PUBLIC_PINATA_SECRET_KEY=yourPinataSecret
+# IPFS uploads through Pinata (server only, never prefix with NEXT_PUBLIC_)
+PINATA_JWT=yourPinataJwt
 NEXT_PUBLIC_IPFS_GATEWAY=https://gateway.pinata.cloud/ipfs
 
 # Optional on base-sepolia, required on base: your contracts
@@ -135,7 +134,7 @@ export const DOCS: DocPage[] = [
             { title: "Open the app", body: <>Go to <A href={APP_URL}>the app</A> and press <C>Log in or connect wallet</C> in the left panel.</> },
             {
               title: "Activate your address",
-              body: "The first time you connect, sign once to record your address on-chain. There is nothing to fill in, and a unique public key is generated for you.",
+              body: "The first time you connect, sign once to create your encryption key and once to record your address and public key on-chain. There is nothing to fill in, and neither costs gas.",
             },
             { title: "Start a conversation", body: <>Press <C>New conversation</C> and paste the other person&apos;s wallet address.</> },
             { title: "Say hello", body: "Type a message and press Send, then approve the signature request in your wallet." },
@@ -226,11 +225,12 @@ export const DOCS: DocPage[] = [
         />
         <H2 id="storage">Where files live</H2>
         <P>
-          Files are pinned to IPFS through Pinata. The contract stores each file&apos;s IPFS hash, type and size, and refuses a hash that
-          was already used, so the same file can&apos;t be sent twice.
+          Files are encrypted in your browser, then pinned to IPFS through Pinata. The contract stores each file&apos;s IPFS hash,
+          type and size. The key that opens the file travels inside the encrypted message, so only you and the recipient can open it.
         </P>
-        <Callout tone="warn" title="Files are public">
-          Anyone with a file&apos;s IPFS link can open it, and the link is readable on-chain. Don&apos;t share anything private.
+        <Callout title="What stays visible">
+          Anyone can fetch the encrypted file from its IPFS link, but without the key it&apos;s random bytes. Its size and kind
+          (photo, video, audio or document) are recorded on-chain in the clear.
         </Callout>
       </>
     ),
@@ -320,8 +320,9 @@ export const DOCS: DocPage[] = [
         </P>
         <H2 id="key">Public key</H2>
         <P>
-          Registration also stores a public key for your profile. You can replace it under <C>Settings</C>, which signs an{" "}
-          <C>updatePublicKey</C> request.
+          Your public key is what others encrypt messages to. It&apos;s derived from a signature your wallet makes over a fixed
+          message, so the same wallet gets the same key on every device, and the private half never leaves your browser. Accounts
+          created before encryption have their old placeholder key replaced automatically the next time they open the app.
         </P>
         <H2 id="storage">Storage and activity</H2>
         <List
@@ -418,7 +419,7 @@ export const DOCS: DocPage[] = [
             [<C key="3">sendMessage(recipient, hash, token, amount, ipfsHash, mediaType, size, text)</C>, "Sends a message, file and/or payment."],
             [<C key="4">sendBatchMessages(…)</C>, "Sends up to 10 messages in one call."],
             [<C key="5">deleteMessage(messageId)</C>, "Marks a message deleted (sender or recipient only)."],
-            [<C key="6">updatePublicKey(newKey)</C>, "Replaces your profile's public key."],
+            [<C key="6">updatePublicKey(newKey)</C>, "Replaces your encryption public key. The app does this for you."],
           ]}
         />
         <H3>Events</H3>
@@ -462,15 +463,16 @@ export const DOCS: DocPage[] = [
     body: () => (
       <>
         <H2 id="public">What is public</H2>
-        <Callout tone="warn" title="Messages are not encrypted">
-          Message text is stored in the contract on a public network, and files sit on IPFS. Anyone can read them. Don&apos;t send
-          secrets, passwords or private documents.
+        <Callout title="Messages are end-to-end encrypted">
+          Message text, captions and files are encrypted in your browser before they&apos;re sent. The chain and IPFS only store
+          ciphertext that you and the recipient can open. Messages sent before encryption was added stay readable by anyone.
         </Callout>
+        <P>What the network can still see:</P>
         <List
           items={[
-            "Your address, username and public key.",
+            "Your address and public key.",
             "Who you message, when, and any payment amounts.",
-            "The text of every message, and the IPFS links of every file.",
+            "Each attachment's kind (photo, video, audio, document) and size, and the length of each message.",
           ]}
         />
         <H2 id="guarantees">What is guaranteed</H2>
@@ -485,17 +487,14 @@ export const DOCS: DocPage[] = [
         <List
           items={[
             "Group messages are delivered to the first other member only (see Chats and groups).",
-            "Deleting a message isn't available in the app yet, and on-chain history can never be erased.",
+            "Deleting a message hides it in the app, but on-chain history can never be erased. What stays is ciphertext.",
+            "Your private key is kept in this browser's storage. Logging out removes it; on a shared computer, always log out.",
             <>
               <C>clearStorage()</C> resets your storage counter without removing files, so the 1 GB limit can be reset by the user.
             </>,
             <>
               Anyone can call <C>Paymaster.relay()</C> with their own signed requests and claim up to <C>maxReimbursementPerTx</C> each
               time. Keep the Paymaster balance and the cap small.
-            </>,
-            <>
-              Pinata keys use the <C>NEXT_PUBLIC_</C> prefix, so they are visible in the browser. Use a scoped key that can only pin
-              files.
             </>,
           ]}
         />
@@ -533,7 +532,7 @@ export const DOCS: DocPage[] = [
           rows={[
             [<C key="1">NEXT_PUBLIC_BASE_RPC</C>, "Yes", `A ${BASE_CHAIN.name} RPC URL.`],
             [<C key="2">RELAYER_PRIVATE_KEY</C>, "Yes", "The relayer wallet. Needs a little ETH for gas. Server-only."],
-            [<C key="3">NEXT_PUBLIC_PINATA_API_KEY / _SECRET_KEY</C>, "For files", "Without them, text works but uploads fail."],
+            [<C key="3">PINATA_JWT</C>, "For files", "Server-only. Without it, text works but uploads fail."],
             [<C key="4">RELAYER_REIMBURSEMENT_WEI</C>, "No", "Refund per message. Defaults to 50000000000000 (0.00005 ETH)."],
             [<C key="5">NEXT_PUBLIC_*_ADDRESS</C>, "No", "Override the deployed contract addresses."],
             [<C key="6">NEXT_PUBLIC_RELAYER_API_URL</C>, "No", "Use an external relayer instead of /api/relay."],

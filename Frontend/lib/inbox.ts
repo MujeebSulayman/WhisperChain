@@ -13,6 +13,7 @@
 import { keccak256, solidityPacked, ZeroAddress } from 'ethers';
 import { findPaymentAsset } from './deployments';
 import { formatDisplayAmount } from './token';
+import type { FileKey } from './e2e';
 
 export type RawMessage = {
 	id: string;
@@ -25,7 +26,11 @@ export type RawMessage = {
 	ipfsHash: string;
 	mediaType: number;
 	fileSize: bigint;
+	/** Decrypted text when `encrypted`; older messages were stored in plain text. */
 	textContent: string;
+	encrypted?: boolean;
+	/** The attachment's key, for encrypted attachments. */
+	file?: FileKey;
 };
 
 export type RawConversation = {
@@ -47,6 +52,8 @@ export type ChatMessage = {
 	ipfsHash?: string;
 	mediaType?: number;
 	fileSize?: bigint;
+	encrypted?: boolean;
+	file?: FileKey;
 	sender: string;
 	recipient: string;
 	paymentAmount?: bigint;
@@ -112,6 +119,8 @@ function toChatMessage(me: string, r: RawMessage): ChatMessage {
 		ipfsHash: r.ipfsHash || undefined,
 		mediaType: r.mediaType,
 		fileSize: r.fileSize,
+		encrypted: r.encrypted,
+		file: r.file,
 		sender: r.sender,
 		recipient: r.recipient,
 		paymentAmount: r.paymentAmount,

@@ -16,6 +16,7 @@ import { BatchMessaging } from './BatchMessaging';
 import { PaymentNotification } from './PaymentNotification';
 import { PaymentHistory } from './PaymentHistory';
 import { Modal } from './Modal';
+import { EncryptionBanner } from './EncryptionBanner';
 import { WalletHub, type WalletTab } from './WalletHub';
 import {
 	sendChatMessage,
@@ -26,16 +27,17 @@ import {
 	waitForTransaction,
 	fetchMessage,
 	isUserRegistered,
-	getUserPublicKey,
 } from '@/lib/scarfActions';
 import { getReadOnlyContract } from '@/lib/blockchain';
 import { NO_CAPTION, groupTag, groupTitle, shortAddress, type Thread } from '@/lib/inbox';
 import { isGaslessConfigured } from '@/lib/gasless';
+import { sealFor, type FileKey, type Payload } from '@/lib/e2e';
 import { getErrorMessage, REQUEST_CANCELLED_MESSAGE } from '@/lib/errors';
 import { useScarf } from '../hooks/useScarf';
 import { useWallet } from '../hooks/useWallet';
 import { useWalletBalance } from '../hooks/useWalletBalance';
 import { useInbox } from '../hooks/useInbox';
+import { useE2EKeys } from '../hooks/useE2EKeys';
 import { useIsMobile } from '../hooks/useMediaQuery';
 import { ethers } from 'ethers';
 
@@ -73,7 +75,6 @@ export function ChatContainer() {
 	const [sidebarOpen, setSidebarOpen] = useState(!isMobile);
 	// Recent chats stay open beside the chat on desktop; on mobile they open only when asked.
 	const [conversationsSidebarOpen, setConversationsSidebarOpen] = useState(!isMobile);
-	const [userPublicKey, setUserPublicKey] = useState<string>('');
 	const [paymentNotification, setPaymentNotification] = useState<{
 		amount: bigint;
 		token?: string;
@@ -85,9 +86,10 @@ export function ChatContainer() {
 	const [walletTab, setWalletTab] = useState<WalletTab | null>(null);
 
 	const { profile, isRegistered, refresh } = useScarf(connectedAddress);
+	const e2e = useE2EKeys(connectedAddress, isRegistered);
 
 	const balance = useWalletBalance(connectedAddress);
-	const inbox = useInbox(connectedAddress, activeThreadId);
+	const inbox = useInbox(connectedAddress, activeThreadId, e2e.keys);
 	const { threads, messagesByThread: messages, addPlaceholder } = inbox;
 
 	const handleDisconnect = () => {
@@ -185,21 +187,6 @@ export function ChatContainer() {
 	}, [isMobile, conversationsSidebarOpen]);
 
 	useEffect(() => {
-		if (!connectedAddress) return;
-
-		const loadPublicKey = async () => {
-			try {
-				const publicKey = await getUserPublicKey(connectedAddress);
-				setUserPublicKey(ethers.hexlify(publicKey));
-			} catch (error) {
-				console.error('Failed to load public key:', error);
-			}
-		};
-
-		loadPublicKey();
-	}, [connectedAddress]);
-
-	useEffect(() => {
 		if (error) {
 			const timer = setTimeout(() => setError(null), 5000);
 			return () => clearTimeout(timer);
@@ -245,6 +232,7 @@ export function ChatContainer() {
 	const handleSendMessage = async (args: {
 		text: string;
 		ipfsHash?: string;
+		file?: FileKey;
 		mediaType?: number;
 		fileSize?: bigint;
 		paymentAmount?: ethers.BigNumberish;
@@ -279,8 +267,11 @@ export function ChatContainer() {
 		const fileSize = isText ? BigInt(0) : (args.fileSize ?? BigInt(0));
 		// Captions travel with files too; the composer's "no caption" placeholder doesn't.
 		const textContent = args.text === NO_CAPTION ? '' : args.text;
-		// Group messages carry the group's tag so every member files them under the group.
-		const messageHash = isGroup ? groupTag(thread.id) : ethers.keccak256(ethers.toUtf8Bytes(args.text));
+		// Only the sender and each recipient can read what's sent; the chain stores ciphertext.
+		const content: Payload = { t: textContent, ...(args.file ? { f: args.file } : {}) };
+		// Group messages carry the group's tag so every member files them under the group. Direct
+		// ones get a random hash: a hash of the text would let anyone guess short messages.
+		const messageHash = isGroup ? groupTag(thread.id) : ethers.hexlify(ethers.randomBytes(32));
 		// The ETH payment check below; the paymaster can't relay ETH, so those go from the wallet.
 		const paysEth = paymentToken === ethers.ZeroAddress && amount > BigInt(0);
 
@@ -294,6 +285,8 @@ export function ChatContainer() {
 			isSelf: true,
 			status: 'pending',
 			ipfsHash: args.ipfsHash,
+			file: args.file,
+			encrypted: true,
 			mediaType,
 			fileSize,
 			sender: connectedAddress,
@@ -305,6 +298,7 @@ export function ChatContainer() {
 			if (paysEth && balance.eth && balance.eth.raw < amount) {
 				throw new Error(`Not enough ETH: you have ${balance.eth.formatted} ETH, and the network fee comes on top`);
 			}
+			const { publicKey: myKey } = e2e.keys ?? (await e2e.unlock());
 
 			if (isGroup) {
 				// One batch, one copy per member. Each copy of a file needs its own IPFS string.
@@ -314,7 +308,7 @@ export function ChatContainer() {
 					ipfsHashes: recipients.map((_, i) => (isText ? '' : i === 0 ? args.ipfsHash! : `${args.ipfsHash}#${i}`)),
 					mediaTypes: recipients.map(() => mediaType),
 					fileSizes: recipients.map(() => fileSize),
-					textContents: recipients.map(() => textContent),
+					textContents: await Promise.all(recipients.map((r) => sealFor(content, myKey, r))),
 				};
 				if (isGaslessConfigured()) {
 					const { request, signature } = await sendBatchMessagesGasless(payload);
@@ -331,7 +325,7 @@ export function ChatContainer() {
 					fileSize,
 					paymentToken,
 					paymentAmount: amount,
-					textContent,
+					textContent: await sealFor(content, myKey, recipients[0]),
 				};
 				if (isGaslessConfigured() && !paysEth) {
 					const { request, signature } = await sendChatMessageGasless(message);
@@ -368,6 +362,7 @@ export function ChatContainer() {
 				<div className='w-full max-w-[30rem]'>
 					<UserRegistration
 						address={connectedAddress}
+						getPublicKey={async () => (e2e.keys ?? (await e2e.unlock())).publicKey}
 						onRegistered={() => {
 							setNeedsRegistration(false);
 							checkRegistration();
@@ -405,7 +400,7 @@ export function ChatContainer() {
 						setWalletTab(tab);
 						if (isMobile) setSidebarOpen(false);
 					}}
-					profile={profile ? { ...profile, publicKey: userPublicKey } : undefined}
+					profile={profile ? { ...profile, publicKey: e2e.keys ? ethers.hexlify(e2e.keys.publicKey) : '' } : undefined}
 					onNewChat={() => {
 						if (!connectedAddress) {
 							setError('Please connect your wallet to create a new conversation');
@@ -436,6 +431,15 @@ export function ChatContainer() {
 							onDismiss={() => setError(null)}
 							variant={error === REQUEST_CANCELLED_MESSAGE ? 'cancel' : 'error'}
 							autoHideDelay={error === REQUEST_CANCELLED_MESSAGE ? 2500 : 5000}
+						/>
+					)}
+
+					{isRegistered && (
+						<EncryptionBanner
+							status={e2e.status}
+							error={e2e.error}
+							onUnlock={() => e2e.unlock().catch(() => {})}
+							onAdoptKey={e2e.adoptThisDeviceKey}
 						/>
 					)}
 
@@ -613,6 +617,7 @@ export function ChatContainer() {
 			{showBatchMessaging && (
 				<Modal maxWidth='42rem' onDismiss={() => setShowBatchMessaging(false)}>
 					<BatchMessaging
+						getSenderKey={async () => (e2e.keys ?? (await e2e.unlock())).publicKey}
 						onComplete={() => {
 							setShowBatchMessaging(false);
 							inbox.reload();

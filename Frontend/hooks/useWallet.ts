@@ -3,6 +3,7 @@
 import { useState, useCallback } from 'react';
 import { usePrivy, useWallets, useLogin, type ConnectedWallet } from '@privy-io/react-auth';
 import { isUserRejectedError } from '@/lib/errors';
+import { forgetKeys } from '@/lib/e2e';
 
 /*
  * The wallet Scarf signs with: the user's primary linked wallet if it is connected in this
@@ -40,14 +41,17 @@ export function useWallet() {
 		}
 	}, [authenticated, connectWallet, login]);
 
+	// Logging out also drops this wallet's message key from the browser.
 	const disconnect = useCallback(async () => {
+		if (wallet) forgetKeys(wallet.address);
 		await logout();
-	}, [logout]);
+	}, [logout, wallet]);
 
 	const switchAccount = useCallback(async () => {
+		if (wallet) forgetKeys(wallet.address);
 		await logout();
 		login();
-	}, [logout, login]);
+	}, [logout, login, wallet]);
 
 	return {
 		connectedAddress: wallet?.address,

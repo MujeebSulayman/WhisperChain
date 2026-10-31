@@ -5,8 +5,8 @@ import { isGaslessConfigured } from '@/lib/gasless';
 import { useState, KeyboardEvent, useRef, useEffect } from 'react';
 import { FileUpload } from './FileUpload';
 import { PaymentOptions } from './PaymentOptions';
-import { uploadToIPFS, getMediaTypeFromFile } from '@/lib/ipfs';
-import { isIPFSHashUsed } from '@/lib/scarfActions';
+import { uploadEncryptedFile, getMediaTypeFromFile } from '@/lib/ipfs';
+import type { FileKey } from '@/lib/e2e';
 import { formatTokenAmount } from '@/lib/token';
 import { ZeroAddress } from 'ethers';
 import { useIsMobile } from '../hooks/useMediaQuery';
@@ -17,6 +17,8 @@ type MessageInputProps = {
     onSend: (args: {
         text: string;
         ipfsHash?: string;
+        /** Opens the encrypted attachment; sent encrypted inside the message. */
+        file?: FileKey;
         mediaType?: number;
         fileSize?: bigint;
         paymentAmount?: BigNumberish;
@@ -65,18 +67,13 @@ export function MessageInput({
 
         try {
             let ipfsHash: string | undefined;
+            let file: FileKey | undefined;
             let mediaType: number | undefined;
             let fileSize: bigint | undefined;
 
             if (currentFile) {
                 try {
-                    ipfsHash = await uploadToIPFS(currentFile, currentFile.name, async (hash) => {
-                        try {
-                            return await isIPFSHashUsed(hash);
-                        } catch {
-                            return false;
-                        }
-                    });
+                    ({ cid: ipfsHash, file } = await uploadEncryptedFile(currentFile));
                     mediaType = getMediaTypeFromFile(currentFile);
                     fileSize = BigInt(currentFile.size);
                 } catch (uploadError: any) {
@@ -91,6 +88,7 @@ export function MessageInput({
             await onSend({
                 text: message,
                 ipfsHash,
+                file,
                 mediaType,
                 fileSize,
                 paymentAmount,

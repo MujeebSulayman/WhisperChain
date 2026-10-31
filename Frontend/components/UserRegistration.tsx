@@ -9,14 +9,16 @@ import {
 } from '@/lib/scarfActions';
 import { isGaslessConfigured } from '@/lib/gasless';
 import { getErrorMessage } from '@/lib/errors';
-import { ethers } from 'ethers';
+import { hexlify } from 'ethers';
 
 type UserRegistrationProps = {
     onRegistered: () => void;
     address: string;
+    /** This wallet's encryption public key; unlocking it may ask for a signature. */
+    getPublicKey: () => Promise<Uint8Array>;
 };
 
-export function UserRegistration({ onRegistered, address }: UserRegistrationProps) {
+export function UserRegistration({ onRegistered, address, getPublicKey }: UserRegistrationProps) {
     const [isRegistering, setIsRegistering] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
@@ -26,8 +28,7 @@ export function UserRegistration({ onRegistered, address }: UserRegistrationProp
         setError(null);
 
         try {
-            const uniqueKey = `${address}-${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;
-            const publicKeyBytes = ethers.keccak256(ethers.toUtf8Bytes(uniqueKey));
+            const publicKeyBytes = hexlify(await getPublicKey());
 
             if (isGaslessConfigured()) {
                 const { request, signature } = await registerUserGasless({ publicKey: publicKeyBytes });

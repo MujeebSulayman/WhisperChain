@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { getReadOnlyContract } from '@/lib/blockchain';
+import { isEnvelope, open, type KeyPair } from '@/lib/e2e';
 import { buildInbox, type ChatMessage, type RawConversation, type RawMessage, type Thread } from '@/lib/inbox';
 
 const POLL_MS = 10_000;
@@ -9,6 +10,9 @@ const POLL_MS = 10_000;
 const MAX_MESSAGES = 300;
 const FETCH_CONCURRENCY = 20;
 const ZERO_ID = '0x' + '0'.repeat(64);
+
+/** Shown in place of a message this device's key can't open. */
+export const UNREADABLE_TEXT = "🔒 Can't decrypt this message on this device";
 
 const readKey = (address: string) => `scarf:lastRead:${address.toLowerCase()}`;
 
@@ -29,7 +33,7 @@ function saveLastRead(address: string, value: Record<string, number>) {
 	}
 }
 
-async function fetchRawMessage(id: string): Promise<RawMessage | null> {
+async function fetchRawMessage(id: string, keys: KeyPair): Promise<RawMessage | null> {
 	const contract = getReadOnlyContract();
 	const [m, deleted] = await Promise.all([contract.getMessage(id), contract.isMessageDeleted(id).catch(() => false)]);
 	if (deleted || m.sender === '0x0000000000000000000000000000000000000000') return null;
@@ -47,6 +51,13 @@ async function fetchRawMessage(id: string): Promise<RawMessage | null> {
 		fileSize: m.fileSize,
 		textContent: (m.textContent ?? '').trim(),
 	};
+	if (isEnvelope(raw.textContent)) {
+		const payload = open(raw.textContent, keys);
+		raw.encrypted = true;
+		raw.textContent = payload ? payload.t : UNREADABLE_TEXT;
+		raw.file = payload?.f;
+		return raw;
+	}
 	// Very old text messages stored their text on IPFS instead of in the contract.
 	if (raw.mediaType === 0 && !raw.textContent && raw.ipfsHash && !raw.ipfsHash.startsWith('text-')) {
 		try {
@@ -60,11 +71,12 @@ async function fetchRawMessage(id: string): Promise<RawMessage | null> {
 }
 
 /*
- * The connected wallet's inbox, read from the Scarf contract. Messages never change once sent,
- * so each is fetched once and cached; polling only asks for the id list and anything new.
+ * The connected wallet's inbox, read from the Scarf contract and decrypted with `keys`; nothing
+ * loads until the keys are unlocked. Messages never change once sent, so each is fetched once
+ * and cached; polling only asks for the id list and anything new.
  * `activeThreadId` is marked read as messages arrive in it.
  */
-export function useInbox(address: string | undefined, activeThreadId: string) {
+export function useInbox(address: string | undefined, activeThreadId: string, keys: KeyPair | null) {
 	const [raws, setRaws] = useState<RawMessage[]>([]);
 	const [conversations, setConversations] = useState<RawConversation[]>([]);
 	const [loaded, setLoaded] = useState(false);
@@ -94,8 +106,13 @@ export function useInbox(address: string | undefined, activeThreadId: string) {
 		setLastRead(saved ?? {});
 	}, [address]);
 
+	// Messages cached under other keys (or none) may now decrypt differently.
+	useEffect(() => {
+		messageCache.current = new Map();
+	}, [keys]);
+
 	const load = useCallback(async () => {
-		if (!address) return;
+		if (!address || !keys) return;
 		try {
 			const contract = getReadOnlyContract();
 
@@ -133,7 +150,7 @@ export function useInbox(address: string | undefined, activeThreadId: string) {
 				await Promise.all(
 					missing.slice(i, i + FETCH_CONCURRENCY).map(async (id) => {
 						try {
-							messageCache.current.set(id, await fetchRawMessage(id));
+							messageCache.current.set(id, await fetchRawMessage(id, keys));
 						} catch {
 							// Not cached, so it's retried on the next poll.
 						}
@@ -147,7 +164,7 @@ export function useInbox(address: string | undefined, activeThreadId: string) {
 		} catch (err) {
 			console.error('Failed to load inbox:', err);
 		}
-	}, [address]);
+	}, [address, keys]);
 
 	// Runs one load at a time. A caller arriving mid-load waits for it and then loads again,
 	// so a message that just landed is never missed by a load that started before it.
@@ -164,7 +181,7 @@ export function useInbox(address: string | undefined, activeThreadId: string) {
 
 	// Poll while the tab is visible, and react to contract events touching this wallet.
 	useEffect(() => {
-		if (!address) return;
+		if (!address || !keys) return;
 		reload();
 		const timer = setInterval(() => document.visibilityState === 'visible' && reload(), POLL_MS);
 		const onVisible = () => document.visibilityState === 'visible' && reload();
@@ -187,7 +204,7 @@ export function useInbox(address: string | undefined, activeThreadId: string) {
 			contract.off(contract.getEvent('MessageSent'), onMessage).catch(() => {});
 			contract.off(contract.getEvent('ConversationCreated'), onConversation).catch(() => {});
 		};
-	}, [address, reload]);
+	}, [address, keys, reload]);
 
 	const inbox = useMemo(
 		() => (address ? buildInbox(address, raws, conversations, lastRead) : { threads: [], messagesByThread: {} }),
@@ -242,7 +259,7 @@ export function useInbox(address: string | undefined, activeThreadId: string) {
 		threads,
 		messagesByThread,
 		/** True only for the very first load, so polling never flickers a spinner. */
-		loading: Boolean(address) && !loaded,
+		loading: Boolean(address && keys) && !loaded,
 		reload,
 		/** Shows a message immediately while it's being sent. */
 		addPending: useCallback((threadId: string, message: ChatMessage) => {

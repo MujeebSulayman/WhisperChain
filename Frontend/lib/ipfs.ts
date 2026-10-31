@@ -1,9 +1,9 @@
 'use client';
 
+import { decryptFile, encryptFile, type FileKey } from './e2e';
+
 const IPFS_GATEWAY =
 	process.env.NEXT_PUBLIC_IPFS_GATEWAY || 'https://gateway.pinata.cloud/ipfs';
-const PINATA_API_KEY = process.env.NEXT_PUBLIC_PINATA_API_KEY;
-const PINATA_SECRET_KEY = process.env.NEXT_PUBLIC_PINATA_SECRET_KEY;
 
 export const MEDIA_TYPE = {
 	TEXT: 0,
@@ -28,58 +28,41 @@ export function getMediaTypeName(type: number): MediaTypeName {
 	return names[type] ?? 'TEXT';
 }
 
-export async function uploadToIPFS(
-	file: File | Blob,
-	filename?: string,
-	checkUsed?: (hash: string) => Promise<boolean>
-): Promise<string> {
-	if (!PINATA_API_KEY || !PINATA_SECRET_KEY) {
-		throw new Error(
-			'Pinata API keys are required. Please set NEXT_PUBLIC_PINATA_API_KEY and NEXT_PUBLIC_PINATA_SECRET_KEY in your .env.local file.'
-		);
-	}
-
+/*
+ * Uploads go straight from the browser to Pinata through a short-lived signed URL from
+ * /api/upload, so the Pinata credentials stay on the server.
+ */
+export async function uploadToIPFS(file: File | Blob, filename?: string): Promise<string> {
 	try {
-		const hash = await uploadToPinata(file, filename);
+		const signed = await fetch('/api/upload', { method: 'POST' });
+		const { url, error } = await signed.json().catch(() => ({}));
+		if (!signed.ok || !url) throw new Error(error || 'Could not get an upload link');
 
-		if (checkUsed) {
-			const isUsed = await checkUsed(hash);
-			if (isUsed) {
-				throw new Error('This file has already been uploaded to the network');
-			}
-		}
-
-		return hash;
+		const formData = new FormData();
+		formData.append('file', file, filename ?? 'file');
+		formData.append('network', 'public');
+		const response = await fetch(url, { method: 'POST', body: formData });
+		if (!response.ok) throw new Error('Pinata upload failed');
+		const { data } = await response.json();
+		if (!data?.cid) throw new Error('Pinata returned no CID');
+		return data.cid;
 	} catch (error: any) {
 		throw new Error(`IPFS upload failed: ${error.message}`);
 	}
 }
 
-async function uploadToPinata(
-	file: File | Blob,
-	filename?: string
-): Promise<string> {
-	const formData = new FormData();
-	formData.append('file', file, filename);
+/** Encrypts `file` and uploads the ciphertext. The returned key opens it again (see downloadDecryptedFile). */
+export async function uploadEncryptedFile(file: File): Promise<{ cid: string; file: FileKey }> {
+	const { key, data } = encryptFile(new Uint8Array(await file.arrayBuffer()));
+	// A generic name and type: the real ones travel encrypted inside the message.
+	const cid = await uploadToIPFS(new Blob([data as BlobPart], { type: 'application/octet-stream' }), 'scarf.bin');
+	return { cid, file: { k: key, n: file.name, m: file.type || 'application/octet-stream' } };
+}
 
-	const response = await fetch(
-		'https://api.pinata.cloud/pinning/pinFileToIPFS',
-		{
-			method: 'POST',
-			headers: {
-				pinata_api_key: PINATA_API_KEY!,
-				pinata_secret_api_key: PINATA_SECRET_KEY!,
-			},
-			body: formData,
-		}
-	);
-
-	if (!response.ok) {
-		throw new Error('Pinata upload failed');
-	}
-
-	const data = await response.json();
-	return data.IpfsHash;
+/** Downloads and decrypts an attachment, as a Blob with its original type. */
+export async function downloadDecryptedFile(hash: string, file: FileKey): Promise<Blob> {
+	const encrypted = new Uint8Array(await (await downloadFromIPFS(hash)).arrayBuffer());
+	return new Blob([decryptFile(encrypted, file.k) as BlobPart], { type: file.m });
 }
 
 export function getIPFSUrl(hash: string): string {
@@ -96,11 +79,6 @@ export function getIPFSUrl(hash: string): string {
 		? IPFS_GATEWAY
 		: `${IPFS_GATEWAY}/`;
 	return `${cleanGateway}${cleanHash}`;
-}
-
-export async function uploadTextToIPFS(text: string): Promise<string> {
-	const blob = new Blob([text], { type: 'text/plain' });
-	return uploadToIPFS(blob, 'message.txt');
 }
 
 export async function downloadFromIPFS(hash: string): Promise<Blob> {

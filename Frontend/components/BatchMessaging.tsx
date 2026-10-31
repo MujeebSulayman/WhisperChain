@@ -10,17 +10,20 @@ import {
 } from '@/lib/scarfActions';
 import { isGaslessConfigured } from '@/lib/gasless';
 import { getErrorMessage } from '@/lib/errors';
+import { sealFor } from '@/lib/e2e';
 import { ethers } from 'ethers';
 import type { AddressLike } from 'ethers';
 
 const MAX_BATCH_MESSAGES = 10;
 
 type BatchMessagingProps = {
+    /** The sender's encryption public key, so they can read their own copies. */
+    getSenderKey: () => Promise<Uint8Array>;
     onComplete: () => void;
     onCancel: () => void;
 };
 
-export function BatchMessaging({ onComplete, onCancel }: BatchMessagingProps) {
+export function BatchMessaging({ getSenderKey, onComplete, onCancel }: BatchMessagingProps) {
     const [recipients, setRecipients] = useState<string[]>(['']);
     const [messages, setMessages] = useState<string[]>(['']);
     const [isSending, setIsSending] = useState(false);
@@ -83,10 +86,13 @@ export function BatchMessaging({ onComplete, onCancel }: BatchMessagingProps) {
         setError(null);
 
         try {
-            const messageHashes = messages.map((msg) =>
-                ethers.keccak256(ethers.toUtf8Bytes(msg))
-            );
+            // Random hashes: a hash of the text would let anyone guess short messages.
+            const messageHashes = messages.map(() => ethers.hexlify(ethers.randomBytes(32)));
             const ipfsHashes = messages.map(() => '');
+            const senderKey = await getSenderKey();
+            const textContents = await Promise.all(
+                messages.map((msg, i) => sealFor({ t: msg }, senderKey, recipients[i].trim()))
+            );
 
             const payload = {
                 recipients: recipients.map((r) => r.trim()) as AddressLike[],
@@ -94,7 +100,7 @@ export function BatchMessaging({ onComplete, onCancel }: BatchMessagingProps) {
                 ipfsHashes,
                 mediaTypes: messages.map(() => 0),
                 fileSizes: messages.map(() => BigInt(0)),
-                textContents: messages,
+                textContents,
             };
             if (isGaslessConfigured()) {
                 const { request, signature } = await sendBatchMessagesGasless(payload);

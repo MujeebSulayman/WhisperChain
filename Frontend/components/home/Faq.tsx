@@ -28,7 +28,7 @@ const FAQS: [string, string][] = [
   ],
   [
     "Who can read my messages?",
-    "Anyone who reads the chain. Message text is stored in the contract on a public network, and files on IPFS can be fetched by anyone with their link. Don't send anything you need to keep secret.",
+    "Only you and the person you're talking to. Messages and files are end-to-end encrypted in your browser, so the chain and IPFS only store ciphertext. Who you talk to, when, and payment amounts are still public.",
   ],
   [
     "Can I delete a message?",
