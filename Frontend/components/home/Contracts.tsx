@@ -7,7 +7,7 @@ import { Icon } from "../site/Icons";
 import { Reveal } from "../site/Reveal";
 
 const CONTRACTS = [
-  { name: "Scarf", role: "Profiles, conversations, messages, media and payments.", address: SCARF_ADDRESS },
+  { name: "Whispr", role: "Profiles, conversations, messages, media and payments.", address: SCARF_ADDRESS },
   { name: "Forwarder", role: "Checks your wallet's signature, then sends the call as you.", address: FORWARDER_ADDRESS },
   { name: "Paymaster", role: "Covers the gas for relayed messages.", address: PAYMASTER_ADDRESS },
 ];

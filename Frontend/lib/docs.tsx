@@ -49,7 +49,7 @@ Content-Type: application/json
 {
   "request": {
     "from": "0xYourAddress",
-    "to": "${short(SCARF_ADDRESS)} (Scarf)",
+    "to": "${short(SCARF_ADDRESS)} (Whispr)",
     "value": "0",
     "gas": "214000",
     "nonce": "7",
@@ -355,8 +355,8 @@ export const DOCS: DocPage[] = [
             { title: "You sign", body: <>Your wallet signs an EIP-712 <C>ForwardRequest</C> describing the exact contract call.</> },
             { title: "The app relays", body: <>The app posts the request and signature to its relayer at <C>/api/relay</C>.</> },
             { title: "The Paymaster submits", body: <>The relayer calls <C>Paymaster.relay()</C>, which runs the request through the Forwarder.</> },
-            { title: "The Forwarder checks", body: "It verifies your signature and nonce, then calls Scarf with your address attached." },
-            { title: "Scarf records it", body: <>It reads you as the sender (ERC-2771), stores the message and emits <C>MessageSent</C>.</> },
+            { title: "The Forwarder checks", body: "It verifies your signature and nonce, then calls the Whispr contract with your address attached." },
+            { title: "Whispr records it", body: <>It reads you as the sender (ERC-2771), stores the message and emits <C>MessageSent</C>.</> },
           ]}
         />
         <H2 id="request">The signed request</H2>
@@ -364,7 +364,7 @@ export const DOCS: DocPage[] = [
           head={["Field", "Meaning"]}
           rows={[
             [<C key="f">from</C>, "Your address."],
-            [<C key="t">to</C>, "The Scarf contract."],
+            [<C key="t">to</C>, "The Whispr contract."],
             [<C key="v">value</C>, "Always 0: the relayer refuses requests that carry ETH."],
             [<C key="g">gas</C>, "Gas limit: an estimate plus 80,000."],
             [<C key="n">nonce</C>, "Your next Forwarder nonce. A request can only run once."],
@@ -391,7 +391,7 @@ export const DOCS: DocPage[] = [
     description: `The three contracts behind Whispr on ${BASE_CHAIN.name}.`,
     toc: [
       { id: "addresses", label: "Addresses" },
-      { id: "scarf", label: "Scarf" },
+      { id: "whispr", label: "Whispr" },
       { id: "forwarder", label: "Forwarder" },
       { id: "paymaster", label: "Paymaster" },
     ],
@@ -401,15 +401,15 @@ export const DOCS: DocPage[] = [
         <Table
           head={["Contract", "Address", "Role"]}
           rows={[
-            ["Scarf", <Addr key="w" a={SCARF_ADDRESS} />, "Profiles, conversations, messages, media, payments"],
+            ["Whispr", <Addr key="w" a={SCARF_ADDRESS} />, "Profiles, conversations, messages, media, payments"],
             ["Forwarder", <Addr key="f" a={FORWARDER_ADDRESS} />, "Verifies signed requests (ERC-2771)"],
-            ["ScarfPaymaster", <Addr key="p" a={PAYMASTER_ADDRESS} />, "Relays requests and refunds the relayer"],
+            ["Paymaster", <Addr key="p" a={PAYMASTER_ADDRESS} />, "Relays requests and refunds the relayer"],
           ]}
         />
         <P>
           Chain ID {BASE_CHAIN.id}. Built with Solidity 0.8.28 and OpenZeppelin, deployed with Hardhat Ignition.
         </P>
-        <H2 id="scarf">Scarf</H2>
+        <H2 id="whispr">Whispr</H2>
         <H3>Main functions</H3>
         <Table
           head={["Function", "What it does"]}
@@ -440,7 +440,7 @@ export const DOCS: DocPage[] = [
         <H2 id="forwarder">Forwarder</H2>
         <P>
           OpenZeppelin&apos;s <C>MinimalForwarder</C>. It checks the EIP-712 signature and nonce of a <C>ForwardRequest</C>, then calls
-          the target with the signer&apos;s address appended, which Scarf reads as the sender.
+          the target with the signer&apos;s address appended, which the Whispr contract reads as the sender.
         </P>
         <H2 id="paymaster">Paymaster</H2>
         <P>
@@ -552,7 +552,7 @@ export const DOCS: DocPage[] = [
     slug: "deploy",
     group: "Developers",
     title: "Deploy the contracts",
-    description: `Deploy your own Scarf, Forwarder and Paymaster to ${BASE_CHAIN.name}.`,
+    description: `Deploy your own Whispr, Forwarder and Paymaster contracts to ${BASE_CHAIN.name}.`,
     toc: [
       { id: "setup", label: "Set up" },
       { id: "deploy", label: "Deploy and verify" },
@@ -570,7 +570,7 @@ export const DOCS: DocPage[] = [
         <Code label="Terminal">{`npx hardhat compile
 npx hardhat ignition deploy ./ignition/modules/Scarf.ts --network sepoliaBase
 npx hardhat run scripts/verify.ts --network sepoliaBase`}</Code>
-        <P>Ignition deploys in order: Forwarder, then Scarf and the Paymaster, both pointing at the Forwarder.</P>
+        <P>Ignition deploys in order: Forwarder, then Whispr and the Paymaster, both pointing at the Forwarder.</P>
         <H2 id="after">After deploying</H2>
         <Steps
           items={[

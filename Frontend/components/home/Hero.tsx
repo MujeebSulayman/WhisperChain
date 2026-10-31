@@ -22,7 +22,7 @@ function AppWindow() {
           {[0, 1, 2].map((i) => (
             <span key={i} className="h-2.5 w-2.5 rounded-full bg-fg/15" />
           ))}
-          <span className="mx-auto rounded-full bg-fg/[.05] px-4 py-1 font-mono text-[11px] text-mute">scarf / app</span>
+          <span className="mx-auto rounded-full bg-fg/[.05] px-4 py-1 font-mono text-[11px] text-mute">whispr / app</span>
         </div>
 
         <div className="grid md:grid-cols-[280px_1fr]">
