@@ -55,8 +55,8 @@ export function UserRegistration({ onRegistered, address, getPublicKey }: UserRe
                 <span className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-good/15 text-good">
                     <CheckCircle2 size={30} strokeWidth={1.8} />
                 </span>
-                <h2 className="display mt-6 text-[30px]">You&apos;re on Scarf.</h2>
-                <p className="mt-2 text-[15px] text-dim">Welcome to Scarf. Opening your inbox…</p>
+                <h2 className="display mt-6 text-[30px]">You&apos;re on Whispr.</h2>
+                <p className="mt-2 text-[15px] text-dim">Your private inbox is ready. Opening it…</p>
             </div>
         );
     }
@@ -67,8 +67,8 @@ export function UserRegistration({ onRegistered, address, getPublicKey }: UserRe
             <p className="eyebrow mt-6">One-time setup</p>
             <h2 className="display mt-2 text-[clamp(28px,4vw,36px)]">Activate your address.</h2>
             <p className="mt-3 text-[15px] leading-relaxed text-dim">
-                Your wallet address is your identity: no name, email or profile to fill in. Sign once to record it
-                on-chain so others can message you. It costs no gas.
+                Your wallet address is your identity: no name, email or profile to fill in. Sign to set up your private
+                inbox and record your address so others can message you. It costs no gas.
             </p>
 
             <div className="mt-7 grid gap-4">

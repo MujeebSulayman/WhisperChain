@@ -121,8 +121,8 @@ function EncryptedAttachment({ message, style }: { message: ChatMessage; style: 
                     {state === 'error'
                         ? "Couldn't download. Tap to retry"
                         : state === 'loading'
-                            ? 'Decrypting…'
-                            : <>{message.fileSize ? `${formatFileSize(message.fileSize)} · ` : ''}End-to-end encrypted</>}
+                            ? 'Opening…'
+                            : <>{message.fileSize ? `${formatFileSize(message.fileSize)} · ` : ''}Private</>}
                 </span>
             </span>
             {state === 'loading'
@@ -262,7 +262,7 @@ export function MessageBubble({ message, index = 0, showAvatar = true, isGrouped
                         ) : (
                             <>
                                 {message.encrypted && (
-                                    <span title="End-to-end encrypted: only you and the recipient can read this">
+                                    <span title="Private: only the people in this chat can read it">
                                         <Lock size={10} className="shrink-0" />
                                     </span>
                                 )}

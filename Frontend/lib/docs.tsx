@@ -64,17 +64,17 @@ export const DOCS: DocPage[] = [
     slug: "",
     group: "Getting started",
     title: "Introduction",
-    description: "Scarf is a messaging app where your wallet is your account. Here is what it does and how these docs are organised.",
+    description: "Whispr is a privacy-first messaging app where your wallet is your account. Here is what it does and how these docs are organised.",
     toc: [
-      { id: "what", label: "What Scarf is" },
+      { id: "what", label: "What Whispr is" },
       { id: "features", label: "What you can do" },
       { id: "next", label: "Where to go next" },
     ],
     body: () => (
       <>
-        <H2 id="what">What Scarf is</H2>
+        <H2 id="what">What Whispr is</H2>
         <P>
-          Scarf is a chat app built on {BASE_CHAIN.name}. Instead of an email and password, you connect a wallet. Every
+          Whispr is a private chat app built on {BASE_CHAIN.name}. Instead of an email and password, you connect a wallet. Every
           message, file and payment you send is recorded by a smart contract, and you sign each one in your wallet.
         </P>
         <P>
@@ -134,7 +134,7 @@ export const DOCS: DocPage[] = [
             { title: "Open the app", body: <>Go to <A href={APP_URL}>the app</A> and press <C>Log in or connect wallet</C> in the left panel.</> },
             {
               title: "Activate your address",
-              body: "The first time you connect, sign once to create your encryption key and once to record your address and public key on-chain. There is nothing to fill in, and neither costs gas.",
+              body: "The first time you connect, sign to set up your private inbox and record your address on-chain. There is nothing to fill in, and it costs no gas.",
             },
             { title: "Start a conversation", body: <>Press <C>New conversation</C> and paste the other person&apos;s wallet address.</> },
             { title: "Say hello", body: "Type a message and press Send, then approve the signature request in your wallet." },
@@ -145,7 +145,7 @@ export const DOCS: DocPage[] = [
         <Table
           head={["Message", "What it means"]}
           rows={[
-            ["Recipient not registered", "The address you messaged hasn't activated Scarf yet. Send them your chat link so they can open the app and sign in."],
+            ["Recipient not registered", "The address you messaged hasn't activated Whispr yet. Send them your chat link so they can open the app and sign in."],
             ["Relayer not configured", "The app's relayer key isn't set, so it can't submit your message. See Run locally."],
             ["Request cancelled", "You rejected the signature in your wallet. Nothing was sent."],
           ]}
@@ -225,11 +225,11 @@ export const DOCS: DocPage[] = [
         />
         <H2 id="storage">Where files live</H2>
         <P>
-          Files are encrypted in your browser, then pinned to IPFS through Pinata. The contract stores each file&apos;s IPFS hash,
-          type and size. The key that opens the file travels inside the encrypted message, so only you and the recipient can open it.
+          Files are pinned to IPFS through Pinata, and only the people in the conversation can open them. The contract stores each
+          file&apos;s IPFS hash, type and size.
         </P>
         <Callout title="What stays visible">
-          Anyone can fetch the encrypted file from its IPFS link, but without the key it&apos;s random bytes. Its size and kind
+          The file&apos;s contents stay private, even to someone holding its IPFS link. Its size and kind
           (photo, video, audio or document) are recorded on-chain in the clear.
         </Callout>
       </>
@@ -289,8 +289,8 @@ export const DOCS: DocPage[] = [
         <H2 id="tokens">Sending tokens</H2>
         <Steps
           items={[
-            { title: "Choose USDC", body: "Pick USDC in the payment panel. Scarf only supports ETH and Circle's USDC on Base." },
-            { title: "Approve once", body: "Approve Scarf to spend that amount. The app checks your allowance and asks only when needed." },
+            { title: "Choose USDC", body: "Pick USDC in the payment panel. Whispr only supports ETH and Circle's USDC on Base." },
+            { title: "Approve once", body: "Approve Whispr to spend that amount. The app checks your allowance and asks only when needed." },
             { title: "Send", body: "The contract moves the tokens from you to the recipient with transferFrom." },
           ]}
         />
@@ -315,14 +315,14 @@ export const DOCS: DocPage[] = [
       <>
         <H2 id="identity">Identity</H2>
         <P>
-          Scarf has no usernames or profiles. Your wallet address is your identity: people find you by your address or the chat link
+          Whispr has no usernames or profiles. Your wallet address is your identity: people find you by your address or the chat link
           under <C>Open wallet</C>, <C>Receive</C>. Activating stores your address and a public key in the contract, and nothing else.
         </P>
         <H2 id="key">Public key</H2>
         <P>
-          Your public key is what others encrypt messages to. It&apos;s derived from a signature your wallet makes over a fixed
-          message, so the same wallet gets the same key on every device, and the private half never leaves your browser. Accounts
-          created before encryption have their old placeholder key replaced automatically the next time they open the app.
+          Your public key is what keeps messages to you private. Your wallet sets it up with a free signature, the same wallet
+          gets the same key on every device, and the private half never leaves your browser. Older accounts are upgraded
+          automatically the next time they open the app.
         </P>
         <H2 id="storage">Storage and activity</H2>
         <List
@@ -388,7 +388,7 @@ export const DOCS: DocPage[] = [
     slug: "contracts",
     group: "How it works",
     title: "Smart contracts",
-    description: `The three contracts behind Scarf on ${BASE_CHAIN.name}.`,
+    description: `The three contracts behind Whispr on ${BASE_CHAIN.name}.`,
     toc: [
       { id: "addresses", label: "Addresses" },
       { id: "scarf", label: "Scarf" },
@@ -419,7 +419,7 @@ export const DOCS: DocPage[] = [
             [<C key="3">sendMessage(recipient, hash, token, amount, ipfsHash, mediaType, size, text)</C>, "Sends a message, file and/or payment."],
             [<C key="4">sendBatchMessages(…)</C>, "Sends up to 10 messages in one call."],
             [<C key="5">deleteMessage(messageId)</C>, "Marks a message deleted (sender or recipient only)."],
-            [<C key="6">updatePublicKey(newKey)</C>, "Replaces your encryption public key. The app does this for you."],
+            [<C key="6">updatePublicKey(newKey)</C>, "Replaces your public key. The app does this for you."],
           ]}
         />
         <H3>Events</H3>
@@ -463,9 +463,9 @@ export const DOCS: DocPage[] = [
     body: () => (
       <>
         <H2 id="public">What is public</H2>
-        <Callout title="Messages are end-to-end encrypted">
-          Message text, captions and files are encrypted in your browser before they&apos;re sent. The chain and IPFS only store
-          ciphertext that you and the recipient can open. Messages sent before encryption was added stay readable by anyone.
+        <Callout title="Messages are private">
+          Message text, captions and files can only be read by the people in the conversation, even though they&apos;re stored on a
+          public network. Messages sent before privacy was added stay readable by anyone.
         </Callout>
         <P>What the network can still see:</P>
         <List
@@ -487,7 +487,7 @@ export const DOCS: DocPage[] = [
         <List
           items={[
             "Group messages are delivered to the first other member only (see Chats and groups).",
-            "Deleting a message hides it in the app, but on-chain history can never be erased. What stays is ciphertext.",
+            "Deleting a message removes it from your chats, but on-chain history can never be erased. What stays is unreadable.",
             "Your private key is kept in this browser's storage. Logging out removes it; on a shared computer, always log out.",
             <>
               <C>clearStorage()</C> resets your storage counter without removing files, so the 1 GB limit can be reset by the user.

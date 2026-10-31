@@ -113,7 +113,7 @@ export async function POST(req: Request) {
 		return fail('Requests that send ETH must be submitted from your own wallet', 400);
 	}
 	if (getAddress(request.to) !== getAddress(SCARF_ADDRESS)) {
-		return fail('Only Scarf calls can be relayed', 400);
+		return fail('Only Whispr calls can be relayed', 400);
 	}
 	let call: ReturnType<typeof RELAYABLE.parseTransaction>;
 	try {

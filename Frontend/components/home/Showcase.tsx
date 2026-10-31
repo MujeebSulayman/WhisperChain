@@ -123,16 +123,16 @@ const ROWS: { tag: string; title: string; body: string; points: string[]; icon: 
   {
     tag: "Conversations",
     title: "One-to-one or the whole crew.",
-    body: "Message any registered wallet, or start a group with as many people as you like. Every conversation lives in one inbox you can search.",
-    points: ["Direct messages and groups", "Search by address or message", "New messages arrive live"],
+    body: "Message any registered wallet, or start a group with as many people as you like. Only the people in a conversation can read it.",
+    points: ["Private direct messages and groups", "Search by address or message", "New messages arrive live"],
     icon: "chat",
     Visual: GroupVisual,
   },
   {
     tag: "Media",
     title: "Share the photo, not a link to it.",
-    body: "Send images, video, audio and documents up to 50 MB each. Files are stored on IPFS and open right in the chat.",
-    points: ["Images, video, audio, documents", "Up to 50 MB per file", "1 GB of storage per user"],
+    body: "Send images, video, audio and documents up to 50 MB each. They open right in the chat, and only for the people in it.",
+    points: ["Images, video, audio, documents", "Private to the conversation", "Up to 50 MB per file"],
     icon: "file",
     Visual: MediaVisual,
   },
@@ -164,7 +164,7 @@ export function Showcase() {
         </span>
         <h2 className="h2 mt-5">Everything you expect from a chat app.</h2>
         <p className="mx-auto mt-4 max-w-[52ch] text-[17px] leading-relaxed text-dim">
-          Plus the things only a wallet can do: sign in without an account, and send money with a message.
+          Private by default, plus the things only a wallet can do: sign in without an account, and send money with a message.
         </p>
       </Reveal>
 

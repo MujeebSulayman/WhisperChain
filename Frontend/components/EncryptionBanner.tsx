@@ -17,16 +17,16 @@ export function EncryptionBanner({ status, error, onUnlock, onAdoptKey }: Encryp
 	const content =
 		status === 'unlocking' || status === 'locked'
 			? {
-					text: 'Unlocking your encrypted messages. Approve the signature in your wallet (it’s free).',
+					text: 'Unlocking your private messages. Approve the signature in your wallet (it’s free).',
 					action: null,
 				}
 			: status === 'mismatch'
 				? {
-						text: 'This wallet made a different encryption key than the one on record, so new messages to you can’t be read on this device. Using this device’s key fixes that, but messages sent to the old key stay unreadable here.',
+						text: 'This wallet unlocked a different inbox key than the one on record, so new messages to you can’t be opened on this device. Switching to this device’s key fixes that, but messages sent to the old key stay closed here.',
 						action: { label: 'Use this device’s key', onClick: onAdoptKey },
 					}
 				: {
-						text: error ?? 'Your encrypted messages are locked.',
+						text: error ?? 'Your private messages are locked.',
 						action: { label: 'Unlock messages', onClick: onUnlock },
 					};
 

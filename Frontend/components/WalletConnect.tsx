@@ -17,8 +17,8 @@ type WalletConnectProps = {
 };
 
 const WALLET_NAMES: Record<string, string> = {
-	privy: 'Scarf wallet',
-	'privy-v2': 'Scarf wallet',
+	privy: 'Whispr wallet',
+	'privy-v2': 'Whispr wallet',
 	metamask: 'MetaMask',
 	coinbase_wallet: 'Coinbase Wallet',
 	base_account: 'Base Account',

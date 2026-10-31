@@ -14,7 +14,7 @@ function AppWindow() {
   return (
     <figure
       className="relative mx-auto mt-16 w-full max-w-[1080px] text-left lg:mt-20"
-      aria-label="The Scarf app: an inbox of conversations and an open chat with a photo, messages and a payment."
+      aria-label="The Whispr app: an inbox of conversations and an open chat with a photo, messages and a payment."
     >
       <div className="sheet rise overflow-hidden !rounded-[24px]" style={{ animationDelay: "320ms" }}>
         {/* Window chrome */}
@@ -88,14 +88,15 @@ function AppWindow() {
         Sent gasless
       </span>
       <span className="pill absolute -right-5 bottom-[78px] hidden bg-[var(--surface)] shadow-[var(--shadow)] lg:inline-flex">
-        <Icon name="file" size={13} />
-        3 photos · on IPFS
+        <Icon name="lock" size={13} />
+        3 photos · private
       </span>
     </figure>
   );
 }
 
 const TICKER: { icon: IconName; label: string }[] = [
+  { icon: "lock", label: "Private by default" },
   { icon: "chat", label: "Direct messages" },
   { icon: "user", label: "Group chats" },
   { icon: "file", label: "Photos and video" },
@@ -143,12 +144,13 @@ export function Hero() {
      
 
         <h1 className="display rise mx-auto mt-6 max-w-[13ch] text-[clamp(46px,7.6vw,108px)]" style={{ animationDelay: "80ms" }}>
-          Chat from <span className="text-gradient">your wallet.</span>
+          Private chat, <span className="text-gradient">from your wallet.</span>
         </h1>
 
         <p className="rise mx-auto mt-6 max-w-[54ch] text-[clamp(16px,1.5vw,19px)] leading-relaxed text-dim" style={{ animationDelay: "160ms" }}>
-          Scarf is a messaging app where your wallet is your account. Talk one-to-one or in groups, share photos, video and
-          files, and send a payment right in the conversation.
+          Whispr is a privacy-first messaging app where your wallet is your account. Chat one-to-one or in groups, share
+          photos, video and files that only the people in the conversation can open, and send a payment without leaving the
+          thread.
         </p>
 
         <div className="rise mt-9 flex flex-wrap justify-center gap-3" style={{ animationDelay: "240ms" }}>
@@ -161,7 +163,7 @@ export function Hero() {
           </Link>
         </div>
         <p className="rise mt-5 font-mono text-[12px] text-mute" style={{ animationDelay: "280ms" }}>
-          No email. No password. No gas.
+          Private by default. No email, no password, no gas.
         </p>
 
         <AppWindow />

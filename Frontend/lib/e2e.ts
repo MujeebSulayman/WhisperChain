@@ -1,7 +1,7 @@
 'use client';
 
 /*
- * End-to-end encryption for Scarf messages and files. The chain and IPFS only ever see ciphertext.
+ * End-to-end encryption for Whispr messages and files. The chain and IPFS only ever see ciphertext.
  *
  * Keys: each wallet has an X25519 keypair derived from a signature over a fixed message, so the
  * same wallet gets the same key on every device. The public key goes in the contract's
@@ -41,7 +41,7 @@ const DOMAIN = utf8ToBytes('scarf-e2e-v1');
 const ZERO_NONCE = new Uint8Array(24);
 
 export const keyMessage = (address: string) =>
-	`Scarf encryption key\n\nSign to unlock your private messages on this device. This is free and sends no transaction.\n\nWallet: ${address.toLowerCase()}\nVersion: ${VERSION}`;
+	`Whispr inbox key\n\nSign to unlock your private messages on this device. This is free and sends no transaction.\n\nWallet: ${address.toLowerCase()}\nVersion: ${VERSION}`;
 
 /** True if `publicKey` was made by keyPairFromSignature, i.e. its owner can read what we encrypt to it. */
 export function isEncryptionKey(publicKey: Uint8Array): boolean {
@@ -170,7 +170,7 @@ export async function getRecipientKey(address: string): Promise<Uint8Array> {
 	const key = getBytes(await getUserPublicKey(address));
 	if (!isEncryptionKey(key)) {
 		throw new Error(
-			`${address.slice(0, 6)}…${address.slice(-4)} hasn't set up encrypted messages yet. Ask them to open Scarf once, then try again.`,
+			`${address.slice(0, 6)}…${address.slice(-4)} hasn't set up private messages yet. Ask them to open Whispr once, then try again.`,
 		);
 	}
 	recipientKeys.set(id, { key, at: Date.now() });

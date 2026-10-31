@@ -159,7 +159,7 @@ export function ChatContainer() {
 			setActiveThreadIdState(other);
 			params.set(CHAT_PARAM, other);
 			isUserRegistered(other)
-				.then((ok) => !ok && setError('That address hasn’t activated Scarf yet, so it can’t receive messages.'))
+				.then((ok) => !ok && setError('That address hasn’t activated Whispr yet, so it can’t receive messages.'))
 				.catch(() => {});
 		}
 

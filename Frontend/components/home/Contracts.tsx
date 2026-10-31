@@ -45,7 +45,7 @@ export function Contracts() {
           </span>
           <h2 className="h2 mt-5">Three contracts run the whole app.</h2>
           <p className="mt-4 max-w-[40ch] text-[16px] leading-relaxed text-dim">
-            There is no Scarf server holding your messages. The app reads and writes these contracts on {BASE_CHAIN.name}, and you
+            There is no Whispr server holding your messages. The app reads and writes these contracts on {BASE_CHAIN.name}, and you
             can inspect each one yourself.
           </p>
         </Reveal>

@@ -189,7 +189,7 @@ function MessageMenu({
                     onClick={remove}
                     disabled={deleting}
                     className={`${btn} ${confirming ? 'text-bad! gap-1 text-[11px]' : ''}`}
-                    title="Delete (hides it in Scarf; the chain keeps its history)"
+                    title="Delete (removes it from your chats; the chain keeps a record it was sent)"
                     aria-label={confirming ? 'Confirm delete' : 'Delete message'}
                 >
                     {deleting ? <Loader2 size={13} className="animate-spin" /> : <Trash2 size={13} strokeWidth={1.8} />}

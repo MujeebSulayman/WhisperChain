@@ -155,7 +155,7 @@ export function WalletHub({
 	);
 }
 
-/** Funds this address holds on networks Scarf doesn't run on: visible, but not spendable here. */
+/** Funds this address holds on networks Whispr doesn't run on: visible, but not spendable here. */
 function OtherNetworks({ holdings, address }: { holdings: WalletBalance['elsewhere']; address: string }) {
 	return (
 		<div className="inset-panel mt-4 rounded-[var(--r-inset)] p-3">
@@ -184,7 +184,7 @@ function OtherNetworks({ holdings, address }: { holdings: WalletBalance['elsewhe
 			</ul>
 			<p className="mt-2.5 flex items-start gap-1.5 border-t border-line pt-2.5 text-[11.5px] leading-relaxed text-mute">
 				<Info size={12} strokeWidth={1.8} className="mt-0.5 shrink-0" />
-				These are safe in your wallet, but Scarf runs on {BASE_CHAIN.name}. Bridge them to {BASE_CHAIN.name} to use them in
+				These are safe in your wallet, but Whispr runs on {BASE_CHAIN.name}. Bridge them to {BASE_CHAIN.name} to use them in
 				chats.
 			</p>
 		</div>

@@ -19,8 +19,8 @@ export function ReceivePanel({ address }: { address: string }) {
 	const share = async () => {
 		try {
 			await navigator.share({
-				title: 'Message me on Scarf',
-				text: `Message me on Scarf, or pay me on ${BASE_CHAIN.name}: ${address}`,
+				title: 'Message me on Whispr',
+				text: `Message me on Whispr, or pay me on ${BASE_CHAIN.name}: ${address}`,
 				url: inviteUrl,
 			});
 		} catch {
@@ -47,7 +47,7 @@ export function ReceivePanel({ address }: { address: string }) {
 					<p className="mt-3 text-center text-[12.5px] text-dim">
 						{view === 'address'
 							? `Scan to send ETH or tokens on ${BASE_CHAIN.name}.`
-							: 'Scan to open Scarf with a chat to you ready to start.'}
+							: 'Scan to open Whispr with a chat to you ready to start.'}
 					</p>
 				</div>
 
@@ -70,7 +70,7 @@ export function ReceivePanel({ address }: { address: string }) {
 
 						<p className="mt-3 flex items-start gap-2 text-[12px] leading-relaxed text-dim">
 							<AlertTriangle size={14} strokeWidth={1.8} className="mt-0.5 shrink-0 text-warn" />
-							Send on {BASE_CHAIN.name} to use funds in Scarf. Funds sent on other EVM networks (Ethereum, Arbitrum,
+							Send on {BASE_CHAIN.name} to use funds in Whispr. Funds sent on other EVM networks (Ethereum, Arbitrum,
 							Optimism) still reach this address and show under &ldquo;On other networks&rdquo;, but can&apos;t be spent here.
 							Never send from Bitcoin, Solana or other non-EVM chains.
 						</p>

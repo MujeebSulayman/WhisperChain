@@ -1,6 +1,6 @@
-# Scarf Frontend
+# Whispr Frontend
 
-A modern, decentralized messaging application built on Base Chain with IPFS storage.
+Whispr is a privacy-first messaging app where your wallet is your account, built on Base.
 
 ## Quick Start
 
@@ -13,10 +13,10 @@ A modern, decentralized messaging application built on Base Chain with IPFS stor
 2. **Set Up Environment Variables**
 
    ```bash
-   cp .env.example .env.local
+   cp .env.example .env
    ```
 
-   Edit `.env.local` and add your IPFS keys (optional, see IPFS_SETUP.md)
+   Edit `.env` and fill in the RPC URL, Privy app ID, relayer key and `PINATA_JWT`.
 
 3. **Run Development Server**
 
@@ -31,7 +31,7 @@ A modern, decentralized messaging application built on Base Chain with IPFS stor
 
 ## Features
 
--  **Encrypted Messaging** - Messages stored on IPFS with on-chain verification
+-  **Private Messaging** - Only the people in a conversation can read it
 -  **Pay-to-Message** - Send payments with messages (ETH or ERC20)
 -  **File Sharing** - Upload images, videos, audio, documents
 -  **Group Conversations** - Multi-participant conversations

@@ -5,7 +5,7 @@ import { findDoc } from "@/lib/docs";
 const doc = findDoc("")!;
 
 export const metadata: Metadata = {
-  title: "Docs - Scarf",
+  title: "Docs - Whispr",
   description: doc.description,
 };
 

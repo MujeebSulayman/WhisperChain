@@ -113,7 +113,7 @@ export function ChatHeader({
                     )}
                 </div>
             ) : (
-                <p className="label flex-1">Scarf</p>
+                <p className="label flex-1">Whispr</p>
             )}
 
             {!isMobile && thread && isGaslessConfigured() && (

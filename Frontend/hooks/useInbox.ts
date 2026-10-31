@@ -12,7 +12,7 @@ const FETCH_CONCURRENCY = 20;
 const ZERO_ID = '0x' + '0'.repeat(64);
 
 /** Shown in place of a message this device's key can't open. */
-export const UNREADABLE_TEXT = "🔒 Can't decrypt this message on this device";
+export const UNREADABLE_TEXT = "🔒 This message can't be opened on this device";
 
 const readKey = (address: string) => `scarf:lastRead:${address.toLowerCase()}`;
 

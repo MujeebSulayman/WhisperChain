@@ -1,18 +1,16 @@
-# Scarf
+# Whispr
 
-Private messaging on the blockchain. Send encrypted messages and media, create group chats, and attach payments?without giving up control of your data.
+Whispr is a privacy-first messaging app where your wallet is your account. Chat one-to-one or in groups, share photos, video and files that only the people in the conversation can open, and send a payment without leaving the thread.
 
-Scarf lets you talk to others using your wallet as your identity. Messages are encrypted and stored in a decentralized way, so you're not dependent on a single company or server. You own the keys; the network routes and stores what you send.
-
-
+There's no sign-up form and no company server holding your conversations. Your messages live on Base, readable only by the people you're talking to.
 
 ## What the project can do
 
-- **Messaging:** Send encrypted text and share files?images, video, audio, documents?stored in a decentralized way.
+- **Private messaging:** Text, images, video, audio and documents that only the people in the conversation can read.
 - **Conversations:** One-to-one chats or group conversations with multiple participants.
-- **Payments:** Attach ETH or ERC 20 tokens to a message; the recipient gets the payment when the message is sent.
+- **Payments:** Attach ETH or USDC to a message; the recipient gets the payment when the message is sent.
 - **Batch sending:** Send up to 10 messages in one transaction to save gas.
-- **Profiles:** Register with a public key and username, update your key, and manage your presence.
+- **Wallet identity:** Your address is your account. Activating it sets up your private inbox with one free signature.
 - **Storage and limits:** Each user has a storage quota for media; the contract enforces message and file-size limits.
 
 You can use the app in two ways: send transactions yourself (you pay gas), or use **gasless** sending (you only sign; someone else submits and can pay gas for you).

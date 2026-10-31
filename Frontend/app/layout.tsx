@@ -8,22 +8,22 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://scarf.chat"),
-  title: "Scarf - Gasless Messaging on Base",
+  title: "Whispr - Private messaging from your wallet",
   description:
-    "Wallet-to-wallet messages, files and payments on Base. Sign once with EIP-712; a relayer submits it and the paymaster covers the gas.",
-  keywords: ["blockchain", "messaging", "decentralized", "web3", "base", "gasless", "meta-transactions"],
-  authors: [{ name: "Scarf" }],
+    "Whispr is a privacy-first messaging app where your wallet is your account. Chat one-to-one or in groups, share photos, video and files that only the people in the conversation can open, and send a payment without leaving the thread.",
+  keywords: ["private messaging", "privacy", "blockchain", "messaging", "decentralized", "web3", "base", "gasless", "meta-transactions"],
+  authors: [{ name: "Whispr" }],
   openGraph: {
-    title: "Scarf",
-    description: "Wallet-to-wallet messaging, settled on Base. You sign; the paymaster pays the gas.",
+    title: "Whispr",
+    description: "Private chats, files and payments, with your wallet as your account.",
     type: "website",
     url: "/",
-    siteName: "Scarf",
+    siteName: "Whispr",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Scarf",
-    description: "Wallet-to-wallet messaging, settled on Base. You sign; the paymaster pays the gas.",
+    title: "Whispr",
+    description: "Private chats, files and payments, with your wallet as your account.",
   },
 };
 

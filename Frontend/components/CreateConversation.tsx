@@ -86,14 +86,14 @@ export function CreateConversation({
         setError(null);
 
         try {
-            // Everyone must have activated Scarf, or the contract rejects messages to them.
+            // Everyone must have activated Whispr, or the contract rejects messages to them.
             const registered = await Promise.all(others.map((p) => isUserRegistered(p)));
             const missing = others.filter((_, i) => !registered[i]);
             if (missing.length > 0) {
                 setError(
                     missing.length === 1
-                        ? `${missing[0].slice(0, 6)}…${missing[0].slice(-4)} hasn't activated Scarf yet. Send them your chat link from Wallet → Receive.`
-                        : `${missing.length} of these addresses haven't activated Scarf yet.`
+                        ? `${missing[0].slice(0, 6)}…${missing[0].slice(-4)} hasn't activated Whispr yet. Send them your chat link from Wallet → Receive.`
+                        : `${missing.length} of these addresses haven't activated Whispr yet.`
                 );
                 return;
             }

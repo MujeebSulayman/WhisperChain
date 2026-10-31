@@ -92,19 +92,19 @@ export function ScarfMark({ size = 32, className = "" }: { size?: number; classN
   );
 }
 
-/** The Scarf logo: the mark, optionally with the wordmark in the display face. */
+/** The Whispr logo: the mark, optionally with the wordmark in the display face. */
 export function Logo({ size = 32, wordmark = true, className = "" }: { size?: number; wordmark?: boolean; className?: string }) {
   return (
     <span
       className={`inline-flex items-center ${className}`}
       style={{ gap: size * 0.38 }}
       role={wordmark ? undefined : "img"}
-      aria-label={wordmark ? undefined : "Scarf"}
+      aria-label={wordmark ? undefined : "Whispr"}
     >
       <ScarfMark size={size} className="brand-mark" />
       {wordmark ? (
         <span className="font-display leading-none tracking-[0.08em]" style={{ fontSize: size * 0.72 }}>
-          scarf
+          whispr
         </span>
       ) : null}
     </span>

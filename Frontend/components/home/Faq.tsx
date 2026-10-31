@@ -7,8 +7,8 @@ import { Icon } from "../site/Icons";
 
 const FAQS: [string, string][] = [
   [
-    "What is Scarf?",
-    "A messaging app where your wallet is your account. Chat one-to-one or in groups, share photos, video, audio and documents, message several people at once, and send a payment in the thread when you need to. Everything runs on smart contracts on Base.",
+    "What is Whispr?",
+    "A privacy-first messaging app where your wallet is your account. Chat one-to-one or in groups, share photos, video, audio and documents that only the people in the conversation can open, message several people at once, and send a payment in the thread when you need to. Everything runs on smart contracts on Base.",
   ],
   [
     "Can I chat in groups?",
@@ -16,7 +16,7 @@ const FAQS: [string, string][] = [
   ],
   [
     "What can I share?",
-    "Text, photos, video, audio and documents. Files up to 50 MB are uploaded to IPFS and linked in the chat, and each user has 1 GB of storage.",
+    "Text, photos, video, audio and documents. Files up to 50 MB open right in the chat, only for the people in it, and each user has 1 GB of storage.",
   ],
   [
     "Can I message many people at once?",
@@ -28,11 +28,11 @@ const FAQS: [string, string][] = [
   ],
   [
     "Who can read my messages?",
-    "Only you and the person you're talking to. Messages and files are end-to-end encrypted in your browser, so the chain and IPFS only store ciphertext. Who you talk to, when, and payment amounts are still public.",
+    "Only you and the people in the conversation. Messages, photos and files stay private to the chat. What's on the public network is who talked to whom, when, and any payment amounts.",
   ],
   [
     "Can I delete a message?",
-    "Not from the app yet. The contract lets the sender or recipient mark a message as deleted, but the original transaction always stays in Base's history, as everything on-chain does.",
+    "Yes. Hover a message and delete it, and it disappears from the chat. A record that a message was sent always stays in Base's history, but what it said stays private.",
   ],
   [
     "Which network is it on?",

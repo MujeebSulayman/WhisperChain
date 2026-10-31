@@ -1,6 +1,6 @@
 'use client';
 
-import { KeyRound, MessagesSquare, MessageSquarePlus, QrCode, Send, ShieldCheck } from 'lucide-react';
+import { Lock, KeyRound, MessagesSquare, MessageSquarePlus, QrCode, ShieldCheck } from 'lucide-react';
 
 type EmptyStateProps = {
     onNewConversation: () => void;
@@ -14,9 +14,9 @@ type EmptyStateProps = {
 };
 
 const STEPS = [
-    { icon: KeyRound, title: 'Sign', description: 'Your wallet signs an EIP-712 request.' },
-    { icon: Send, title: 'Relay', description: 'A relayer submits it. No gas from you.' },
-    { icon: ShieldCheck, title: 'Settle', description: 'Scarf records it on Base.' },
+    { icon: Lock, title: 'Private', description: 'Only you and the people in the chat can read it.' },
+    { icon: KeyRound, title: 'Sign', description: 'Your wallet approves it. No gas from you.' },
+    { icon: ShieldCheck, title: 'Settle', description: 'Whispr records it on Base.' },
 ];
 
 /** The glowing glass orb from the Prinet chat screen. */
@@ -37,7 +37,7 @@ export function EmptyState({ onNewConversation, onShareAddress, recentCount = 0,
                 <h2 className="display rise mt-10 text-[clamp(1.9rem,4vw,3rem)]">
                     {connected ? (
                         <>
-                            Say it here. <span className="text-gradient">Settle it on-chain.</span>
+                            Say it privately. <span className="text-gradient">Settle it on-chain.</span>
                         </>
                     ) : (
                         <>

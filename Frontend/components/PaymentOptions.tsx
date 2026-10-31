@@ -158,7 +158,7 @@ export function PaymentOptions({ onPaymentSet, onCancel }: PaymentOptionsProps) 
                         ) : (
                             <>
                                 <ShieldCheck size={16} strokeWidth={1.8} className="shrink-0 text-accent" />
-                                <p className="flex-1 text-[12.5px] text-dim">Let Scarf move this much USDC when the message sends.</p>
+                                <p className="flex-1 text-[12.5px] text-dim">Let Whispr move this much USDC when the message sends.</p>
                                 <button onClick={approve} disabled={approval === 'approving'} className="btn btn-sm btn-accent h-8! shrink-0 disabled:opacity-60">
                                     {approval === 'approving' && <Loader2 size={14} className="animate-spin" />}
                                     {approval === 'approving' ? 'Approving…' : 'Approve'}
