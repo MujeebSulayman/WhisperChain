@@ -9,6 +9,7 @@ import { useState, useEffect } from 'react';
 import { downloadDecryptedFile, getIPFSUrl, getMediaTypeName } from '@/lib/ipfs';
 import { baseIpfsHash } from '@/lib/inbox';
 import type { FileKey } from '@/lib/e2e';
+import { canClaim, claimPrivatePayment, isPrivatePaymentClaimed, type PrivatePayment } from '@/lib/privatePay';
 import { formatTokenAmount } from '@/lib/token';
 import { ZeroAddress } from 'ethers';
 import { useTokenInfo } from '../hooks/useTokenInfo';
@@ -132,6 +133,53 @@ function EncryptedAttachment({ message, style }: { message: ChatMessage; style: 
     );
 }
 
+/** Claims a private payment into the recipient's wallet. Shows "Claimed" once the funds have moved. */
+function ClaimPayment({ payment, to }: { payment: PrivatePayment; to: string }) {
+    const [state, setState] = useState<'checking' | 'ready' | 'claiming' | 'claimed' | 'error'>('checking');
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        let cancelled = false;
+        isPrivatePaymentClaimed(payment)
+            .then((claimed) => !cancelled && setState(claimed ? 'claimed' : 'ready'))
+            .catch(() => !cancelled && setState('ready'));
+        return () => {
+            cancelled = true;
+        };
+    }, [payment]);
+
+    if (!canClaim(payment)) return null;
+    if (state === 'claimed') {
+        return (
+            <span className="ml-auto flex shrink-0 items-center gap-1 text-[12px] text-good">
+                <CheckCheck size={14} /> Claimed
+            </span>
+        );
+    }
+
+    const claim = async () => {
+        setState('claiming');
+        setError(null);
+        try {
+            await claimPrivatePayment(payment, to);
+            setState('claimed');
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Claim failed');
+            setState('error');
+        }
+    };
+
+    return (
+        <span className="ml-auto flex shrink-0 flex-col items-end gap-1">
+            <button onClick={claim} disabled={state !== 'ready' && state !== 'error'} className="btn btn-sm btn-accent h-8! disabled:opacity-60">
+                {state === 'claiming' || state === 'checking' ? <Loader2 size={14} className="animate-spin" /> : null}
+                {state === 'claiming' ? 'Claiming…' : state === 'error' ? 'Retry' : 'Claim'}
+            </button>
+            {error && <span className="max-w-[14rem] text-right text-[11px] text-bad">{error}</span>}
+        </span>
+    );
+}
+
 export function MessageBubble({ message, index = 0, showAvatar = true, isGrouped = false, showAuthor = false, actions }: MessageBubbleProps) {
     const [isVisible, setIsVisible] = useState(false);
     const isSelf = message.isSelf;
@@ -244,12 +292,20 @@ export function MessageBubble({ message, index = 0, showAvatar = true, isGrouped
                         >
                             <Coins size={16} strokeWidth={1.8} className={message.paymentSettled ? 'text-good' : isSelf ? '' : 'text-accent'} />
                             <span className="min-w-0">
-                                <span className={`block text-[11px] ${subtle}`}>{isSelf ? 'Payment sent' : 'Payment received'}</span>
+                                <span className={`block text-[11px] ${subtle}`}>
+                                    {message.privatePayment
+                                        ? isSelf ? 'Private payment sent' : 'Private payment received'
+                                        : isSelf ? 'Payment sent' : 'Payment received'}
+                                </span>
                                 <span className="block text-[15px] font-semibold tracking-[-0.02em]">
                                     {paymentTokenInfo.loading ? '…' : paymentAmountStr} {paymentLabel}
                                 </span>
                             </span>
-                            {message.paymentSettled && <CheckCheck size={14} className="ml-auto shrink-0 text-good" />}
+                            {message.privatePayment && !isSelf && message.status !== 'pending' ? (
+                                <ClaimPayment payment={message.privatePayment} to={message.recipient} />
+                            ) : (
+                                message.paymentSettled && <CheckCheck size={14} className="ml-auto shrink-0 text-good" />
+                            )}
                         </div>
                     )}
 

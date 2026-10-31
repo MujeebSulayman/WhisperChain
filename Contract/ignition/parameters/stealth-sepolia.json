@@ -1,0 +1,6 @@
+{
+  "WhisprStealthPayModule": {
+    "forwarder": "0x61d6789168986B18Eb1423894c5147De1B5afCf1",
+    "relayer": "0xA764180fabf41b48914F255D568497876AF1Ef70"
+  }
+}

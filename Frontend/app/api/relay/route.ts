@@ -1,9 +1,16 @@
 import { NextResponse } from 'next/server';
-import { Contract, Interface, JsonRpcProvider, Wallet, getAddress, isAddress, isHexString } from 'ethers';
+import { Contract, Interface, JsonRpcProvider, Wallet, ZeroAddress, getAddress, isAddress, isHexString } from 'ethers';
 import paymasterAbi from '@/blockchain/ScarfPaymaster.json';
 import forwarderAbi from '@/blockchain/ScarfForwarder.json';
 import type { InterfaceAbi } from 'ethers';
-import { FORWARDER_ADDRESS, PAYMASTER_ADDRESS, SCARF_ADDRESS, findPaymentAsset } from '@/lib/deployments';
+import {
+	FORWARDER_ADDRESS,
+	PAYMASTER_ADDRESS,
+	SCARF_ADDRESS,
+	STEALTH_PAY_ADDRESS,
+	STEALTH_PAYMASTER_ADDRESS,
+	findPaymentAsset,
+} from '@/lib/deployments';
 
 const RPC_URL = process.env.NEXT_PUBLIC_BASE_RPC ?? '';
 const RELAYER_PRIVATE_KEY = process.env.RELAYER_PRIVATE_KEY ?? '';
@@ -34,6 +41,19 @@ const RELAYABLE = new Interface([
 	'function deleteMessage(bytes32 messageId)',
 	'function clearStorage()',
 ]);
+
+// Private payments (WhisprStealthPay), paid for by their own paymaster.
+const STEALTH_RELAYABLE = new Interface([
+	'function registerKeys(bytes stealthMetaAddress)',
+	'function sendToken(address token, address stealthAddress, uint256 amount, bytes ephemeralPubKey, bytes metadata, uint256 deadline, uint8 v, bytes32 r, bytes32 s)',
+	'function claimToken(address token, address to, uint256 amount, uint256 deadline, uint8 v, bytes32 r, bytes32 s)',
+]);
+
+/** Each contract the relayer will call, with the calls it accepts and the paymaster that pays. */
+const TARGETS = [
+	{ address: SCARF_ADDRESS, calls: RELAYABLE, paymaster: PAYMASTER_ADDRESS },
+	{ address: STEALTH_PAY_ADDRESS, calls: STEALTH_RELAYABLE, paymaster: STEALTH_PAYMASTER_ADDRESS },
+].filter((t) => t.address);
 
 type RelayBody = {
 	request: {
@@ -112,12 +132,13 @@ export async function POST(req: Request) {
 	if (value !== BigInt(0)) {
 		return fail('Requests that send ETH must be submitted from your own wallet', 400);
 	}
-	if (getAddress(request.to) !== getAddress(SCARF_ADDRESS)) {
+	const target = TARGETS.find((t) => getAddress(t.address) === getAddress(request.to));
+	if (!target) {
 		return fail('Only Whispr calls can be relayed', 400);
 	}
 	let call: ReturnType<typeof RELAYABLE.parseTransaction>;
 	try {
-		call = RELAYABLE.parseTransaction({ data: request.data });
+		call = target.calls.parseTransaction({ data: request.data });
 	} catch {
 		call = null;
 	}
@@ -133,6 +154,10 @@ export async function POST(req: Request) {
 		fn === 'sendMessage' ? [call.args.paymentAmount] : fn === 'sendBatchMessages' ? [...call.args.paymentAmounts] : [];
 	if (tokens.some((t, i) => amounts[i] > BigInt(0) && !findPaymentAsset(t))) {
 		return fail('Only ETH and USDC payments are supported', 400);
+	}
+	// Private token payments: USDC only (ETH never comes through the relayer).
+	if ((fn === 'sendToken' || fn === 'claimToken') && (!findPaymentAsset(call.args.token) || call.args.token === ZeroAddress)) {
+		return fail('Only USDC can be sent privately through the relayer', 400);
 	}
 
 	const gas = toUint(request.gas);
@@ -170,8 +195,8 @@ export async function POST(req: Request) {
 	}
 
 	try {
-		if (PAYMASTER_ADDRESS) {
-			const paymaster = new Contract(PAYMASTER_ADDRESS, paymasterAbi as InterfaceAbi, wallet);
+		if (target.paymaster) {
+			const paymaster = new Contract(target.paymaster, paymasterAbi as InterfaceAbi, wallet);
 			const args = [reqTuple, signature, relayerAddress, REIMBURSEMENT_WEI] as const;
 			// Simulate first: a call that would revert costs the relayer gas for nothing.
 			await paymaster.relay.staticCall(...args);

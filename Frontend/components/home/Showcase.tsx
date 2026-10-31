@@ -147,8 +147,8 @@ const ROWS: { tag: string; title: string; body: string; points: string[]; icon: 
   {
     tag: "Payments",
     title: "Settle up without leaving the chat.",
-    body: "Attach ETH or USDC to a message. It goes straight to the other person in the same send, with nothing to claim later.",
-    points: ["ETH or USDC", "Paid directly to the recipient", "A full payment history"],
+    body: "Attach ETH or USDC to a message. Only the two of you know who it went to, and they claim it with one tap.",
+    points: ["ETH or USDC", "Private by default", "No gas to send or claim USDC"],
     icon: "coin",
     Visual: PaymentVisual,
   },

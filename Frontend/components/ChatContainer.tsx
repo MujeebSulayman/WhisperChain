@@ -32,6 +32,7 @@ import { getReadOnlyContract } from '@/lib/blockchain';
 import { NO_CAPTION, groupTag, groupTitle, shortAddress, type Thread } from '@/lib/inbox';
 import { isGaslessConfigured } from '@/lib/gasless';
 import { sealFor, type FileKey, type Payload } from '@/lib/e2e';
+import { isPrivatePaymentConfigured, sendPrivatePayment } from '@/lib/privatePay';
 import { getErrorMessage, REQUEST_CANCELLED_MESSAGE } from '@/lib/errors';
 import { useScarf } from '../hooks/useScarf';
 import { useWallet } from '../hooks/useWallet';
@@ -272,8 +273,11 @@ export function ChatContainer() {
 		// Group messages carry the group's tag so every member files them under the group. Direct
 		// ones get a random hash: a hash of the text would let anyone guess short messages.
 		const messageHash = isGroup ? groupTag(thread.id) : ethers.hexlify(ethers.randomBytes(32));
+		// Payments are private when the stealth contract is deployed; the message then carries the receipt.
+		const isPrivatePayment = amount > BigInt(0) && isPrivatePaymentConfigured();
 		// The ETH payment check below; the paymaster can't relay ETH, so those go from the wallet.
 		const paysEth = paymentToken === ethers.ZeroAddress && amount > BigInt(0);
+		const messagePaysEth = paysEth && !isPrivatePayment;
 
 		const pendingId = `pending-${Date.now()}`;
 		inbox.addPending(thread.id, {
@@ -299,6 +303,7 @@ export function ChatContainer() {
 				throw new Error(`Not enough ETH: you have ${balance.eth.formatted} ETH, and the network fee comes on top`);
 			}
 			const { publicKey: myKey } = e2e.keys ?? (await e2e.unlock());
+			if (isPrivatePayment) content.p = await sendPrivatePayment(recipients[0], paymentToken, amount);
 
 			if (isGroup) {
 				// One batch, one copy per member. Each copy of a file needs its own IPFS string.
@@ -323,16 +328,29 @@ export function ChatContainer() {
 					ipfsHash: args.ipfsHash ?? '',
 					mediaType,
 					fileSize,
-					paymentToken,
-					paymentAmount: amount,
+					paymentToken: isPrivatePayment ? ethers.ZeroAddress : paymentToken,
+					paymentAmount: isPrivatePayment ? BigInt(0) : amount,
 					textContent: await sealFor(content, myKey, recipients[0]),
 				};
-				if (isGaslessConfigured() && !paysEth) {
-					const { request, signature } = await sendChatMessageGasless(message);
-					await submitSignedForwardRequest(request, signature);
-				} else {
-					const tx = await sendChatMessage({ ...message, value: paysEth ? amount : undefined });
-					await waitForTransaction(Promise.resolve(tx));
+				const deliver = async () => {
+					if (isGaslessConfigured() && !messagePaysEth) {
+						const { request, signature } = await sendChatMessageGasless(message);
+						await submitSignedForwardRequest(request, signature);
+					} else {
+						const tx = await sendChatMessage({ ...message, value: messagePaysEth ? amount : undefined });
+						await waitForTransaction(Promise.resolve(tx));
+					}
+				};
+				try {
+					await deliver();
+				} catch (err) {
+					// The money has already moved, and this message is how the recipient finds it: try once more.
+					if (!content.p) throw err;
+					try {
+						await deliver();
+					} catch {
+						throw new Error('Your payment went through, but the message carrying it didn’t, so they can’t see it yet. Don’t pay again.');
+					}
 				}
 			}
 

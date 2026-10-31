@@ -279,24 +279,27 @@ export const DOCS: DocPage[] = [
       <>
         <H2 id="eth">Sending ETH</H2>
         <P>
-          Press the coin icon in the composer, enter an amount and send your message. The contract transfers the ETH straight to the
-          recipient in the same transaction and emits <C>PaymentSettled</C>. There is nothing to claim later.
+          Press the coin icon in the composer, enter an amount and send your message. Payments are private: anyone can see that money
+          moved, but not who received it. The recipient sees the payment in the chat and presses <C>Claim</C> to move it into their
+          wallet.
         </P>
         <Callout title="Payments need funds">
-          A payment is real money: the ETH or tokens you attach come from your wallet. Token payments stay gasless, but a message that
-          pays ETH is sent from your wallet directly (the paymaster never relays ETH), so you also pay a small network fee.
+          A payment is real money: the ETH or tokens you attach come from your wallet. USDC payments are gasless to send and to claim.
+          ETH is sent from your wallet directly (the paymaster never relays ETH), so you pay a small network fee, and claiming ETH takes
+          its network fee out of the payment.
         </Callout>
         <H2 id="tokens">Sending tokens</H2>
         <Steps
           items={[
             { title: "Choose USDC", body: "Pick USDC in the payment panel. Whispr only supports ETH and Circle's USDC on Base." },
-            { title: "Approve once", body: "Approve Whispr to spend that amount. The app checks your allowance and asks only when needed." },
-            { title: "Send", body: "The contract moves the tokens from you to the recipient with transferFrom." },
+            { title: "Sign", body: "When you send, your wallet asks you to sign for that amount. There is no separate approval and no gas." },
+            { title: "Claim", body: "The recipient presses Claim on the payment in the chat. That's gasless too." },
           ]}
         />
         <H2 id="history">Payment history</H2>
         <P>
-          <C>Payment history</C> in the left panel lists the payments you have sent and received, with filters for each direction.
+          <C>Payment history</C> in the left panel lists public payments you have sent and received. Private payments live in their
+          conversations, where they can be claimed.
         </P>
       </>
     ),
@@ -471,7 +474,8 @@ export const DOCS: DocPage[] = [
         <List
           items={[
             "Your address and public key.",
-            "Who you message, when, and any payment amounts.",
+            "Who you message, and when.",
+            "That a payment moved and how much, but not who received it.",
             "Each attachment's kind (photo, video, audio, document) and size, and the length of each message.",
           ]}
         />
@@ -479,7 +483,7 @@ export const DOCS: DocPage[] = [
         <List
           items={[
             "Only your signature can send a message as you. A relayer can't forge, change or replay it.",
-            "Payments move in the same transaction as the message, straight to the recipient.",
+            "Only the recipient can claim a private payment. Nobody else can move it, including the relayer.",
             "Sends are protected by a reentrancy guard and can be paused by the owner in an emergency.",
           ]}
         />

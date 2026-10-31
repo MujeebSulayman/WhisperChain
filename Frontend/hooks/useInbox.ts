@@ -56,6 +56,11 @@ async function fetchRawMessage(id: string, keys: KeyPair): Promise<RawMessage | 
 		raw.encrypted = true;
 		raw.textContent = payload ? payload.t : UNREADABLE_TEXT;
 		raw.file = payload?.f;
+		if (payload?.p) {
+			raw.privatePayment = payload.p;
+			raw.paymentAmount = BigInt(payload.p.a);
+			raw.paymentToken = payload.p.k;
+		}
 		return raw;
 	}
 	// Very old text messages stored their text on IPFS instead of in the contract.

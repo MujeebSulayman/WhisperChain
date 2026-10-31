@@ -18,7 +18,7 @@ const NETWORKS = {
 		// Circle's native USDC on Base.
 		usdc: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
 		// Not deployed on mainnet yet: the NEXT_PUBLIC_*_ADDRESS variables are required.
-		deployed: { scarf: '', forwarder: '', paymaster: '' },
+		deployed: { scarf: '', forwarder: '', paymaster: '', stealthPay: '', stealthPaymaster: '' },
 	},
 	'base-sepolia': {
 		id: 84532,
@@ -31,6 +31,9 @@ const NETWORKS = {
 			scarf: '0x03825A9458BFE8F66D6464Ba126f94eB4D02AE43',
 			forwarder: '0x61d6789168986B18Eb1423894c5147De1B5afCf1',
 			paymaster: '0xA3bFa5c5c950D58A4fa7bB0fD8DBB0464AF65F4f',
+			// Private payments (Contract/ignition/modules/WhisprStealthPay.ts) and the paymaster that pays only for them.
+			stealthPay: '0x05739F4a9BbE04496DD6C53790dC9eD7D52a02AC',
+			stealthPaymaster: '0x7E6288FBC951159EEc485Cd028C185f09e81d4bd',
 		},
 	},
 } as const;
@@ -55,6 +58,9 @@ export const FORWARDER_ADDRESS =
 
 export const PAYMASTER_ADDRESS =
 	process.env.NEXT_PUBLIC_PAYMASTER_ADDRESS ?? NETWORK.deployed.paymaster;
+
+export const STEALTH_PAY_ADDRESS: string = NETWORK.deployed.stealthPay;
+export const STEALTH_PAYMASTER_ADDRESS: string = NETWORK.deployed.stealthPaymaster;
 
 export const USDC_ADDRESS = NETWORK.usdc;
 

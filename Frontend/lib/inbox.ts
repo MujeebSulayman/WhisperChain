@@ -14,6 +14,7 @@ import { keccak256, solidityPacked, ZeroAddress } from 'ethers';
 import { findPaymentAsset } from './deployments';
 import { formatDisplayAmount } from './token';
 import type { FileKey } from './e2e';
+import type { PrivatePayment } from './privatePay';
 
 export type RawMessage = {
 	id: string;
@@ -31,6 +32,8 @@ export type RawMessage = {
 	encrypted?: boolean;
 	/** The attachment's key, for encrypted attachments. */
 	file?: FileKey;
+	/** How to claim a private payment; its amount and token are copied into paymentAmount/paymentToken. */
+	privatePayment?: PrivatePayment;
 };
 
 export type RawConversation = {
@@ -54,6 +57,7 @@ export type ChatMessage = {
 	fileSize?: bigint;
 	encrypted?: boolean;
 	file?: FileKey;
+	privatePayment?: PrivatePayment;
 	sender: string;
 	recipient: string;
 	paymentAmount?: bigint;
@@ -121,6 +125,7 @@ function toChatMessage(me: string, r: RawMessage): ChatMessage {
 		fileSize: r.fileSize,
 		encrypted: r.encrypted,
 		file: r.file,
+		privatePayment: r.privatePayment,
 		sender: r.sender,
 		recipient: r.recipient,
 		paymentAmount: r.paymentAmount,

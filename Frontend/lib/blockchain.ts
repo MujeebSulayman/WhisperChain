@@ -13,10 +13,10 @@ import { Scarf__factory } from '@/typechain/factories/Scarf__factory';
 import type { Scarf } from '@/typechain/Scarf';
 import forwarderAbi from '@/blockchain/ScarfForwarder.json';
 import paymasterAbi from '@/blockchain/ScarfPaymaster.json';
-import { BASE_CHAIN, FORWARDER_ADDRESS, PAYMASTER_ADDRESS, SCARF_ADDRESS } from './deployments';
+import { BASE_CHAIN, FORWARDER_ADDRESS, PAYMASTER_ADDRESS, SCARF_ADDRESS, STEALTH_PAY_ADDRESS } from './deployments';
 
 export type { Scarf } from '@/typechain/Scarf';
-export { BASE_CHAIN, FORWARDER_ADDRESS, PAYMASTER_ADDRESS, SCARF_ADDRESS };
+export { BASE_CHAIN, FORWARDER_ADDRESS, PAYMASTER_ADDRESS, SCARF_ADDRESS, STEALTH_PAY_ADDRESS };
 
 export const SCARF_ABI = Scarf__factory.abi;
 export const FORWARDER_ABI = forwarderAbi as InterfaceAbi;

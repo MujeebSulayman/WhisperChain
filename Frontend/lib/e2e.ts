@@ -22,13 +22,15 @@ import { sha256 } from '@noble/hashes/sha2.js';
 import { hkdf } from '@noble/hashes/hkdf.js';
 import { bytesToHex, concatBytes, hexToBytes, randomBytes, utf8ToBytes } from '@noble/hashes/utils.js';
 import { decodeBase64, encodeBase64, getBytes } from 'ethers';
+import type { PrivatePayment } from './privatePay';
 
 export type KeyPair = { secretKey: Uint8Array; publicKey: Uint8Array };
 
-/** What a message encrypts: its text and, for attachments, how to open the file. */
+/** What a message encrypts: its text, how to open an attachment, and how to claim a private payment. */
 export type Payload = {
 	t: string;
 	f?: FileKey;
+	p?: PrivatePayment;
 };
 
 /** The key to an encrypted file on IPFS, plus the name and type it had before encryption. */

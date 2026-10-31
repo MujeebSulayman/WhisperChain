@@ -20,6 +20,8 @@ import {
 	storeKeys,
 	type KeyPair,
 } from '@/lib/e2e';
+import { deriveStealthKeys } from '@/lib/stealth';
+import { getMetaAddress, isPrivatePaymentConfigured, registerStealthKeys, setStealthKeys } from '@/lib/privatePay';
 
 /**
  * locked: no key on this device yet (waiting for the signature).
@@ -110,6 +112,20 @@ export function useE2EKeys(address: string | undefined, isRegistered: boolean) {
 			cancelled = true;
 		};
 	}, [address, keys, isRegistered]);
+
+	// Private payments: the stealth keys come from the inbox key, and are published once.
+	useEffect(() => {
+		if (!keys) {
+			setStealthKeys(null);
+			return;
+		}
+		const stealth = deriveStealthKeys(keys.secretKey);
+		setStealthKeys(stealth);
+		if (!address || !isRegistered || status !== 'ready' || !isPrivatePaymentConfigured()) return;
+		getMetaAddress(address)
+			.then((onChain) => (onChain?.toLowerCase() === stealth.metaAddress.toLowerCase() ? undefined : registerStealthKeys(stealth.metaAddress)))
+			.catch((err) => console.error('Failed to publish payment keys:', err));
+	}, [address, keys, isRegistered, status]);
 
 	/** Replaces the key on the contract with this device's. Messages sent to the old key stay unreadable here. */
 	const adoptThisDeviceKey = useCallback(async () => {

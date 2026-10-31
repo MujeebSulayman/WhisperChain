@@ -28,7 +28,7 @@ const FAQS: [string, string][] = [
   ],
   [
     "Who can read my messages?",
-    "Only you and the people in the conversation. Messages, photos and files stay private to the chat. What's on the public network is who talked to whom, when, and any payment amounts.",
+    "Only you and the people in the conversation. Messages, photos and files stay private to the chat. Payments are private too: anyone can see that money moved, but not who received it. What's on the public network is who messaged whom, and when.",
   ],
   [
     "Can I delete a message?",
