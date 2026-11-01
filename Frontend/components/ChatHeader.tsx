@@ -1,9 +1,8 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { ChevronDown, ExternalLink, Menu, MessagesSquare, Users, Zap } from 'lucide-react';
+import { ChevronDown, Menu, MessagesSquare, Users, Zap } from 'lucide-react';
 import { isGaslessConfigured } from '@/lib/gasless';
-import { explorerAddress } from '@/lib/links';
 import { shortAddress, type Thread } from '@/lib/inbox';
 import { CopyAddress } from './CopyAddress';
 import { AddressAvatar } from './AddressAvatar';
@@ -17,9 +16,6 @@ type ChatHeaderProps = {
     showConversations?: boolean;
     isMobile?: boolean;
 };
-
-const iconLink =
-    'grid place-items-center rounded-full p-1.5 text-mute transition-colors hover:bg-[color-mix(in_srgb,var(--fg)_8%,transparent)] hover:text-fg';
 
 /** Who this chat is with: the address for a DM, the member list for a group. */
 export function ChatHeader({
@@ -63,9 +59,6 @@ export function ChatHeader({
                                 {isMobile ? shortAddress(peer) : peer}
                             </h2>
                             <CopyAddress text={peer} label="their address" size={14} />
-                            <a href={explorerAddress(peer)} target="_blank" rel="noreferrer" className={iconLink} title="View on explorer" aria-label="View their address on explorer">
-                                <ExternalLink size={14} strokeWidth={1.8} />
-                            </a>
                         </div>
                     </div>
                 </div>
@@ -102,9 +95,6 @@ export function ChatHeader({
                                                 {isMe && <span className="ml-1.5 font-sans text-mute">(you)</span>}
                                             </span>
                                             <CopyAddress text={p} size={13} />
-                                            <a href={explorerAddress(p)} target="_blank" rel="noreferrer" className={iconLink} aria-label="View on explorer">
-                                                <ExternalLink size={13} strokeWidth={1.8} />
-                                            </a>
                                         </li>
                                     );
                                 })}

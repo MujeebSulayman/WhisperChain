@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import { Coins, ArrowUpRight, ArrowDownLeft, ExternalLink, Loader2 } from 'lucide-react';
 import { formatEther, ZeroAddress } from 'ethers';
 import { fetchUserMessages, fetchMessage, isPaymentSettled } from '@/lib/scarfActions';
-import { BASE_CHAIN } from '@/lib/blockchain';
 import { formatTokenAmount } from '@/lib/token';
 import { useTokenInfo } from '../hooks/useTokenInfo';
 import type { AddressLike, BytesLike } from 'ethers';
@@ -371,31 +370,6 @@ function PaymentHistoryRow({ payment }: { payment: PaymentTransaction }) {
                     {format(new Date(payment.timestamp * 1000), 'MMM d, yyyy HH:mm')}
                 </div>
             </div>
-            <a
-                href={`${BASE_CHAIN.explorer}/tx/${payment.messageId}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                    padding: '0.5rem',
-                    borderRadius: '0.875rem',
-                    background: 'transparent',
-                    border: '1px solid color-mix(in srgb, var(--fg) 10%, transparent)',
-                    color: 'color-mix(in srgb, var(--fg) 70%, transparent)',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s',
-                    flexShrink: 0,
-                }}
-                onMouseEnter={(e) => {
-                    e.currentTarget.style.background = 'color-mix(in srgb, var(--fg) 5%, transparent)';
-                    e.currentTarget.style.color = 'var(--fg)';
-                }}
-                onMouseLeave={(e) => {
-                    e.currentTarget.style.background = 'transparent';
-                    e.currentTarget.style.color = 'color-mix(in srgb, var(--fg) 70%, transparent)';
-                }}
-            >
-                <ExternalLink style={{ width: '1rem', height: '1rem' }} />
-            </a>
         </div>
     );
 }

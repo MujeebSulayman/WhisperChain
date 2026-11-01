@@ -1,5 +1,3 @@
-import { BASE_CHAIN } from "./deployments";
-
 /** The messaging app itself. */
 export const APP_URL = "/app";
 
@@ -8,10 +6,6 @@ export const APP_URL = "/app";
 export const SHOW_SOCIALS = false;
 export const X_URL = "#";
 export const TELEGRAM_URL = "https://t.me/+SIuTkwhokfg4ZDBk";
-
-export const explorerAddress = (address: string) => `${BASE_CHAIN.explorer}/address/${address}`;
-export const explorerTx = (hash: string) => `${BASE_CHAIN.explorer}/tx/${hash}`;
-
 
 /** A link that opens Scarf with a new conversation to `address` ready to go. */
 export const chatInviteUrl = (address: string) =>

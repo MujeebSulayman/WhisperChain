@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { A, C, Callout, Cards, Code, H2, H3, List, P, Steps, Table } from "@/components/docs/Blocks";
 import { BASE_CHAIN, FORWARDER_ADDRESS, PAYMASTER_ADDRESS, SCARF_ADDRESS } from "./deployments";
-import { APP_URL, explorerAddress } from "./links";
+import { APP_URL } from "./links";
 
 export type DocPage = {
   slug: string; // "" is the docs home
@@ -16,7 +16,7 @@ export type DocPage = {
 export const DOC_GROUPS = ["Getting started", "Using the app", "How it works", "Developers"] as const;
 
 const short = (a: string) => `${a.slice(0, 6)}…${a.slice(-4)}`;
-const Addr = ({ a }: { a: string }) => <A href={explorerAddress(a)}>{short(a)}</A>;
+const Addr = ({ a }: { a: string }) => <C>{short(a)}</C>;
 
 const ENV_FRONTEND = `# Base network
 NEXT_PUBLIC_NETWORK=base

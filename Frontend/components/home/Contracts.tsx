@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { BASE_CHAIN, FORWARDER_ADDRESS, PAYMASTER_ADDRESS, SCARF_ADDRESS } from "@/lib/deployments";
-import { explorerAddress } from "@/lib/links";
 import { Icon } from "../site/Icons";
 import { Reveal } from "../site/Reveal";
 
@@ -60,15 +59,6 @@ export function Contracts() {
                 </div>
                 <div className="flex shrink-0 items-center gap-2">
                   <CopyAddress address={c.address} />
-                  <a
-                    href={explorerAddress(c.address)}
-                    target="_blank"
-                    rel="noreferrer"
-                    aria-label={`${c.name} on BaseScan`}
-                    className="grid h-[30px] w-[30px] place-items-center rounded-full bg-[var(--steel)] text-mute transition-colors hover:text-fg"
-                  >
-                    <Icon name="arrowUpRight" size={14} />
-                  </a>
                 </div>
               </li>
             ))}

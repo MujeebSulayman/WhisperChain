@@ -104,7 +104,3 @@ export async function connectScarf(): Promise<ConnectResult> {
 		contract: getScarfContract(signer),
 	};
 }
-
-export function getExplorerUrl(address = SCARF_ADDRESS) {
-	return `${BASE_CHAIN.explorer}/address/${address}`;
-}

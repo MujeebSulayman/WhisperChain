@@ -1,12 +1,11 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { ArrowUpRight, CheckCircle2, ExternalLink, Loader2, AlertCircle } from 'lucide-react';
+import { ArrowUpRight, CheckCircle2, Loader2, AlertCircle } from 'lucide-react';
 import { Contract, ZeroAddress, isAddress, parseUnits, formatUnits } from 'ethers';
 import { connectScarf } from '@/lib/blockchain';
 import { BASE_CHAIN } from '@/lib/deployments';
 import { getErrorMessage } from '@/lib/errors';
-import { explorerTx } from '@/lib/links';
 import type { WalletAsset } from '@/hooks/useWalletBalance';
 import { shortAddress } from './CopyAddress';
 
@@ -114,11 +113,7 @@ export function SendPanel({ from, assets, defaultRecipient = '', onSent, onBusyC
 						<p className="mt-3 text-[15px]">
 							{amount} {asset?.symbol} sent to <span className="font-mono">{shortAddress(recipient.trim())}</span>
 						</p>
-						<a href={explorerTx(txHash)} target="_blank" rel="noreferrer" className="btn btn-sm btn-ghost mt-5">
-							<ExternalLink size={14} strokeWidth={1.8} />
-							View transaction
-						</a>
-						<button onClick={reset} className="btn btn-white mt-3 w-full">
+						<button onClick={reset} className="btn btn-white mt-5 w-full">
 							Send another
 						</button>
 					</div>

@@ -2,9 +2,9 @@
 
 import { useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
-import { AlertTriangle, Check, Copy, ExternalLink, Link2, Share2 } from 'lucide-react';
+import { AlertTriangle, Check, Copy, Link2, Share2 } from 'lucide-react';
 import { BASE_CHAIN } from '@/lib/deployments';
-import { chatInviteUrl, explorerAddress } from '@/lib/links';
+import { chatInviteUrl } from '@/lib/links';
 import { useCopy } from './CopyAddress';
 
 /** Everything someone needs to pay or message you: QR, full address, and a chat invite link. */
@@ -82,21 +82,16 @@ export function ReceivePanel({ address }: { address: string }) {
 					</div>
 				)}
 
-				<div className="mt-4 grid grid-cols-2 gap-2">
+				<div className={`mt-4 grid gap-2 ${canShare ? 'grid-cols-2' : ''}`}>
 					<button onClick={() => linkCopy.copy(inviteUrl)} className="btn btn-sm btn-ghost">
 						{linkCopy.copied ? <Check size={14} strokeWidth={2} className="text-good" /> : <Link2 size={14} strokeWidth={1.8} />}
 						{linkCopy.copied ? 'Link copied' : 'Copy chat link'}
 					</button>
-					{canShare ? (
+					{canShare && (
 						<button onClick={share} className="btn btn-sm btn-ghost">
 							<Share2 size={14} strokeWidth={1.8} />
 							Share
 						</button>
-					) : (
-						<a href={explorerAddress(address)} target="_blank" rel="noreferrer" className="btn btn-sm btn-ghost">
-							<ExternalLink size={14} strokeWidth={1.8} />
-							Explorer
-						</a>
 					)}
 				</div>
 

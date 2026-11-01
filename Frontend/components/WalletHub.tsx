@@ -18,7 +18,6 @@ import {
 } from 'lucide-react';
 import { BASE_CHAIN } from '@/lib/deployments';
 import { getErrorMessage, isUserRejectedError } from '@/lib/errors';
-import { explorerAddress } from '@/lib/links';
 import { useActiveWallet, useWallet } from '@/hooks/useWallet';
 import type { WalletBalance } from '@/hooks/useWalletBalance';
 import { Modal } from './Modal';
@@ -116,7 +115,7 @@ export function WalletHub({
 							<ArrowDownLeft size={13} strokeWidth={2} />+{balance.lastIncrease.formatted} {balance.lastIncrease.symbol} just arrived
 						</p>
 					)}
-					{balance.elsewhere.length > 0 && <OtherNetworks holdings={balance.elsewhere} address={address} />}
+					{balance.elsewhere.length > 0 && <OtherNetworks holdings={balance.elsewhere} />}
 				</div>
 
 				{/* Sections */}
@@ -147,7 +146,7 @@ export function WalletHub({
 						/>
 					)}
 					{tab === 'account' && (
-						<AccountSection address={address} onPaymentHistory={onPaymentHistory} onDisconnect={onDisconnect} />
+						<AccountSection onPaymentHistory={onPaymentHistory} onDisconnect={onDisconnect} />
 					)}
 				</div>
 			</div>
@@ -156,22 +155,14 @@ export function WalletHub({
 }
 
 /** Funds this address holds on networks Whispr doesn't run on: visible, but not spendable here. */
-function OtherNetworks({ holdings, address }: { holdings: WalletBalance['elsewhere']; address: string }) {
+function OtherNetworks({ holdings }: { holdings: WalletBalance['elsewhere'] }) {
 	return (
 		<div className="inset-panel mt-4 rounded-[var(--r-inset)] p-3">
 			<p className="label text-[10px]!">On other networks</p>
 			<ul className="mt-2 grid gap-1.5">
 				{holdings.map(({ chain, assets }) => (
 					<li key={chain.id} className="flex items-center justify-between gap-3 text-[13px]">
-						<a
-							href={`${chain.explorer}/address/${address}`}
-							target="_blank"
-							rel="noreferrer"
-							className="flex items-center gap-1 text-dim hover:text-fg"
-						>
-							{chain.name}
-							<ExternalLink size={11} strokeWidth={1.8} />
-						</a>
+						<span className="text-dim">{chain.name}</span>
 						<span className="flex flex-wrap justify-end gap-x-3 font-mono text-[12.5px]">
 							{assets.map((a) => (
 								<span key={a.token}>
@@ -192,11 +183,9 @@ function OtherNetworks({ holdings, address }: { holdings: WalletBalance['elsewhe
 }
 
 function AccountSection({
-	address,
 	onPaymentHistory,
 	onDisconnect,
 }: {
-	address: string;
 	onPaymentHistory: () => void;
 	onDisconnect: () => void;
 }) {
@@ -219,7 +208,6 @@ function AccountSection({
 		<div className="grid gap-1">
 			<p className="label mb-1 px-1">Activity</p>
 			<AccountRow icon={Coins} label="Payment history" hint="Payments sent and received in chats" onClick={onPaymentHistory} />
-			<AccountRow icon={ExternalLink} label="View on explorer" hint="Every transaction for this address" href={explorerAddress(address)} />
 
 			<p className="label mb-1 mt-4 px-1">Security</p>
 			{isEmbedded && (
