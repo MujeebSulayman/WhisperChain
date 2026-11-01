@@ -439,6 +439,10 @@ export function ChatContainer() {
 						setShowPaymentHistory(true);
 						if (isMobile) setSidebarOpen(false);
 					}}
+					onDisconnect={() => {
+						if (isMobile) setSidebarOpen(false);
+						handleDisconnect();
+					}}
 					isMobile={isMobile}
 				/>
 

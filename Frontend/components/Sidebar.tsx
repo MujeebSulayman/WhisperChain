@@ -1,6 +1,6 @@
 'use client';
 
-import { MessageSquarePlus, Settings, Send, PanelLeftClose, PanelLeftOpen, Coins, Wallet } from 'lucide-react';
+import { MessageSquarePlus, Settings, Send, PanelLeftClose, PanelLeftOpen, Coins, Wallet, LogOut } from 'lucide-react';
 import { WalletConnect } from './WalletConnect';
 import { UserStats } from './UserStats';
 import { StorageManagement } from './StorageManagement';
@@ -22,6 +22,7 @@ type SidebarProps = {
     onBatchSend: () => void;
     onSettings: () => void;
     onPaymentHistory: () => void;
+    onDisconnect?: () => void;
     isMobile?: boolean;
 };
 
@@ -37,6 +38,7 @@ export function Sidebar({
     onBatchSend,
     onSettings,
     onPaymentHistory,
+    onDisconnect,
     isMobile = false,
 }: SidebarProps) {
     if (isMobile && !isOpen) return null;
@@ -79,6 +81,11 @@ export function Sidebar({
                         <button onClick={onToggle} className="avatar is-on h-10 w-10" title={shortAddress}>
                             {initial}
                         </button>
+                        {onDisconnect && (
+                            <button onClick={onDisconnect} className="icon-btn text-bad" title="Log out" aria-label="Log out">
+                                <LogOut size={18} strokeWidth={1.8} />
+                            </button>
+                        )}
                     </div>
                 )}
             </aside>
@@ -123,6 +130,12 @@ export function Sidebar({
                         <button onClick={onSettings} className="row">
                             <Settings size={17} strokeWidth={1.8} className="text-accent" />
                             <span className="text-[14px] font-medium">Settings</span>
+                        </button>
+                    )}
+                    {connectedAddress && onDisconnect && (
+                        <button onClick={onDisconnect} className="row">
+                            <LogOut size={17} strokeWidth={1.8} className="text-bad" />
+                            <span className="text-[14px] font-medium text-bad">Log out</span>
                         </button>
                     )}
                 </nav>

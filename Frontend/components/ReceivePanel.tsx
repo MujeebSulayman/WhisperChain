@@ -2,9 +2,9 @@
 
 import { useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
-import { AlertTriangle, Check, Copy, Droplets, ExternalLink, Link2, Share2 } from 'lucide-react';
+import { AlertTriangle, Check, Copy, ExternalLink, Link2, Share2 } from 'lucide-react';
 import { BASE_CHAIN } from '@/lib/deployments';
-import { FAUCET_URL, chatInviteUrl, explorerAddress } from '@/lib/links';
+import { chatInviteUrl, explorerAddress } from '@/lib/links';
 import { useCopy } from './CopyAddress';
 
 /** Everything someone needs to pay or message you: QR, full address, and a chat invite link. */
@@ -100,17 +100,6 @@ export function ReceivePanel({ address }: { address: string }) {
 					)}
 				</div>
 
-				{FAUCET_URL && (
-					<a
-						href={FAUCET_URL}
-						target="_blank"
-						rel="noreferrer"
-						className="mt-3 flex items-center justify-center gap-1.5 text-[12.5px] text-accent hover:text-fg"
-					>
-						<Droplets size={13} strokeWidth={1.8} />
-						Need test ETH? Get some from a {BASE_CHAIN.name} faucet
-					</a>
-				)}
 			</div>
 	);
 }

@@ -18,10 +18,10 @@ export const DOC_GROUPS = ["Getting started", "Using the app", "How it works", "
 const short = (a: string) => `${a.slice(0, 6)}…${a.slice(-4)}`;
 const Addr = ({ a }: { a: string }) => <A href={explorerAddress(a)}>{short(a)}</A>;
 
-const ENV_FRONTEND = `# Base network: base-sepolia (default) or base (mainnet)
-NEXT_PUBLIC_NETWORK=base-sepolia
+const ENV_FRONTEND = `# Base network
+NEXT_PUBLIC_NETWORK=base
 # RPC for that same network, used for reads and by the relayer
-NEXT_PUBLIC_BASE_RPC=https://sepolia.base.org
+NEXT_PUBLIC_BASE_RPC=https://mainnet.base.org
 
 # Login (Privy app ID from dashboard.privy.io)
 NEXT_PUBLIC_PRIVY_APP_ID=yourPrivyAppId
@@ -34,13 +34,13 @@ RELAYER_REIMBURSEMENT_WEI=50000000000000
 PINATA_JWT=yourPinataJwt
 NEXT_PUBLIC_IPFS_GATEWAY=https://gateway.pinata.cloud/ipfs
 
-# Optional on base-sepolia, required on base: your contracts
+# Your contracts
 # NEXT_PUBLIC_SCARF_ADDRESS=0x…
 # NEXT_PUBLIC_FORWARDER_ADDRESS=0x…
 # NEXT_PUBLIC_PAYMASTER_ADDRESS=0x…`;
 
 const ENV_CONTRACT = `PRIVATE_KEY=your_deployer_private_key
-SEPOLIA_BASE_URL=https://sepolia.base.org
+BASE_URL=https://mainnet.base.org
 ETHERSCAN_API_KEY=your_etherscan_key`;
 
 const RELAY_REQUEST = `POST /api/relay
@@ -572,8 +572,8 @@ export const DOCS: DocPage[] = [
         <Code label=".env">{ENV_CONTRACT}</Code>
         <H2 id="deploy">Deploy and verify</H2>
         <Code label="Terminal">{`npx hardhat compile
-npx hardhat ignition deploy ./ignition/modules/Scarf.ts --network sepoliaBase
-npx hardhat run scripts/verify.ts --network sepoliaBase`}</Code>
+npx hardhat ignition deploy ./ignition/modules/Scarf.ts --network base
+npx hardhat run scripts/verify.ts --network base`}</Code>
         <P>Ignition deploys in order: Forwarder, then Whispr and the Paymaster, both pointing at the Forwarder.</P>
         <H2 id="after">After deploying</H2>
         <Steps

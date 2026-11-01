@@ -22,7 +22,7 @@ const NETWORKS = {
 	},
 	'base-sepolia': {
 		id: 84532,
-		name: 'Base Sepolia',
+		name: 'Base',
 		explorer: 'https://sepolia.basescan.org',
 		testnet: true,
 		// Circle's test USDC on Base Sepolia.
@@ -123,7 +123,7 @@ const OTHER_CHAINS_BY_NETWORK: Record<NetworkKey, OtherChain[]> = {
 		{
 			key: 'ethereum',
 			id: 11155111,
-			name: 'Sepolia',
+			name: 'Ethereum',
 			rpcUrl: process.env.NEXT_PUBLIC_RPC_ETHEREUM ?? 'https://ethereum-sepolia-rpc.publicnode.com',
 			explorer: 'https://sepolia.etherscan.io',
 			usdc: '0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238',
@@ -131,7 +131,7 @@ const OTHER_CHAINS_BY_NETWORK: Record<NetworkKey, OtherChain[]> = {
 		{
 			key: 'arbitrum',
 			id: 421614,
-			name: 'Arbitrum Sepolia',
+			name: 'Arbitrum',
 			rpcUrl: process.env.NEXT_PUBLIC_RPC_ARBITRUM ?? 'https://sepolia-rollup.arbitrum.io/rpc',
 			explorer: 'https://sepolia.arbiscan.io',
 			usdc: '0x75faf114eafb1BDbe2F0316DF893fd58CE46AA4d',
@@ -139,7 +139,7 @@ const OTHER_CHAINS_BY_NETWORK: Record<NetworkKey, OtherChain[]> = {
 		{
 			key: 'optimism',
 			id: 11155420,
-			name: 'OP Sepolia',
+			name: 'Optimism',
 			rpcUrl: process.env.NEXT_PUBLIC_RPC_OPTIMISM ?? 'https://sepolia.optimism.io',
 			explorer: 'https://sepolia-optimism.etherscan.io',
 			usdc: '0x5fd84259d66Cd46123540766Be93DFE6D43130D7',

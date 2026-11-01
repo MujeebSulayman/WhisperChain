@@ -36,7 +36,7 @@ const FAQS: [string, string][] = [
   ],
   [
     "Which network is it on?",
-    `${BASE_CHAIN.testnet ? `${BASE_CHAIN.name}, Base's test network` : BASE_CHAIN.name} (chain ID ${BASE_CHAIN.id}). The contract addresses are on this page and can be checked on BaseScan.`,
+    `${BASE_CHAIN.name}. The contract addresses are on this page and can be checked on BaseScan.`,
   ],
 ];
 
