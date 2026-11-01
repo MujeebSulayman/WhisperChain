@@ -3,12 +3,14 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { getReadOnlyContract } from '@/lib/blockchain';
 import { isEnvelope, open, type KeyPair } from '@/lib/e2e';
-import { buildInbox, type ChatMessage, type RawConversation, type RawMessage, type Thread } from '@/lib/inbox';
+import { baseIpfsHash, buildInbox, type ChatMessage, type RawConversation, type RawMessage, type Thread } from '@/lib/inbox';
 
 const POLL_MS = 10_000;
 /** How many of the newest messages to keep in the inbox. */
 const MAX_MESSAGES = 300;
 const FETCH_CONCURRENCY = 20;
+/** How far a pending message's local time may be ahead of the block time of its real copy. */
+const PENDING_CLOCK_SKEW_S = 120;
 const ZERO_ID = '0x' + '0'.repeat(64);
 
 /** Shown in place of a message this device's key can't open. */
@@ -254,9 +256,29 @@ export function useInbox(address: string | undefined, activeThreadId: string, ke
 		return [...extra, ...inbox.threads].map((t) => (t.id === activeThreadId ? { ...t, unreadCount: 0 } : t));
 	}, [inbox.threads, placeholders, activeThreadId]);
 
+	// A sent message can arrive from the chain (event or poll) before its send call returns.
+	// From then on the real one replaces the pending copy, so the chat never shows both.
 	const messagesByThread = useMemo(() => {
 		const merged: Record<string, ChatMessage[]> = { ...inbox.messagesByThread };
-		for (const [id, list] of Object.entries(pending)) merged[id] = [...(merged[id] ?? []), ...list];
+		for (const [id, list] of Object.entries(pending)) {
+			const real = merged[id] ?? [];
+			const claimed = new Set<string>();
+			const stillPending = list.filter((p) => {
+				const landed = real.find(
+					(m) =>
+						!claimed.has(m.id) &&
+						m.isSelf &&
+						m.body === p.body &&
+						baseIpfsHash(m.ipfsHash ?? '') === baseIpfsHash(p.ipfsHash ?? '') &&
+						(m.paymentAmount ?? BigInt(0)) === (p.paymentAmount ?? BigInt(0)) &&
+						// The chain's clock and this device's can differ a little.
+						m.timestamp >= p.timestamp - PENDING_CLOCK_SKEW_S,
+				);
+				if (landed) claimed.add(landed.id);
+				return !landed;
+			});
+			merged[id] = [...real, ...stillPending];
+		}
 		return merged;
 	}, [inbox.messagesByThread, pending]);
 
