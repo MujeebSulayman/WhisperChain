@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { APP_URL, TELEGRAM_URL } from "@/lib/links";
+import { APP_URL, SHOW_SOCIALS, TELEGRAM_URL } from "@/lib/links";
 import { Icon } from "../site/Icons";
 import { Reveal } from "../site/Reveal";
 
@@ -28,9 +28,11 @@ export function CtaBand() {
                 Open the app
                 <Icon name="arrowRight" size={18} stroke={2.2} />
               </Link>
-              <a href={TELEGRAM_URL} target="_blank" rel="noreferrer" className="btn btn-lg !bg-transparent !text-[var(--accent-ink)] !shadow-[inset_0_0_0_1.5px_currentColor]">
-                Join Telegram
-              </a>
+              {SHOW_SOCIALS && (
+                <a href={TELEGRAM_URL} target="_blank" rel="noreferrer" className="btn btn-lg !bg-transparent !text-[var(--accent-ink)] !shadow-[inset_0_0_0_1.5px_currentColor]">
+                  Join Telegram
+                </a>
+              )}
             </div>
           </div>
         </div>

@@ -4,6 +4,8 @@ import { BASE_CHAIN } from "./deployments";
 export const APP_URL = "/app";
 
 // Community links. X is still a placeholder.
+/** Hidden for now; set to true to bring back the X and Telegram links across the site. */
+export const SHOW_SOCIALS = false;
 export const X_URL = "#";
 export const TELEGRAM_URL = "https://t.me/+SIuTkwhokfg4ZDBk";
 

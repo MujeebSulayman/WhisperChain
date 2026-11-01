@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { APP_URL, TELEGRAM_URL, X_URL } from "@/lib/links";
+import { APP_URL, SHOW_SOCIALS, TELEGRAM_URL, X_URL } from "@/lib/links";
 import { Icon, Logo } from "./Icons";
 import { TelegramIcon, XIcon } from "./Socials";
 import { useTheme } from "./ThemeProvider";
@@ -33,6 +33,7 @@ function ThemeButton() {
 }
 
 function SocialLinks() {
+  if (!SHOW_SOCIALS) return null;
   return (
     <>
       <a href={X_URL} target="_blank" rel="noreferrer" aria-label="Whispr on X" className="grid h-9 w-9 place-items-center rounded-full text-mute transition-colors hover:text-fg">

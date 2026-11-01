@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { TELEGRAM_URL } from "@/lib/links";
+import { SHOW_SOCIALS, TELEGRAM_URL } from "@/lib/links";
 import { BASE_CHAIN } from "@/lib/deployments";
 import { Icon } from "../site/Icons";
 
@@ -52,13 +52,15 @@ export function Faq() {
             FAQ
           </span>
           <h2 className="h2 mt-5">Questions, answered.</h2>
-          <p className="mt-4 max-w-[36ch] text-[16px] leading-relaxed text-dim">
-            Still curious? Ask the team on{" "}
-            <a href={TELEGRAM_URL} target="_blank" rel="noreferrer" className="text-accent underline-offset-4 hover:underline">
-              Telegram
-            </a>
-            .
-          </p>
+          {SHOW_SOCIALS && (
+            <p className="mt-4 max-w-[36ch] text-[16px] leading-relaxed text-dim">
+              Still curious? Ask the team on{" "}
+              <a href={TELEGRAM_URL} target="_blank" rel="noreferrer" className="text-accent underline-offset-4 hover:underline">
+                Telegram
+              </a>
+              .
+            </p>
+          )}
         </div>
 
         <div className="border-t border-line">

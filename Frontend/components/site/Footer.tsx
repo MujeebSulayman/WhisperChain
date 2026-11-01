@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { APP_URL, TELEGRAM_URL, X_URL } from "@/lib/links";
+import { APP_URL, SHOW_SOCIALS, TELEGRAM_URL, X_URL } from "@/lib/links";
 import { Logo } from "./Icons";
 import { TelegramIcon, XIcon } from "./Socials";
 
@@ -29,14 +29,14 @@ export function Footer() {
           ))}
         </nav>
 
-        <div className="flex items-center gap-2">
+        {SHOW_SOCIALS && <div className="flex items-center gap-2">
           <a href={X_URL} target="_blank" rel="noreferrer" aria-label="X" className="grid h-10 w-10 place-items-center rounded-full bg-[var(--steel)] text-dim transition-colors hover:text-fg">
             <XIcon className="h-4 w-4" />
           </a>
           <a href={TELEGRAM_URL} target="_blank" rel="noreferrer" aria-label="Telegram" className="grid h-10 w-10 place-items-center rounded-full bg-[var(--steel)] text-dim transition-colors hover:text-fg">
             <TelegramIcon className="h-[18px] w-[18px]" />
           </a>
-        </div>
+        </div>}
       </div>
       <div className="border-t border-line">
         <p className="mx-auto w-full max-w-[1200px] px-4 py-5 text-[13px] text-mute sm:px-6">© {new Date().getFullYear()} Whispr</p>
