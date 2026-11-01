@@ -26,6 +26,8 @@ type MessageInputProps = {
     }) => Promise<void>;
     disabled?: boolean;
     placeholder?: string;
+    /** Shown instead of `placeholder` while the composer is disabled, saying why. */
+    disabledPlaceholder?: string;
     /** Payments go to one recipient, so groups hide the payment button. */
     allowPayments?: boolean;
 };
@@ -34,6 +36,7 @@ export function MessageInput({
     onSend,
     disabled = false,
     placeholder = 'Write a message…',
+    disabledPlaceholder = 'Connect your wallet to send messages',
     allowPayments = true,
 }: MessageInputProps) {
     const isMobile = useIsMobile();
@@ -235,7 +238,7 @@ export function MessageInput({
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={handleKeyDown}
                     disabled={disabled || isSending}
-                    placeholder={disabled ? 'Connect and register to send messages' : placeholder}
+                    placeholder={disabled ? disabledPlaceholder : placeholder}
                     rows={1}
                     className="max-h-[120px] min-h-[40px] flex-1 resize-none bg-transparent px-2 py-[9px] text-[15px] leading-normal text-fg outline-none placeholder:text-mute disabled:cursor-not-allowed"
                 />

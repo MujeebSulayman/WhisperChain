@@ -69,7 +69,6 @@ export function ChatContainer() {
 		if (cFromUrl !== null && cFromUrl !== activeThreadId) setActiveThreadIdState(cFromUrl);
 	}, [cFromUrl, activeThreadId]);
 	const [error, setError] = useState<string | null>(null);
-	const [needsRegistration, setNeedsRegistration] = useState(false);
 	const [showCreateConversation, setShowCreateConversation] = useState(false);
 	const [showProfileSettings, setShowProfileSettings] = useState(false);
 	const [showBatchMessaging, setShowBatchMessaging] = useState(false);
@@ -86,7 +85,8 @@ export function ChatContainer() {
 	const [showPaymentHistory, setShowPaymentHistory] = useState(false);
 	const [walletTab, setWalletTab] = useState<WalletTab | null>(null);
 
-	const { profile, isRegistered, refresh } = useScarf(connectedAddress);
+	const { profile, status: registration, isRegistered, refresh } = useScarf(connectedAddress);
+	const needsRegistration = registration === 'unregistered';
 	const e2e = useE2EKeys(connectedAddress, isRegistered);
 
 	const balance = useWalletBalance(connectedAddress);
@@ -194,10 +194,6 @@ export function ChatContainer() {
 		}
 	}, [error]);
 
-	useEffect(() => {
-		if (connectedAddress) checkRegistration();
-	}, [connectedAddress]);
-
 	// "Payment received" toasts. The inbox itself refreshes through useInbox.
 	useEffect(() => {
 		if (!connectedAddress) return;
@@ -219,16 +215,6 @@ export function ChatContainer() {
 		};
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [connectedAddress]);
-
-	const checkRegistration = async () => {
-		if (!connectedAddress) return;
-		try {
-			const registered = await isUserRegistered(connectedAddress);
-			setNeedsRegistration(!registered);
-		} catch (err: any) {
-			console.error('Registration check failed:', err);
-		}
-	};
 
 	const handleSendMessage = async (args: {
 		text: string;
@@ -382,8 +368,8 @@ export function ChatContainer() {
 						address={connectedAddress}
 						getPublicKey={async () => (e2e.keys ?? (await e2e.unlock())).publicKey}
 						onRegistered={() => {
-							setNeedsRegistration(false);
-							checkRegistration();
+							// The registration screen stays until the chain confirms it.
+							refresh(true);
 							inbox.reload();
 						}}
 					/>
@@ -508,6 +494,13 @@ export function ChatContainer() {
 								key={activeThreadId}
 								onSend={handleSendMessage}
 								disabled={!connectedAddress || !isRegistered}
+								disabledPlaceholder={
+									!connectedAddress
+										? 'Connect your wallet to send messages'
+										: registration === 'unknown'
+											? 'Checking your account…'
+											: 'Activate your address to send messages'
+								}
 								allowPayments={activeThread?.kind !== 'group'}
 								placeholder={
 									activeThread?.kind === 'group'
